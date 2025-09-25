@@ -65,6 +65,7 @@ class WeierstrassUI:
         self.render_btn = widgets.Button(description='Render', button_style='primary')
         self.save_btn = widgets.Button(description='Save PNG', button_style='info')
         self.save_hires_btn = widgets.Button(description='Save High-Res PNG', button_style='warning')
+        self.help_btn = widgets.Button(description='Help', button_style='', icon='question')
         
         # Particle management
         self.add_particle_btn = widgets.Button(description='Add Particle', button_style='success')
@@ -73,6 +74,7 @@ class WeierstrassUI:
         self.render_btn.on_click(lambda b: self.render_playground())
         self.save_btn.on_click(self.save_figure)
         self.save_hires_btn.on_click(self.save_high_res_figure)
+        self.help_btn.on_click(self.show_help)
         self.add_particle_btn.on_click(self.add_particle)
     
     def _setup_layout(self):
@@ -113,7 +115,7 @@ class WeierstrassUI:
 
         controls_box = widgets.VBox([
             widgets.HTML("<h3>Controls</h3>"),
-            self.render_btn, self.save_btn, self.save_hires_btn
+            self.render_btn, self.save_btn, self.save_hires_btn, self.help_btn
         ])
 
         # Layout in three columns
@@ -394,6 +396,13 @@ class WeierstrassUI:
             
             # Add clickable high-res functionality
             print("\\n✨ Click the image above to open a high-resolution version in a new tab!")
+    
+    def show_help(self, b):
+        """Display help information."""
+        from weierstrass_preamble import get_help
+        with self.output:
+            self.output.clear_output()
+            get_help()
     
     def save_figure(self, b=None):
         """Save current figure as PNG."""

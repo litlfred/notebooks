@@ -37,13 +37,23 @@ feature-descriptive-name
 ```python
 # Example structure for a notebook called "chaos_game":
 
-# chaos_game.ipynb - MINIMAL notebook
+# chaos_game.ipynb - MINIMAL notebook (3-4 cells max)
 """
-Just imports and UI instantiation:
-- Import libraries
-- Create UI instance  
+Ultra-minimal notebook with just:
+- Import preamble, lib, and ui modules
+- Call setup from preamble
 - Display UI
 - Display output widget
+"""
+
+# chaos_game_preamble.py - Documentation and setup
+"""
+Contains:
+- Comprehensive documentation and mathematical background
+- Module docstring with detailed explanations  
+- setup_environment() function for configuration
+- get_help() function for user guidance
+- All verbose explanations moved from notebook
 """
 
 # chaos_game_lib.py - Mathematical/computational logic
@@ -61,18 +71,35 @@ All UI widgets and interaction logic:
 - Widget creation and configuration
 - Layout and styling
 - Event handlers that call lib functions
+- Help button linking to preamble.get_help()
 - Parameter validation
 - File I/O operations
 """
 ```
 
-### 3. Recommended Architecture
+### 3. Four-File Architecture Pattern
 ```python
-# notebook_name.ipynb
+# notebook_name.ipynb (ULTRA-MINIMAL)
+from notebook_name_preamble import setup_environment
 from notebook_name_lib import *
 from notebook_name_ui import create_ui
 
-ui = create_ui()
+setup_environment()
+
+# notebook_name_preamble.py  
+def setup_environment(): ...
+def get_help(): ...
+# Comprehensive documentation in module docstring
+
+# notebook_name_lib.py
+def mathematical_function(): ...
+def visualization_function(): ...
+
+# notebook_name_ui.py  
+class UI:
+    def show_help(self): 
+        from notebook_name_preamble import get_help
+        get_help()
 ui.display()
 display(ui.get_output_widget())
 
