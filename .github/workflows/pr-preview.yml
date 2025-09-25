@@ -55,15 +55,17 @@ jobs:
         if [ -d "docs" ]; then
           echo "✓ Found docs directory"
           
-          # List changed files in docs
-          if [ -f "docs/index.html" ]; then echo "✓ index.html present"; fi
-          if [ -f "docs/js/weierstrass-app.js" ]; then echo "✓ JavaScript app present"; fi
-          if [ -f "docs/css/style.css" ]; then echo "✓ CSS styles present"; fi
-          if [ -d "docs/python/weierstrass_playground" ]; then echo "✓ Python package present"; fi
+          # List changed files in docs (new markdown structure)
+          if [ -f "docs/index.md" ]; then echo "✓ index.md present"; fi
+          if [ -f "docs/weierstrass-playground.md" ]; then echo "✓ weierstrass-playground.md present"; fi
+          if [ -f "docs/_layouts/default.html" ]; then echo "✓ Jekyll layout present"; fi
+          if [ -f "docs/weierstrass-playground/weierstrass-app.js" ]; then echo "✓ JavaScript app present"; fi
+          if [ -f "docs/weierstrass-playground/style.css" ]; then echo "✓ CSS styles present"; fi
+          if [ -d "docs/weierstrass-playground/python/weierstrass_playground" ]; then echo "✓ Python package present"; fi
           
-          # Check for basic HTML structure
-          if grep -q "Weierstrass" docs/index.html; then
-            echo "✓ HTML contains expected content"
+          # Check for basic markdown structure
+          if grep -q "Weierstrass" docs/weierstrass-playground.md; then
+            echo "✓ Markdown contains expected content"
           fi
         fi
         

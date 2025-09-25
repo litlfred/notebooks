@@ -68,18 +68,20 @@ jobs:
         print('✓ Mathematical functions working correctly')
         "
     
-    - name: Validate HTML and JavaScript
+    - name: Validate markdown and JavaScript
       run: |
         # Basic validation that files exist and have expected content
-        test -f docs/index.html
-        test -f docs/js/weierstrass-app.js
-        test -f docs/css/style.css
-        test -d docs/python/weierstrass_playground
-        test -f docs/python/weierstrass_playground/__init__.py
+        test -f docs/index.md
+        test -f docs/weierstrass-playground.md
+        test -f docs/_layouts/default.html
+        test -f docs/weierstrass-playground/weierstrass-app.js
+        test -f docs/weierstrass-playground/style.css
+        test -d docs/weierstrass-playground/python/weierstrass_playground
+        test -f docs/weierstrass-playground/python/weierstrass_playground/__init__.py
         
-        # Check that HTML contains expected elements
-        grep -q "Weierstrass ℘ Playground" docs/index.html
-        grep -q "Pyodide" docs/js/weierstrass-app.js
+        # Check that markdown contains expected elements
+        grep -q "Weierstrass ℘ Playground" docs/weierstrass-playground.md
+        grep -q "Pyodide" docs/weierstrass-playground/weierstrass-app.js
         
         echo "✓ Static files validated"
     
