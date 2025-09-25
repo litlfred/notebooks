@@ -40,9 +40,11 @@ jobs:
     
     - name: Test Weierstrass mathematical functions
       run: |
-        cd docs/python
+        cd src
         python -c "
-        import weierstrass_core as wc
+        import weierstrass_playground.core as wc
+        import weierstrass_playground.visualization as viz
+        import weierstrass_playground.integration as integ
         import numpy as np
         import matplotlib.pyplot as plt
         
@@ -69,7 +71,7 @@ jobs:
         
         # Test 3: Background generation
         print('\\nTest 3: Background generation')
-        bg = wc.soft_background(F, M)
+        bg = viz.soft_background(F, M)
         assert bg.shape == (50, 50, 3), f'Wrong background shape: {bg.shape}'
         print(f'✅ Background generated: shape {bg.shape}')
         
@@ -77,7 +79,7 @@ jobs:
         print('\\nTest 4: Trajectory integration')
         z0, v0 = 5.5 + 0j, 0 + 1j
         dt, T = 0.01, 1.0
-        trajectory, blowup_point = wc.integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
+        trajectory, blowup_point = integ.integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
         print(f'✅ Trajectory integrated: {len(trajectory)} points')
         
         print('\\n🎉 All mathematical tests passed!')
@@ -149,9 +151,10 @@ jobs:
     
     - name: Performance benchmarks
       run: |
-        cd docs/python
+        cd src
         python -c "
-        import weierstrass_core as wc
+        import weierstrass_playground.core as wc
+        import weierstrass_playground.visualization as viz
         import numpy as np
         import time
         
@@ -178,7 +181,7 @@ jobs:
         # Benchmark 3: Background generation
         print('\\nBenchmark 3: Background generation speed')
         start_time = time.time()
-        bg = wc.soft_background(F, M)
+        bg = viz.soft_background(F, M)
         bg_time = time.time() - start_time
         print(f'✅ Background generated in {bg_time:.3f}s')
         

@@ -46,25 +46,62 @@ Integration uses RK4 method with automatic blow-up detection near poles.
 This repository contains a modular framework for mathematical visualizations:
 
 ```
+├── src/weierstrass_playground/    # Main Python package
+│   ├── __init__.py               # Package initialization
+│   ├── core.py                   # Core mathematical functions
+│   ├── visualization.py          # Visualization and plotting
+│   ├── integration.py            # Trajectory integration and ODEs
+│   └── browser.py                # Browser-specific adaptations
 ├── docs/                          # Browser playground (GitHub Pages)
 │   ├── index.html                # Main web interface  
 │   ├── css/style.css            # Styling
 │   ├── js/weierstrass-app.js    # JavaScript application
-│   ├── python/weierstrass_core.py  # Python math library for Pyodide
+│   ├── python/weierstrass_playground/  # Browser-compatible package copy
 │   └── README.md                # Detailed development docs
-├── weierstrass_lib.py           # Mathematical functions library  
-├── weierstrass_ui.py            # UI components
+├── weierstrass_lib.py           # Legacy library (maintained for compatibility)
+├── weierstrass_ui.py            # Legacy UI components
 ├── weierstrass_preamble.py      # Setup and documentation
 ├── weierstrass_playground.ipynb  # Jupyter notebook version
-└── requirements.txt             # Python dependencies
+├── setup.py & pyproject.toml    # Package configuration
+└── requirements.txt             # Dependencies
 ```
 
 ## Common Framework
 
 The playground uses a modular architecture where each "page" acts like a Jupyter notebook:
-- **Math library components**: Core mathematical functions
-- **UI components**: Interactive controls and visualization
-- **Page structure**: Similar to notebook cells but browser-native
+- **Math library components**: Core mathematical functions (`weierstrass_playground.core`)
+- **UI components**: Interactive controls and visualization (`weierstrass_playground.visualization`)
+- **Integration components**: Trajectory computation (`weierstrass_playground.integration`)
+- **Browser adaptations**: Web-specific functionality (`weierstrass_playground.browser`)
+
+### Package Installation
+
+Install the Python package locally:
+```bash
+# Development installation
+pip install -e .
+
+# Or install from PyPI (when published)
+pip install weierstrass-playground
+```
+
+### Python Usage
+
+```python
+import weierstrass_playground as wp
+
+# Basic function evaluation
+z = 2.0 + 1.5j
+p, q, N = 11.0, 5.0, 3
+wp_val = wp.wp_rect(z, p, q, N)
+
+# Create visualization
+fig = wp.browser.create_complete_visualization(
+    mode='two_panel', p=p, q=q, N=N, 
+    nx=100, ny=100, particles=[(5+0j, 0+1j)], 
+    # ... other parameters
+)
+```
 
 ## Development
 

@@ -32,10 +32,10 @@ jobs:
     
     - name: Test mathematical functions
       run: |
-        if [ -f "docs/python/weierstrass_core.py" ]; then
-          cd docs/python
+        if [ -d "src/weierstrass_playground" ]; then
+          cd src
           python -c "
-          import weierstrass_core as wc
+          import weierstrass_playground.core as wc
           import numpy as np
           print('Testing mathematical functions in PR...')
           z = 2.0 + 1.5j

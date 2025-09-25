@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "weierstrass-playground"
+version = "1.0.0"
+description = "Interactive visualization of the Weierstrass ℘ function with trajectory integration"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Weierstrass Playground Contributors"}
+]
+maintainers = [
+    {name = "litlfred", email = "litlfred@users.noreply.github.com"}
+]
+keywords = ["weierstrass", "mathematics", "visualization", "elliptic-functions", "complex-analysis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research", 
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9", 
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Visualization",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20.0",
+    "matplotlib>=3.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=22.0",
+    "isort>=5.0",
+]
+jupyter = [
+    "ipywidgets>=7.6.0",
+    "jupyter>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/litlfred/notebooks"
+Documentation = "https://litlfred.github.io/notebooks/"
+Repository = "https://github.com/litlfred/notebooks.git"
+"Bug Tracker" = "https://github.com/litlfred/notebooks/issues"
+"Live Demo" = "https://litlfred.github.io/notebooks/"
+
+[project.scripts]
+weierstrass-demo = "weierstrass_playground.browser:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true

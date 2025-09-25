@@ -54,9 +54,9 @@ jobs:
     
     - name: Test core mathematical functions
       run: |
-        cd docs/python
+        cd src
         python -c "
-        import weierstrass_core as wc
+        import weierstrass_playground.core as wc
         import numpy as np
         print('Testing mathematical functions...')
         z = 2.0 + 1.5j
@@ -74,7 +74,8 @@ jobs:
         test -f docs/index.html
         test -f docs/js/weierstrass-app.js
         test -f docs/css/style.css
-        test -f docs/python/weierstrass_core.py
+        test -d docs/python/weierstrass_playground
+        test -f docs/python/weierstrass_playground/__init__.py
         
         # Check that HTML contains expected elements
         grep -q "Weierstrass ℘ Playground" docs/index.html

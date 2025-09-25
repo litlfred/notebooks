@@ -87,15 +87,17 @@ class WeierstrassApp {
      * Setup Python environment and load our library
      */
     async setupPython() {
-        // Load our Weierstrass library
-        const response = await fetch('./python/weierstrass_core.py');
-        const pythonCode = await response.text();
-        
-        this.pyodide.runPython(pythonCode);
-        
-        // Set up plotting utilities for web display
+        // Load our Weierstrass playground library using new package structure
         this.pyodide.runPython(`
-            import io
+            import sys
+            sys.path.append('./python')
+            
+            # Import the weierstrass_playground package  
+            import weierstrass_playground as wp
+            from weierstrass_playground import browser
+            
+            # Set up browser-specific functions
+            import io  
             import base64
             from matplotlib import pyplot as plt
             
@@ -292,42 +294,64 @@ class WeierstrassApp {
                 throw new Error('Time step dt must be between 0 and 1.');
             }
 
-            // Call Python rendering function
+            // Call Python rendering function using new package structure
             const pythonCode = `
-# Set parameters
+# Validate and set parameters
+params_dict = {
+    'p': ${params.p},
+    'q': ${params.q}, 
+    'N': ${params.N},
+    'nx': ${params.grid_x},
+    'ny': ${params.grid_y},
+    'n_contours': ${params.contours},
+    'vec_density': ${params.vec_density},
+    'dt': ${params.dt},
+    'T': ${params.T},
+    'saturation': ${params.saturation},
+    'value_floor': ${params.value_floor},
+    'mag_scale': ${params.mag_scale},
+    'blow_thresh': ${params.blow_thresh}
+}
+
+# Validate parameters for browser safety
+validated_params = browser.validate_browser_parameters(params_dict)
+
+# Set parameters from validated values
 mode = '${params.mode}'
-p, q, N = ${params.p}, ${params.q}, ${params.N}
-nx, ny = ${params.grid_x}, ${params.grid_y}
-n_contours = ${params.contours}
-vec_density = ${params.vec_density}
+p, q, N = validated_params['p'], validated_params['q'], validated_params['N']
+nx, ny = validated_params['nx'], validated_params['ny'] 
+n_contours = validated_params['n_contours']
+vec_density = validated_params['vec_density']
 vec_width = ${params.vec_width}
 vec_max_len = ${params.vec_max_len}
-saturation = ${params.saturation}
-value_floor = ${params.value_floor}
-mag_scale = ${params.mag_scale}
-dt = ${params.dt}
-T = ${params.T}
-blow_thresh = ${params.blow_thresh}
+saturation = validated_params['saturation']
+value_floor = validated_params['value_floor']
+mag_scale = validated_params['mag_scale']
+dt = validated_params['dt']
+T = validated_params['T']
+blow_thresh = validated_params['blow_thresh']
 emoji_size = ${params.emoji_size}
 show_lattice_trajectories = ${params.show_lattice_trajectories ? 'True' : 'False'}
 
-# Convert particles to complex numbers
+# Convert particles to the format expected by the browser module
 particles = []
 particle_data = ${JSON.stringify(params.particles)}
 for p_data in particle_data:
-    z0 = complex(p_data[0], p_data[1])
-    v0 = complex(p_data[2], p_data[3])
-    particles.append((z0, v0))
+    # p_data is [z0_real, z0_imag, v0_real, v0_imag]
+    particles.append(p_data)
 
 print(f"Rendering with {len(particles)} particles, grid {nx}x{ny}")
 
-# Generate visualization
-fig, axes = create_figure_with_plots(
+# Generate visualization using new package structure
+fig = browser.create_complete_visualization(
     mode, p, q, N, nx, ny, n_contours, vec_density,
     vec_width, vec_max_len, saturation, value_floor,
     mag_scale, particles, dt, T, blow_thresh,
     emoji_size, show_lattice_trajectories
 )
+
+# Clean up memory
+browser.cleanup_matplotlib()
 
 # Convert to base64 for web display
 image_data = plot_to_base64(fig)
