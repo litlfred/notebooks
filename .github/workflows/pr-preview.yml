@@ -59,6 +59,7 @@ jobs:
           if [ -f "docs/index.html" ]; then echo "✓ index.html present"; fi
           if [ -f "docs/js/weierstrass-app.js" ]; then echo "✓ JavaScript app present"; fi
           if [ -f "docs/css/style.css" ]; then echo "✓ CSS styles present"; fi
+          if [ -d "docs/python/weierstrass_playground" ]; then echo "✓ Python package present"; fi
           
           # Check for basic HTML structure
           if grep -q "Weierstrass" docs/index.html; then
