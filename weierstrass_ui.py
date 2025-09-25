@@ -30,7 +30,8 @@ class WeierstrassUI:
         # Visualization mode selection
         self.mode_dropdown = widgets.Dropdown(
             options=[('Two-panel: ℘(z) and ℘′(z)', 'two_panel'),
-                     ('Three-panel: ℘(z), Re(℘′(z)), Im(℘′(z))', 'three_panel')],
+                     ('Three-panel: ℘(z), Re(℘′(z)), Im(℘′(z))', 'three_panel'),
+                     ('Five-panel: ℘(z), ℘′(z), Re(℘(z)), Im(℘(z))', 'five_panel')],
             value='two_panel',
             description='Mode:'
         )
@@ -184,6 +185,7 @@ class WeierstrassUI:
         print("\\nFeatures:")
         print("- Two-panel mode shows ℘(z) and ℘′(z) with color mapping")
         print("- Three-panel mode shows ℘(z), Re(℘′(z)), and Im(℘′(z)) in grayscale")
+        print("- Five-panel mode shows ℘(z), ℘′(z), complex plane, Re(℘(z)), and Im(℘(z))")
         print("- Higher N values give more accurate ℘ function but slower computation")
         print("- Trajectories follow z''(t) = -℘(z(t)) * z(t)")
         print("- 💥 marks indicate trajectory blow-ups near poles")
@@ -243,7 +245,7 @@ class WeierstrassUI:
                     vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
                     vector_overlay(ax2, X2, Y2, F2, M2, vec_density, vec_width, vec_max_len)
             
-            else:  # three_panel mode
+            elif mode == 'three_panel':
                 fig, axes = create_three_panel_figure(p, q)
                 ax1, ax2, ax3 = axes
                 
@@ -285,6 +287,89 @@ class WeierstrassUI:
                 # Add vector fields only to the first panel in three-panel mode
                 if vec_density > 0:
                     vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
+            
+            elif mode == 'five_panel':
+                fig, axes = create_five_panel_figure(p, q)
+                ax1, ax2, ax3, ax4, ax5 = axes
+                
+                # Compute fields
+                X1, Y1, F1, M1 = field_grid(p, q, 'wp', N, nx, ny)
+                X2, Y2, F2, M2 = field_grid(p, q, 'wp_deriv', N, nx, ny)
+                
+                # Create backgrounds
+                bg1 = soft_background(F1, M1, saturation, mag_scale, value_floor)  # ℘(z) color
+                bg2 = soft_background(F2, M2, saturation, mag_scale, value_floor)  # ℘′(z) color
+                # For ax3, show a simple grid or lattice visualization
+                bg3 = np.ones((ny, nx, 3)) * 0.95  # Light gray background
+                bg4 = grayscale_background(np.real(F1), M1, value_floor)  # Re(℘(z))
+                bg5 = grayscale_background(np.imag(F1), M1, value_floor)  # Im(℘(z))
+                
+                # Display backgrounds
+                ax1.imshow(bg1, extent=[0, p, 0, q], origin='lower', aspect='equal')
+                ax2.imshow(bg2, extent=[0, p, 0, q], origin='lower', aspect='equal')
+                ax3.imshow(bg3, extent=[0, p, 0, q], origin='lower', aspect='equal')
+                ax4.imshow(bg4, extent=[0, p, 0, q], origin='lower', aspect='equal', cmap='gray')
+                ax5.imshow(bg5, extent=[0, p, 0, q], origin='lower', aspect='equal', cmap='gray')
+                
+                # Add contours
+                add_topo_contours(ax1, X1, Y1, F1, M1, n_contours)
+                add_topo_contours(ax2, X2, Y2, F2, M2, n_contours)
+                
+                # For grayscale panels, add contours of the real/imaginary parts
+                if n_contours > 0:
+                    re_F1 = np.real(F1)
+                    im_F1 = np.imag(F1)
+                    re_F1 = np.where(M1, re_F1, np.nan)
+                    im_F1 = np.where(M1, im_F1, np.nan)
+                    
+                    if not np.all(np.isnan(re_F1)):
+                        vmin, vmax = np.nanmin(re_F1), np.nanmax(re_F1)
+                        if vmax > vmin:
+                            levels = np.linspace(vmin, vmax, n_contours)
+                            ax4.contour(X1, Y1, re_F1, levels=levels, colors='black', alpha=0.3, linewidths=0.5)
+                    
+                    if not np.all(np.isnan(im_F1)):
+                        vmin, vmax = np.nanmin(im_F1), np.nanmax(im_F1)
+                        if vmax > vmin:
+                            levels = np.linspace(vmin, vmax, n_contours)
+                            ax5.contour(X1, Y1, im_F1, levels=levels, colors='black', alpha=0.3, linewidths=0.5)
+                
+                # Add vector fields to first two panels
+                if vec_density > 0:
+                    vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
+                    vector_overlay(ax2, X2, Y2, F2, M2, vec_density, vec_width, vec_max_len)
+                
+                # Draw lattice points on ax3 (complex plane)
+                for m in range(-N, N+1):
+                    for n in range(-N, N+1):
+                        omega = m * p + n * 1j * q
+                        omega_wrapped = (omega.real % p) + 1j * (omega.imag % q)
+                        ax3.plot(omega_wrapped.real, omega_wrapped.imag, 'ko', markersize=3, alpha=0.6)
+            
+            else:  # fallback to two_panel
+                fig, axes = create_two_panel_figure(p, q)
+                ax1, ax2 = axes
+                
+                # Compute fields
+                X1, Y1, F1, M1 = field_grid(p, q, 'wp', N, nx, ny)
+                X2, Y2, F2, M2 = field_grid(p, q, 'wp_deriv', N, nx, ny)
+                
+                # Create backgrounds
+                bg1 = soft_background(F1, M1, saturation, mag_scale, value_floor)
+                bg2 = soft_background(F2, M2, saturation, mag_scale, value_floor)
+                
+                # Display backgrounds
+                ax1.imshow(bg1, extent=[0, p, 0, q], origin='lower', aspect='equal')
+                ax2.imshow(bg2, extent=[0, p, 0, q], origin='lower', aspect='equal')
+                
+                # Add contours
+                add_topo_contours(ax1, X1, Y1, F1, M1, n_contours)
+                add_topo_contours(ax2, X2, Y2, F2, M2, n_contours)
+                
+                # Add vector fields
+                if vec_density > 0:
+                    vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
+                    vector_overlay(ax2, X2, Y2, F2, M2, vec_density, vec_width, vec_max_len)
             
             # Integrate and plot trajectories
             trajectories = []

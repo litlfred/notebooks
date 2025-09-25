@@ -439,6 +439,43 @@ def create_three_panel_figure(p, q):
     return fig, (ax1, ax2, ax3)
 
 
+def create_five_panel_figure(p, q):
+    """Create a five-panel figure: ℘(z), ℘'(z), complex plane, Re(℘(z)), Im(℘(z))."""
+    fig = plt.figure(figsize=(30, 12))
+    
+    # Create 2x3 subplot grid, use 5 panels
+    ax1 = plt.subplot(2, 3, 1)  # Top left: ℘(z)
+    ax2 = plt.subplot(2, 3, 2)  # Top middle: ℘'(z)  
+    ax3 = plt.subplot(2, 3, 3)  # Top right: complex plane grid
+    ax4 = plt.subplot(2, 3, 4)  # Bottom left: Re(℘(z))
+    ax5 = plt.subplot(2, 3, 5)  # Bottom middle: Im(℘(z))
+    # Leave subplot (2,3,6) empty
+    
+    fig.subplots_adjust(wspace=0.05, hspace=0.3)
+    
+    # Set titles
+    ax1.set_title('℘(z)', fontsize=16)
+    ax2.set_title("℘'(z)", fontsize=16)
+    ax3.set_title('Complex Plane', fontsize=16)
+    ax4.set_title('Re(℘(z))', fontsize=16)
+    ax5.set_title('Im(℘(z))', fontsize=16)
+    
+    # Set labels and limits for all panels
+    for ax in [ax1, ax2, ax3, ax4, ax5]:
+        ax.set_xlim(0, p)
+        ax.set_ylim(0, q)
+        ax.set_xlabel('Re(z)')
+        
+    ax1.set_ylabel('Im(z)')
+    ax4.set_ylabel('Im(z)')
+    
+    # Remove y-tick labels for middle and right panels
+    for ax in [ax2, ax3, ax5]:
+        ax.set_yticks([])
+    
+    return fig, (ax1, ax2, ax3, ax4, ax5)
+
+
 def plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size=20):
     """Plot trajectories on given axes with blow-up markers."""
     for i, (trajectory, blowup_point) in enumerate(trajectories):
