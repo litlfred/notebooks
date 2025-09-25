@@ -102,27 +102,40 @@ jobs:
         echo "🌐 Testing frontend files..."
         
         # Check that essential files exist
-        test -f docs/index.html
-        test -f docs/js/weierstrass-app.js
-        test -f docs/css/style.css
-        test -f docs/python/weierstrass_core.py
+        test -f docs/index.md
+        test -f docs/weierstrass-playground.md
+        test -f docs/_layouts/default.html
+        test -f docs/weierstrass-playground/weierstrass-app.js
+        test -f docs/weierstrass-playground/style.css
+        test -d docs/weierstrass-playground/python/weierstrass_playground
         
-        # Check HTML structure
-        echo "✅ Validating HTML structure..."
-        grep -q "Weierstrass ℘ Playground" docs/index.html
-        grep -q "container" docs/index.html
-        grep -q "plot-area" docs/index.html
+        # Check main index markdown structure
+        echo "✅ Validating main index markdown structure..."
+        grep -q "Mathematical Notebooks" docs/index.md
+        grep -q "weierstrass-playground" docs/index.md
+        grep -q "layout: default" docs/index.md
+        
+        # Check notebook markdown structure
+        echo "✅ Validating notebook markdown structure..."
+        grep -q "Weierstrass ℘ Playground" docs/weierstrass-playground.md
+        grep -q "weierstrass-playground" docs/weierstrass-playground.md
+        grep -q "layout: default" docs/weierstrass-playground.md
+        
+        # Check layout template
+        echo "✅ Validating Jekyll layout template..."
+        grep -q "{{ content }}" docs/_layouts/default.html
+        grep -q "Mathematical Notebooks" docs/_layouts/default.html
         
         # Check JavaScript structure
         echo "✅ Validating JavaScript structure..."
-        grep -q "class WeierstrassApp" docs/js/weierstrass-app.js
-        grep -q "loadPyodide" docs/js/weierstrass-app.js
-        grep -q "setupResizeHandler" docs/js/weierstrass-app.js
+        grep -q "class WeierstrassApp" docs/weierstrass-playground/weierstrass-app.js
+        grep -q "loadPyodide" docs/weierstrass-playground/weierstrass-app.js
+        grep -q "setupResizeHandler" docs/weierstrass-playground/weierstrass-app.js
         
         # Check CSS structure
         echo "✅ Validating CSS structure..."
-        grep -q "container" docs/css/style.css
-        grep -q "responsive" docs/css/style.css
+        grep -q "container" docs/weierstrass-playground/style.css
+        grep -q "responsive" docs/weierstrass-playground/style.css
         
         echo "🎉 Frontend validation completed!"
     
@@ -130,7 +143,7 @@ jobs:
       run: |
         # Basic JavaScript syntax check using Node.js
         echo "🔍 Checking JavaScript syntax..."
-        node -c docs/js/weierstrass-app.js
+        node -c docs/weierstrass-playground/weierstrass-app.js
         echo "✅ JavaScript syntax is valid"
 
   test-performance:

@@ -1,12 +1,28 @@
 # GitHub Pages Configuration
-# Minimal configuration to serve static files properly
+# Enhanced Jekyll configuration for markdown-based notebooks
 
 plugins:
   - jekyll-optional-front-matter
+  - jekyll-default-layout
 
-# Don't process these as Jekyll files
+# Default layout for pages
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Don't process these files
 exclude:
   - python/__pycache__/
   - "*.pyc"
   - "*.tmp"
-  - README.md
+  - weierstrass-playground/python/
+  - DEVELOPMENT.md
