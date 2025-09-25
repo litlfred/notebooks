@@ -1,0 +1,13 @@
+# GitHub Pages Configuration
+# This file ensures proper deployment from the docs/ directory
+
+source: docs
+plugins:
+  - jekyll-optional-front-matter
+  - jekyll-readme-index
+  - jekyll-default-layout
+
+exclude:
+  - python/__pycache__/
+  - "*.pyc"
+  - "*.tmp"
