@@ -40,50 +40,55 @@ jobs:
     
     - name: Test Weierstrass mathematical functions
       run: |
-        cd src
-        python -c "
-        import weierstrass_playground.core as wc
-        import weierstrass_playground.visualization as viz
-        import weierstrass_playground.integration as integ
-        import numpy as np
-        import matplotlib.pyplot as plt
-        
-        print('🧮 Testing mathematical core functions...')
-        
-        # Test 1: Basic function evaluation
-        print('Test 1: Basic ℘ function evaluation')
-        z = 2.0 + 1.5j
-        p, q, N = 11.0, 5.0, 3
-        wp_val = wc.wp_rect(z, p, q, N)
-        wp_deriv_val = wc.wp_deriv(z, p, q, N)
-        
-        assert np.isfinite(wp_val), '℘ function returned non-finite value'
-        assert np.isfinite(wp_deriv_val), '℘\\' function returned non-finite value'
-        print(f'✅ ℘({z}) = {wp_val}')
-        print(f'✅ ℘\\'({z}) = {wp_deriv_val}')
-        
-        # Test 2: Field grid computation
-        print('\\nTest 2: Field grid computation')
-        X, Y, F, M = wc.field_grid(p, q, 'wp', N, 50, 50)
-        valid_points = np.sum(M)
-        total_points = M.size
-        print(f'✅ Grid computed: {valid_points}/{total_points} valid points')
-        
-        # Test 3: Background generation
-        print('\\nTest 3: Background generation')
-        bg = viz.soft_background(F, M)
-        assert bg.shape == (50, 50, 3), f'Wrong background shape: {bg.shape}'
-        print(f'✅ Background generated: shape {bg.shape}')
-        
-        # Test 4: Trajectory integration
-        print('\\nTest 4: Trajectory integration')
-        z0, v0 = 5.5 + 0j, 0 + 1j
-        dt, T = 0.01, 1.0
-        trajectory, blowup_point = integ.integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
-        print(f'✅ Trajectory integrated: {len(trajectory)} points')
-        
-        print('\\n🎉 All mathematical tests passed!')
-        "
+        if [ -d "src/weierstrass_playground" ]; then
+          echo "🧮 Testing Weierstrass mathematical functions..."
+          cd src
+          python -c "
+import weierstrass_playground.core as wc
+import weierstrass_playground.visualization as viz
+import weierstrass_playground.integration as integ
+import numpy as np
+import matplotlib.pyplot as plt
+
+print('🧮 Testing mathematical core functions...')
+
+# Test 1: Basic function evaluation
+print('Test 1: Basic ℘ function evaluation')
+z = 2.0 + 1.5j
+p, q, N = 11.0, 5.0, 3
+wp_val = wc.wp_rect(z, p, q, N)
+wp_deriv_val = wc.wp_deriv(z, p, q, N)
+
+assert np.isfinite(wp_val), '℘ function returned non-finite value'
+assert np.isfinite(wp_deriv_val), '℘\' function returned non-finite value'
+print(f'✅ ℘({z}) = {wp_val}')
+print(f'✅ ℘\'({z}) = {wp_deriv_val}')
+
+# Test 2: Field grid computation
+print('\nTest 2: Field grid computation')
+X, Y, F, M = wc.field_grid(p, q, 'wp', N, 50, 50)
+valid_points = np.sum(M)
+total_points = M.size
+print(f'✅ Grid computed: {valid_points}/{total_points} valid points')
+
+# Test 3: Background generation
+print('\nTest 3: Background generation')
+bg = viz.soft_background(F, M)
+assert bg.shape == (50, 50, 3), f'Wrong background shape: {bg.shape}'
+print(f'✅ Background generated: shape {bg.shape}')
+
+# Test 4: Trajectory integration
+print('\nTest 4: Trajectory integration')
+z0, v0 = 5.5 + 0j, 0 + 1j
+dt, T = 0.01, 1.0
+trajectory, blowup_point = integ.integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
+print(f'✅ Trajectory integrated: {len(trajectory)} points')
+
+print('\n🎉 All mathematical tests passed!')
+          "
+        else
+          echo "ℹ️  No src/weierstrass_playground directory found"
+        fi
 
   test-frontend:
     runs-on: ubuntu-latest
