@@ -28,18 +28,55 @@ feature-descriptive-name
 ## Code Architecture Guidelines
 
 ### 1. Separation of Concerns
-- **Notebooks** should contain ONLY UI code and presentation logic
-- **Mathematical/computational logic** should be extracted to Python modules/libraries
-- Create a `{notebook_name}_lib.py` file for each major notebook
+- **Notebooks** should contain ONLY minimal imports and calls to UI modules
+- **Mathematical/computational logic** should be extracted to `{notebook_name}_lib.py` modules  
+- **UI code** should be extracted to `{notebook_name}_ui.py` modules
+- Create three separate files for each major notebook
 
-### 2. Library Structure
+### 2. File Structure
 ```python
-# Example: weierstrass_lib.py
+# Example structure for a notebook called "chaos_game":
+
+# chaos_game.ipynb - MINIMAL notebook
 """
-Mathematical functions for Weierstrass ℘ playground.
-Separated from notebook for reusability and maintainability.
+Just imports and UI instantiation:
+- Import libraries
+- Create UI instance  
+- Display UI
+- Display output widget
 """
 
+# chaos_game_lib.py - Mathematical/computational logic
+"""
+All mathematical functions and algorithms:
+- Core computation functions
+- Integration/simulation methods
+- Data processing utilities
+- Visualization helpers (backgrounds, contours, etc.)
+"""
+
+# chaos_game_ui.py - UI components and layout
+"""
+All UI widgets and interaction logic:
+- Widget creation and configuration
+- Layout and styling
+- Event handlers that call lib functions
+- Parameter validation
+- File I/O operations
+"""
+```
+
+### 3. Recommended Architecture
+```python
+# notebook_name.ipynb
+from notebook_name_lib import *
+from notebook_name_ui import create_ui
+
+ui = create_ui()
+ui.display()
+display(ui.get_output_widget())
+
+# notebook_name_lib.py  
 def core_mathematical_function():
     """Core computation logic"""
     pass
@@ -48,24 +85,17 @@ def visualization_helper():
     """Visualization utilities"""
     pass
 
-def integration_solver():
-    """Numerical methods"""
-    pass
-```
-
-### 3. Notebook Structure
-```python
-# Notebook should primarily contain:
-import notebook_lib
-import ipywidgets as widgets
-
-# UI setup
-controls = widgets.VBox([...])
-
-# Event handlers that call library functions
-def on_render_click():
-    result = notebook_lib.compute_something(params)
-    notebook_lib.visualize(result)
+# notebook_name_ui.py
+class NotebookUI:
+    def __init__(self):
+        self._create_widgets()
+        self._setup_layout()
+    
+    def display(self):
+        display(self.ui)
+        
+def create_ui():
+    return NotebookUI()
 ```
 
 ## Quality Standards
@@ -92,8 +122,9 @@ def on_render_click():
 
 ```
 repository-root/
-├── notebook_name.ipynb          # Main interactive notebook
+├── notebook_name.ipynb          # MINIMAL notebook (imports + UI display only)
 ├── notebook_name_lib.py         # Mathematical/computational logic
+├── notebook_name_ui.py          # UI widgets and layout code
 ├── test_notebook_name.py        # Optional: tests for library functions
 ├── requirements.txt             # Dependencies
 └── README.md                    # Repository overview

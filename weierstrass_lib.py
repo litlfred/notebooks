@@ -479,3 +479,51 @@ def plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size=20):
                 for ax in axes:
                     ax.text(bp_wrapped.real, bp_wrapped.imag, '💥', fontsize=emoji_size, 
                            ha='center', va='center')
+
+
+def create_clickable_figure(fig, high_res_callback=None):
+    """Make a figure clickable to show high-resolution version in new window."""
+    import base64
+    from io import BytesIO
+    from IPython.display import HTML, Javascript, display
+    
+    def on_click(event):
+        if high_res_callback:
+            high_res_callback()
+    
+    # Add click handler
+    fig.canvas.mpl_connect('button_press_event', on_click)
+    
+    # Also create an HTML version with click handler
+    buf = BytesIO()
+    fig.savefig(buf, format='png', dpi=150, bbox_inches='tight')
+    buf.seek(0)
+    img_b64 = base64.b64encode(buf.read()).decode()
+    buf.close()
+    
+    html = f"""
+    <div style="cursor: pointer;" onclick="open_high_res_figure()">
+        <img src="data:image/png;base64,{img_b64}" style="max-width: 100%; cursor: pointer;" 
+             title="Click to open high-resolution version in new tab"/>
+        <p style="text-align: center; color: #666; font-style: italic;">
+            Click image to open high-resolution version in new tab
+        </p>
+    </div>
+    
+    <script>
+    function open_high_res_figure() {{
+        // This will be set by the callback
+        if (window.high_res_callback) {{
+            window.high_res_callback();
+        }}
+    }}
+    </script>
+    """
+    
+    return HTML(html)
+
+
+def save_high_resolution_figure(fig, filename='weierstrass_high_res.png', dpi=300):
+    """Save figure at high resolution and return the filename."""
+    fig.savefig(filename, dpi=dpi, bbox_inches='tight', facecolor='white')
+    return filename
