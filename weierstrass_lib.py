@@ -518,6 +518,36 @@ def plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size=20):
                            ha='center', va='center')
 
 
+def plot_lattice_trajectories_on_axes(axes, trajectories, p, q):
+    """Plot lattice trajectories on given axes as dotted grey lines."""
+    for trajectory, blowup_point in trajectories:
+        if len(trajectory) > 1:
+            # Wrap trajectory with breaks
+            wrapped_traj = wrap_with_breaks(trajectory, p, q)
+            
+            # Split trajectory at NaN breaks
+            segments = []
+            current_segment = []
+            
+            for z in wrapped_traj:
+                if np.isnan(z):
+                    if current_segment:
+                        segments.append(np.array(current_segment))
+                        current_segment = []
+                else:
+                    current_segment.append(z)
+            
+            if current_segment:
+                segments.append(np.array(current_segment))
+            
+            # Plot segments on all axes as dotted grey lines
+            for segment in segments:
+                if len(segment) > 1:
+                    for ax in axes:
+                        ax.plot(segment.real, segment.imag, color='grey', 
+                               linewidth=1, alpha=0.6, linestyle=':', zorder=0)
+
+
 def create_clickable_figure(fig, high_res_callback=None):
     """Make a figure clickable to show high-resolution version in new window."""
     import base64

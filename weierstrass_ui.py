@@ -50,16 +50,19 @@ class WeierstrassUI:
         self.vec_max_len_slider = widgets.FloatSlider(value=0.5, min=0.1, max=2.0, step=0.1, description='Vec max len')
         self.show_vectors_checkbox = widgets.Checkbox(value=True, description='Show vectors')
 
-        # Palette parameters
-        self.saturation_slider = widgets.FloatSlider(value=0.3, min=0.0, max=1.0, step=0.05, description='Saturation')
-        self.value_floor_slider = widgets.FloatSlider(value=0.3, min=0.0, max=1.0, step=0.05, description='Value floor')
-        self.mag_scale_slider = widgets.FloatSlider(value=1.0, min=0.1, max=5.0, step=0.1, description='Mag scale')
+        # Palette parameters (soft by default)
+        self.saturation_slider = widgets.FloatSlider(value=0.2, min=0.0, max=1.0, step=0.05, description='Saturation')
+        self.value_floor_slider = widgets.FloatSlider(value=0.4, min=0.0, max=1.0, step=0.05, description='Value floor')
+        self.mag_scale_slider = widgets.FloatSlider(value=0.8, min=0.1, max=5.0, step=0.1, description='Mag scale')
 
         # Integration parameters
         self.dt_text = widgets.FloatText(value=0.01, description='dt')
         self.T_slider = widgets.FloatSlider(value=10.0, min=1.0, max=50.0, step=1.0, description='T (duration)')
         self.blowup_thresh_slider = widgets.FloatSlider(value=10.0, min=1.0, max=50.0, step=1.0, description='Blow-up |Δz|')
         self.emoji_size_slider = widgets.IntSlider(value=20, min=10, max=50, description='Emoji size')
+        
+        # Lattice trajectories option
+        self.show_lattice_trajectories_checkbox = widgets.Checkbox(value=False, description='Show lattice trajectories (z=1,2,3..p-1, z\'=i)')
 
         # Control buttons
         self.render_btn = widgets.Button(description='Render', button_style='primary')
@@ -104,7 +107,8 @@ class WeierstrassUI:
 
         integration_box = widgets.VBox([
             widgets.HTML("<h3>Integration</h3>"),
-            self.dt_text, self.T_slider, self.blowup_thresh_slider, self.emoji_size_slider
+            self.dt_text, self.T_slider, self.blowup_thresh_slider, self.emoji_size_slider,
+            self.show_lattice_trajectories_checkbox
         ])
 
         particles_box = widgets.VBox([
@@ -215,6 +219,7 @@ class WeierstrassUI:
             T = self.T_slider.value
             blow_thresh = self.blowup_thresh_slider.value
             emoji_size = self.emoji_size_slider.value
+            show_lattice_trajectories = self.show_lattice_trajectories_checkbox.value
             
             particles = self.get_particles()
             
@@ -389,6 +394,25 @@ class WeierstrassUI:
             
             # Plot trajectories on all axes
             plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size)
+            
+            # Plot lattice trajectories if requested
+            if show_lattice_trajectories:
+                lattice_trajectories = []
+                # Generate trajectories for z = 1, 2, 3, ..., p-1 with z' = i
+                for k in range(1, int(p)):
+                    z0 = complex(k, 0)
+                    v0 = complex(0, 1)  # z' = i
+                    try:
+                        trajectory, blowup_point = integrate_second_order_with_blowup(
+                            z0, v0, dt, T, p, q, N, blow_thresh
+                        )
+                        lattice_trajectories.append((trajectory, blowup_point))
+                    except Exception as e:
+                        print(f"Error integrating lattice trajectory k={k}: {e}")
+                        lattice_trajectories.append((np.array([z0]), None))
+                
+                # Plot lattice trajectories as dotted grey lines
+                plot_lattice_trajectories_on_axes(axes, lattice_trajectories, p, q)
             
             plt.tight_layout()
             self.current_fig = fig
