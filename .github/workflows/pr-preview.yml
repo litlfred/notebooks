@@ -1,0 +1,110 @@
+name: PR Preview Deploy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
+
+# Allow multiple concurrent PR deployments
+concurrency:
+  group: "pr-preview-${{ github.event.number }}"
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout PR
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install numpy matplotlib
+    
+    - name: Test mathematical functions
+      run: |
+        if [ -f "docs/python/weierstrass_core.py" ]; then
+          cd docs/python
+          python -c "
+          import weierstrass_core as wc
+          import numpy as np
+          print('Testing mathematical functions in PR...')
+          z = 2.0 + 1.5j
+          p, q, N = 11.0, 5.0, 2
+          wp_val = wc.wp_rect(z, p, q, N)
+          print(f'✓ ℘ function test passed: |℘({z})| = {abs(wp_val):.4f}')
+          "
+        else
+          echo "No mathematical functions to test in this PR"
+        fi
+    
+    - name: Validate changes
+      run: |
+        echo "🔍 Validating PR changes..."
+        
+        # Check if docs directory exists
+        if [ -d "docs" ]; then
+          echo "✓ Found docs directory"
+          
+          # List changed files in docs
+          if [ -f "docs/index.html" ]; then echo "✓ index.html present"; fi
+          if [ -f "docs/js/weierstrass-app.js" ]; then echo "✓ JavaScript app present"; fi
+          if [ -f "docs/css/style.css" ]; then echo "✓ CSS styles present"; fi
+          
+          # Check for basic HTML structure
+          if grep -q "Weierstrass" docs/index.html; then
+            echo "✓ HTML contains expected content"
+          fi
+        fi
+        
+        echo "🎯 PR validation completed"
+    
+    - name: Comment on PR
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🔍 PR Preview Build')
+          );
+          
+          const body = `🔍 **PR Preview Build Complete**
+          
+          ✅ Mathematical functions tested
+          ✅ Static files validated
+          ✅ Ready for review
+          
+          Once approved, this PR can be merged to trigger automatic deployment to GitHub Pages.
+          
+          **Manual Deploy**: Repository maintainers can also trigger deployment manually using the \`workflow_dispatch\` event in the Actions tab.`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+          }

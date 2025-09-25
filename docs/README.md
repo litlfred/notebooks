@@ -1,15 +1,44 @@
 # Weierstrass ℘ Playground - Browser Edition
 
-An interactive mathematical visualization of the Weierstrass ℘ (Weierstrass P) function running entirely in your browser using [Pyodide](https://pyodide.org/). No Python installation, Jupyter notebooks, or server required!
+An interactive mathematical playground running entirely in your browser using [Pyodide](https://pyodide.org/). Features dynamic visualizations that re-render automatically when the browser window is resized.
 
 ## 🌟 Features
 
 - **Zero Installation**: Runs completely in your browser using WebAssembly
-- **Interactive Visualization**: Real-time parameter adjustment and immediate visual feedback
+- **Dynamic Visualizations**: Re-renders automatically when window is resized with visual indicators
+- **Interactive Controls**: Real-time parameter adjustment with immediate feedback
 - **Mathematical Accuracy**: Full NumPy/matplotlib computation in the browser
 - **Trajectory Integration**: RK4 integration of second-order differential equations
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Offline Capable**: After initial load, works without internet connection
+- **Common Framework**: Modular architecture with reusable math/UI components
+
+## 🏗️ Common Framework Architecture
+
+This playground implements a notebook-like framework where each "page" acts like a Jupyter notebook with modular components:
+
+### Component Structure
+```
+📦 Page Components (like notebook cells)
+├── 🧮 Math Library Components
+│   ├── Core mathematical functions
+│   ├── Numerical computations
+│   └── Algorithm implementations
+├── 🎨 UI Components  
+│   ├── Interactive controls
+│   ├── Parameter management
+│   └── User interface elements
+└── 📱 Page Controller
+    ├── Event handling
+    ├── State management
+    └── Rendering coordination
+```
+
+### Framework Features
+- **Modular Design**: Each component is self-contained and reusable
+- **Dynamic Rendering**: Automatic re-computation when parameters or window size changes
+- **State Management**: Persistent parameter state across interactions
+- **Event-Driven**: Responsive to user interactions and system events
+- **Extensible**: Easy to add new mathematical playgrounds using the same pattern
 
 ## 🚀 Live Demo
 
@@ -23,7 +52,15 @@ Visit the playground at: **https://litlfred.github.io/notebooks/**
 2. Wait for Pyodide and mathematical libraries to load (first time takes ~30 seconds)
 3. Configure parameters using the control panel
 4. Click "Render" to generate visualizations
-5. Click "Save PNG" to download your visualizations
+5. **Resize your browser window** to see dynamic re-rendering in action
+6. Click "Save PNG" to download your visualizations
+
+### Dynamic Features
+
+- **Auto Re-rendering**: Window resize triggers automatic visualization update
+- **Visual Indicators**: Status messages show when re-rendering is in progress
+- **Debounced Updates**: Resize events are debounced to avoid excessive computation
+- **Parameter Persistence**: Settings are maintained during dynamic updates
 
 ### Parameters
 

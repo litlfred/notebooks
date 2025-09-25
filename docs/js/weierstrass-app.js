@@ -8,8 +8,33 @@ class WeierstrassApp {
         this.pyodide = null;
         this.isInitialized = false;
         this.isComputing = false;
+        this.lastRenderParams = null;
+        this.resizeTimeout = null;
         
         this.initializeEventListeners();
+        this.setupResizeHandler();
+    }
+
+    /**
+     * Setup window resize handler for dynamic re-rendering
+     */
+    setupResizeHandler() {
+        window.addEventListener('resize', () => {
+            if (this.lastRenderParams && this.isInitialized && !this.isComputing) {
+                // Clear existing timeout
+                if (this.resizeTimeout) {
+                    clearTimeout(this.resizeTimeout);
+                }
+                
+                // Show re-rendering indicator
+                this.updateStatus('Re-rendering due to window resize...', 'computing');
+                
+                // Debounce resize events - wait 500ms after last resize
+                this.resizeTimeout = setTimeout(() => {
+                    this.render(true); // Pass true to indicate this is a resize render
+                }, 500);
+            }
+        });
     }
 
     /**
@@ -235,7 +260,7 @@ class WeierstrassApp {
     /**
      * Main render function
      */
-    async render() {
+    async render(isResize = false) {
         if (!this.isInitialized || this.isComputing) {
             return;
         }
@@ -243,12 +268,20 @@ class WeierstrassApp {
         this.isComputing = true;
         const renderBtn = document.getElementById('render-btn');
         renderBtn.disabled = true;
-        renderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Computing...';
+        
+        if (isResize) {
+            renderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Re-rendering...';
+            this.updateStatus('Re-rendering visualization for new window size...', 'computing');
+        } else {
+            renderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Computing...';
+            this.updateStatus('Computing Weierstrass function and trajectories...', 'computing');
+        }
         
         try {
-            this.updateStatus('Computing Weierstrass function and trajectories...', 'computing');
-            
             const params = this.getParameters();
+            
+            // Store parameters for resize re-rendering
+            this.lastRenderParams = params;
             
             // Validate parameters
             if (params.particles.length === 0) {
@@ -306,7 +339,7 @@ image_data = plot_to_base64(fig)
             // Display the image
             this.displayPlot(imageData);
             
-            this.updateStatus(`Visualization complete! Grid: ${params.grid_x}×${params.grid_y}, Particles: ${params.particles.length}, N: ${params.N}`, 'success');
+            this.updateStatus(`Visualization complete! Grid: ${params.grid_x}×${params.grid_y}, Particles: ${params.particles.length}, N: ${params.N}. Resize window to re-render dynamically.`, 'success');
             
         } catch (error) {
             console.error('Rendering error:', error);

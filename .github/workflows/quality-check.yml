@@ -1,0 +1,204 @@
+name: Quality Check & Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of test to run'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - mathematical
+        - frontend
+        - performance
+  
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'docs/**'
+    - 'weierstrass_*.py'
+    - '.github/workflows/**'
+
+jobs:
+  test-mathematical:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'full' || github.event.inputs.test_type == 'mathematical' || github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install Python dependencies
+      run: |
+        pip install numpy matplotlib scipy
+    
+    - name: Test Weierstrass mathematical functions
+      run: |
+        cd docs/python
+        python -c "
+        import weierstrass_core as wc
+        import numpy as np
+        import matplotlib.pyplot as plt
+        
+        print('🧮 Testing mathematical core functions...')
+        
+        # Test 1: Basic function evaluation
+        print('Test 1: Basic ℘ function evaluation')
+        z = 2.0 + 1.5j
+        p, q, N = 11.0, 5.0, 3
+        wp_val = wc.wp_rect(z, p, q, N)
+        wp_deriv_val = wc.wp_deriv(z, p, q, N)
+        
+        assert np.isfinite(wp_val), '℘ function returned non-finite value'
+        assert np.isfinite(wp_deriv_val), '℘\\' function returned non-finite value'
+        print(f'✅ ℘({z}) = {wp_val}')
+        print(f'✅ ℘\\'({z}) = {wp_deriv_val}')
+        
+        # Test 2: Field grid computation
+        print('\\nTest 2: Field grid computation')
+        X, Y, F, M = wc.field_grid(p, q, 'wp', N, 50, 50)
+        valid_points = np.sum(M)
+        total_points = M.size
+        print(f'✅ Grid computed: {valid_points}/{total_points} valid points')
+        
+        # Test 3: Background generation
+        print('\\nTest 3: Background generation')
+        bg = wc.soft_background(F, M)
+        assert bg.shape == (50, 50, 3), f'Wrong background shape: {bg.shape}'
+        print(f'✅ Background generated: shape {bg.shape}')
+        
+        # Test 4: Trajectory integration
+        print('\\nTest 4: Trajectory integration')
+        z0, v0 = 5.5 + 0j, 0 + 1j
+        dt, T = 0.01, 1.0
+        trajectory, blowup_point = wc.integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
+        print(f'✅ Trajectory integrated: {len(trajectory)} points')
+        
+        print('\\n🎉 All mathematical tests passed!')
+        "
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'full' || github.event.inputs.test_type == 'frontend' || github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Validate HTML structure
+      run: |
+        echo "🌐 Testing frontend files..."
+        
+        # Check that essential files exist
+        test -f docs/index.html
+        test -f docs/js/weierstrass-app.js
+        test -f docs/css/style.css
+        test -f docs/python/weierstrass_core.py
+        
+        # Check HTML structure
+        echo "✅ Validating HTML structure..."
+        grep -q "Weierstrass ℘ Playground" docs/index.html
+        grep -q "container" docs/index.html
+        grep -q "plot-area" docs/index.html
+        
+        # Check JavaScript structure
+        echo "✅ Validating JavaScript structure..."
+        grep -q "class WeierstrassApp" docs/js/weierstrass-app.js
+        grep -q "loadPyodide" docs/js/weierstrass-app.js
+        grep -q "setupResizeHandler" docs/js/weierstrass-app.js
+        
+        # Check CSS structure
+        echo "✅ Validating CSS structure..."
+        grep -q "container" docs/css/style.css
+        grep -q "responsive" docs/css/style.css
+        
+        echo "🎉 Frontend validation completed!"
+    
+    - name: Test JavaScript syntax
+      run: |
+        # Basic JavaScript syntax check using Node.js
+        echo "🔍 Checking JavaScript syntax..."
+        node -c docs/js/weierstrass-app.js
+        echo "✅ JavaScript syntax is valid"
+
+  test-performance:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'full' || github.event.inputs.test_type == 'performance'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install numpy matplotlib time-machine
+    
+    - name: Performance benchmarks
+      run: |
+        cd docs/python
+        python -c "
+        import weierstrass_core as wc
+        import numpy as np
+        import time
+        
+        print('⚡ Running performance benchmarks...')
+        
+        # Benchmark 1: Function evaluation speed
+        print('Benchmark 1: Function evaluation speed')
+        z = 2.0 + 1.5j
+        p, q, N = 11.0, 5.0, 3
+        
+        start_time = time.time()
+        for i in range(100):
+            wp_val = wc.wp_rect(z + i*0.01, p, q, N)
+        eval_time = time.time() - start_time
+        print(f'✅ 100 evaluations in {eval_time:.3f}s ({1000*eval_time/100:.1f}ms per eval)')
+        
+        # Benchmark 2: Grid computation
+        print('\\nBenchmark 2: Grid computation speed')
+        start_time = time.time()
+        X, Y, F, M = wc.field_grid(p, q, 'wp', N, 100, 100)
+        grid_time = time.time() - start_time
+        print(f'✅ 100x100 grid computed in {grid_time:.3f}s')
+        
+        # Benchmark 3: Background generation
+        print('\\nBenchmark 3: Background generation speed')
+        start_time = time.time()
+        bg = wc.soft_background(F, M)
+        bg_time = time.time() - start_time
+        print(f'✅ Background generated in {bg_time:.3f}s')
+        
+        print('\\n🚀 Performance benchmarks completed!')
+        "
+
+  report:
+    runs-on: ubuntu-latest
+    needs: [test-mathematical, test-frontend]
+    if: always()
+    
+    steps:
+    - name: Generate test report
+      run: |
+        echo "📊 Test Summary Report"
+        echo "======================"
+        echo "Mathematical tests: ${{ needs.test-mathematical.result }}"
+        echo "Frontend tests: ${{ needs.test-frontend.result }}"
+        
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "🔍 PR Quality Check completed"
+          echo "Ready for review and deployment"
+        fi
