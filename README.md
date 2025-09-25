@@ -1,51 +1,23 @@
 # Weierstrass ℘ Playground
 
-Interactive visualization of the Weierstrass ℘ function with particle trajectory dynamics, available in two versions:
+**Interactive visualization of the Weierstrass ℘ function running entirely in your browser**
 
-## 🌐 Browser Playground (Recommended)
+**🚀 [Try it now: https://litlfred.github.io/notebooks/](https://litlfred.github.io/notebooks/)**
 
-**Run entirely in your browser - no installation required!**
-
-**🚀 Try it now: [https://litlfred.github.io/notebooks/](https://litlfred.github.io/notebooks/)**
-
-- **Zero setup**: Works immediately in any modern web browser
+- **Zero Installation**: Works immediately in any modern web browser
 - **Powered by Pyodide**: Full Python + NumPy + Matplotlib running via WebAssembly
-- **Mobile friendly**: Responsive design works on phones and tablets
-- **Offline capable**: After initial load, works without internet
+- **Mobile Friendly**: Responsive design works on phones and tablets
+- **Dynamic Visualizations**: Re-renders when browser is resized
 
-### Features
-- Interactive parameter controls with real-time feedback
-- Two-panel visualization: ℘(z) and ℘′(z) fields with color mapping
-- Particle trajectory integration following z''(t) = -℘(z(t)) * z(t)
-- Lattice trajectory visualization option
-- PNG export functionality
-- Comprehensive help system
+## Features
 
-## 📔 Jupyter Notebook Version
-
-Traditional Jupyter notebook with ipywidgets interface (from PR #2).
-
-### Setup
-1. Install dependencies:
-   ```bash
-   pip install numpy matplotlib ipywidgets
-   ```
-
-2. Enable Jupyter widgets:
-   ```bash
-   jupyter nbextension enable --py widgetsnbextension --sys-prefix
-   ```
-
-3. Run the notebook:
-   ```bash
-   jupyter notebook weierstrass_playground.ipynb
-   ```
-
-### Features
+- **Interactive parameter controls** with real-time visual feedback
 - **Multiple visualization modes**: Two-panel, three-panel, and five-panel layouts
-- **Advanced controls**: Full parameter customization with sliders and inputs
-- **High-resolution export**: 600 DPI PNG output capability
-- **Modular architecture**: Separated into lib, ui, and preamble modules
+- **Particle trajectory integration** following z''(t) = -℘(z(t)) * z(t)
+- **Lattice trajectory visualization** option for exploring periodic structure
+- **Dynamic rendering** with visual indicators during re-computation
+- **PNG export** functionality for high-quality visualizations
+- **Comprehensive help system** with mathematical background
 
 ## Mathematical Background
 
@@ -60,27 +32,18 @@ where the sum runs over non-zero lattice points ω ∈ Λ = ℤp + ℤiq within 
 
 Integration uses RK4 method with automatic blow-up detection near poles.
 
-## Quick Start Examples
+## Quick Start
 
-### Browser Version
 1. Visit https://litlfred.github.io/notebooks/
-2. Wait for libraries to load (~30 seconds first time)
+2. Wait for Pyodide to load (~30 seconds first time)
 3. Try default settings: p=11, q=5, N=3
 4. Click "Render" to generate visualization
 5. Experiment with different particles: z₀ = `5+2j`, v₀ = `0+1j`
-
-### Jupyter Version  
-1. Open `weierstrass_playground.ipynb`
-2. Run all cells from top to bottom
-3. Use interactive controls at the bottom
-4. Try different visualization modes and particle configurations
-
-## Performance Notes
-
-**Browser version**: Keep grid resolution ≤150 and N≤4 for responsive interaction  
-**Jupyter version**: Can handle higher resolution (300×300) and N≤6 with more computational resources
+6. Resize your browser window to see dynamic re-rendering
 
 ## Repository Structure
+
+This repository contains a modular framework for mathematical visualizations:
 
 ```
 ├── docs/                          # Browser playground (GitHub Pages)
@@ -88,24 +51,26 @@ Integration uses RK4 method with automatic blow-up detection near poles.
 │   ├── css/style.css            # Styling
 │   ├── js/weierstrass-app.js    # JavaScript application
 │   ├── python/weierstrass_core.py  # Python math library for Pyodide
-│   └── README.md                # Detailed browser version docs
-├── weierstrass_playground.ipynb  # Main Jupyter notebook (minimal)
+│   └── README.md                # Detailed development docs
 ├── weierstrass_lib.py           # Mathematical functions library  
-├── weierstrass_ui.py            # Jupyter UI components
+├── weierstrass_ui.py            # UI components
 ├── weierstrass_preamble.py      # Setup and documentation
-└── requirements.txt             # Python dependencies for Jupyter version
+├── weierstrass_playground.ipynb  # Jupyter notebook version
+└── requirements.txt             # Python dependencies
 ```
 
-## Dependencies
+## Common Framework
 
-**Browser version**: None (libraries loaded automatically via CDN)
-**Jupyter version**: `numpy`, `matplotlib`, `ipywidgets`
+The playground uses a modular architecture where each "page" acts like a Jupyter notebook:
+- **Math library components**: Core mathematical functions
+- **UI components**: Interactive controls and visualization
+- **Page structure**: Similar to notebook cells but browser-native
 
 ## Development
 
-See `docs/README.md` for detailed development instructions for the browser version.
+See `docs/README.md` for detailed development instructions.
 
-For local development of the browser version:
+For local development:
 ```bash
 cd docs
 python -m http.server 8000
