@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Board - Interactive Workspace</title>
+    
+    <!-- Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; 
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+        font-src 'self' https://cdnjs.cloudflare.com; 
+        connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tiny.cloud;
+        img-src 'self' data:;
+    ">
+    
+    <link rel="stylesheet" href="board-style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+</head>
+<body class="desktop-mode" data-theme="dark">
+    
+    <!-- Widget Library Sidebar -->
+    <div class="widget-library" id="widget-library">
+        <div class="library-header">
+            <h3><i class="fas fa-puzzle-piece"></i> Widget Library</h3>
+            <button class="library-toggle" onclick="toggleLibrary()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="widget-categories">
+            <div class="widget-category">
+                <h4><i class="fas fa-sticky-note"></i> Content</h4>
+                <div class="widget-items">
+                    <div class="widget-item" draggable="true" data-widget-type="markdown">
+                        <i class="fas fa-markdown"></i>
+                        <span>Markdown Note</span>
+                    </div>
+                    <div class="widget-item" draggable="true" data-widget-type="latex">
+                        <i class="fas fa-square-root-alt"></i>
+                        <span>LaTeX Math</span>
+                    </div>
+                    <div class="widget-item" draggable="true" data-widget-type="python">
+                        <i class="fab fa-python"></i>
+                        <span>Python Code</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="widget-category">
+                <h4><i class="fas fa-chart-line"></i> Visualizations</h4>
+                <div class="widget-items">
+                    <div class="widget-item" draggable="true" data-widget-type="weierstrass">
+                        <i class="fas fa-infinity"></i>
+                        <span>Weierstrass ℘</span>
+                    </div>
+                    <div class="widget-item" draggable="true" data-widget-type="plot">
+                        <i class="fas fa-chart-area"></i>
+                        <span>2D Plot</span>
+                    </div>
+                    <div class="widget-item" draggable="true" data-widget-type="3dplot">
+                        <i class="fas fa-cube"></i>
+                        <span>3D Plot</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="widget-category">
+                <h4><i class="fas fa-database"></i> Data</h4>
+                <div class="widget-items">
+                    <div class="widget-item" draggable="true" data-widget-type="dataset">
+                        <i class="fas fa-table"></i>
+                        <span>Dataset</span>
+                    </div>
+                    <div class="widget-item" draggable="true" data-widget-type="csv">
+                        <i class="fas fa-file-csv"></i>
+                        <span>CSV Data</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Board Canvas -->
+    <div class="board-canvas" id="board-canvas">
+        <!-- Board header -->
+        <div class="board-header">
+            <div class="board-title">
+                <h1 contenteditable="true" id="board-title">Mathematical Workspace</h1>
+                <p class="board-subtitle">Interactive notebook with draggable widgets</p>
+            </div>
+            
+            <div class="board-tools">
+                <button class="tool-btn" onclick="toggleLibrary()">
+                    <i class="fas fa-plus"></i> Add Widget
+                </button>
+                <button class="tool-btn" onclick="fitToScreen()">
+                    <i class="fas fa-compress-arrows-alt"></i> Fit Screen
+                </button>
+                <button class="tool-btn" onclick="toggleGrid()">
+                    <i class="fas fa-grip-lines"></i> Grid
+                </button>
+            </div>
+        </div>
+        
+        <!-- Board content area -->
+        <div class="board-content" id="board-content">
+            <!-- Widgets will be dynamically added here -->
+        </div>
+    </div>
+    
+    <!-- Global Control Panel -->
+    <div class="global-control-panel" id="global-controls">
+        <button class="panel-toggle" onclick="toggleControlPanel()">
+            <i class="fas fa-chevron-up" id="panel-toggle-icon"></i>
+        </button>
+        
+        <div class="control-section">
+            <h4>Board:</h4>
+            <button class="control-btn" onclick="saveBoard()">
+                <i class="fas fa-save"></i> Save Board
+            </button>
+            <button class="control-btn" onclick="loadBoard()">
+                <i class="fas fa-folder-open"></i> Load Board
+            </button>
+            <button class="control-btn" onclick="exportBoard()">
+                <i class="fas fa-download"></i> Export
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Widgets:</h4>
+            <button class="control-btn" id="play-all-btn" onclick="playAllWidgets()">
+                <i class="fas fa-play"></i> Run All
+            </button>
+            <button class="control-btn" id="pause-all-btn" onclick="pauseAllWidgets()">
+                <i class="fas fa-pause"></i> Pause All
+            </button>
+            <button class="control-btn danger" id="clear-all-btn" onclick="clearBoard()">
+                <i class="fas fa-trash"></i> Clear All
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Layout:</h4>
+            <button class="control-btn" id="desktop-mode-btn" onclick="setLayoutMode('desktop')">
+                <i class="fas fa-desktop"></i> Desktop
+            </button>
+            <button class="control-btn" id="mobile-mode-btn" onclick="setLayoutMode('mobile')">
+                <i class="fas fa-mobile-alt"></i> Mobile
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Theme:</h4>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                <i class="fas fa-sun" id="theme-icon"></i>
+            </button>
+        </div>
+        
+        <div class="session-status">
+            <div class="status-dot" id="session-status-dot"></div>
+            <span id="session-status-text">Board Ready</span>
+        </div>
+    </div>
+
+    <!-- Widget Editor Modal -->
+    <div class="widget-editor-modal" id="widget-editor" style="display: none;">
+        <div class="editor-content">
+            <div class="editor-header">
+                <h3 id="editor-title">Edit Widget</h3>
+                <button onclick="closeEditor()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="editor-body" id="editor-body">
+                <!-- Dynamic editor content -->
+            </div>
+            <div class="editor-actions">
+                <button class="btn-secondary" onclick="closeEditor()">Cancel</button>
+                <button class="btn-primary" onclick="saveWidget()">Save Widget</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load board application
+        function loadBoardApplication() {
+            const boardScript = document.createElement('script');
+            boardScript.src = 'board-app.js';
+            document.body.appendChild(boardScript);
+        }
+        
+        document.addEventListener('DOMContentLoaded', loadBoardApplication);
+    </script>
+</body>
+</html>
