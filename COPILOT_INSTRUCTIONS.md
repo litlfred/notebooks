@@ -4,26 +4,54 @@
 
 This is a **random collection of Python notebooks** for mathematical explorations, visualizations, and interactive experiments. Each notebook should be self-contained and focused on a specific mathematical concept, algorithm, or visualization technique.
 
+## 🚨 URGENT: Branch Naming Compliance Required
+
+**IMMEDIATE ACTION NEEDED**: Recent PRs (#2, #3, #7) ALL violated branch naming requirements by using `copilot/fix-<UUID>` patterns instead of the required `feature-descriptive-name` format.
+
+**GOING FORWARD**: Every branch MUST use descriptive names like:
+- `feature-weierstrass-board-system` ✅  
+- `feature-pyodide-browser-deployment` ✅
+- `feature-trajectory-visualization-fixes` ✅
+
+**NOT allowed**:
+- `copilot/fix-79449fca-2fc8-42d9-b210-2bf7c4d836d0` ❌
+- `copilot/fix-anything` ❌
+- Generic UUID-based names ❌
+
 ## Branch Naming Convention
 
-**MANDATORY**: All Copilot branches MUST follow the pattern:
+**🚨 CRITICAL REQUIREMENT**: All Copilot branches MUST follow the pattern:
 
 ```
 feature-descriptive-name
 ```
 
-### Examples:
+**⚠️ RECENT VIOLATIONS**: All recent PRs (#2, #3, #7) violated this requirement by using `copilot/fix-<UUID>` patterns. This MUST be corrected going forward.
+
+### ✅ Valid Examples:
 - `feature-weierstrass-playground`
 - `feature-mandelbrot-explorer` 
 - `feature-fourier-analysis`
 - `feature-neural-network-viz`
 - `feature-prime-spirals`
+- `feature-board-system-widgets`
+- `feature-pyodide-deployment`
+- `feature-trajectory-visualization`
 
-### ❌ Invalid branch names:
-- `copilot/fix-xyz-123-456`
+### ❌ STRICTLY FORBIDDEN Branch Names:
+- `copilot/fix-xyz-123-456` ← **RECENTLY USED INCORRECTLY**
+- `copilot/fix-<any-uuid>` ← **RECENTLY USED INCORRECTLY**  
 - `main`
 - `fix-bug`
 - `update-notebook`
+- Any non-descriptive generic names
+
+### 🎯 Branch Name Requirements:
+1. **MUST start with `feature-`**
+2. **MUST describe the actual functionality being added**
+3. **MUST use kebab-case (dashes, not underscores or camelCase)**
+4. **MUST be readable and self-explanatory**
+5. **MUST NOT use UUIDs, random IDs, or generic patterns**
 
 ## Code Architecture Guidelines
 
@@ -183,6 +211,12 @@ repository-root/
 - Update PR descriptions with checklists showing progress
 - Commit working increments rather than large monolithic changes
 
+### Branch Name Enforcement
+- **Before creating any PR**: Verify your branch follows `feature-descriptive-name`
+- **Self-check**: Would a developer understand what this branch contains from the name alone?
+- **If using auto-generated branch names**: IMMEDIATELY rename to a descriptive name
+- **Review requirement**: All PRs with non-compliant branch names MUST be declined
+
 ## Testing
 
 ### Manual Testing
@@ -227,7 +261,8 @@ repository-root/
 ## Review Criteria
 
 Before submitting:
-- [ ] Branch name follows `feature-*` pattern
+- [ ] **🚨 CRITICAL**: Branch name follows `feature-descriptive-name` pattern (NOT `copilot/fix-*`)
+- [ ] Branch name clearly describes the feature/functionality being added
 - [ ] Mathematical logic extracted to separate module
 - [ ] Notebook runs completely from top to bottom
 - [ ] UI controls are intuitive and well-organized
