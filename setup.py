@@ -47,10 +47,6 @@ setup(
             "black>=22.0",
             "isort>=5.0",
         ],
-        "jupyter": [
-            "ipywidgets>=7.6.0",
-            "jupyter>=1.0.0",
-        ],
     },
     entry_points={
         "console_scripts": [

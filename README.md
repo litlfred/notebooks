@@ -12,7 +12,8 @@
 ## Features
 
 - **Interactive parameter controls** with real-time visual feedback
-- **Multiple visualization modes**: Two-panel, three-panel, and five-panel layouts
+- **Multiple visualization modes**: Two-panel and time-series layouts
+- **Time-series visualization**: Shows Re(℘(z(t))) and Im(℘(z(t))) vs time
 - **Particle trajectory integration** following z''(t) = -℘(z(t)) * z(t)
 - **Lattice trajectory visualization** option for exploring periodic structure
 - **Dynamic rendering** with visual indicators during re-computation
@@ -52,27 +53,23 @@ This repository contains a modular framework for mathematical visualizations:
 │   ├── visualization.py          # Visualization and plotting
 │   ├── integration.py            # Trajectory integration and ODEs
 │   └── browser.py                # Browser-specific adaptations
-├── docs/                          # Browser playground (GitHub Pages)
+├── docs/weierstrass-playground/   # Browser playground (GitHub Pages)
 │   ├── index.html                # Main web interface  
-│   ├── css/style.css            # Styling
-│   ├── js/weierstrass-app.js    # JavaScript application
-│   ├── python/weierstrass_playground/  # Browser-compatible package copy
-│   └── README.md                # Detailed development docs
-├── weierstrass_lib.py           # Legacy library (maintained for compatibility)
-├── weierstrass_ui.py            # Legacy UI components
-├── weierstrass_preamble.py      # Setup and documentation
-├── weierstrass_playground.ipynb  # Jupyter notebook version
-├── setup.py & pyproject.toml    # Package configuration
-└── requirements.txt             # Dependencies
+│   ├── style.css                 # Styling
+│   ├── weierstrass-app.js        # JavaScript application
+│   └── python/weierstrass_playground/  # Browser-compatible package copy
+├── weierstrass_lib.py            # Standalone library functions
+├── setup.py & pyproject.toml     # Package configuration
+└── requirements.txt              # Dependencies
 ```
 
-## Common Framework
+## Architecture
 
-The playground uses a modular architecture where each "page" acts like a Jupyter notebook:
-- **Math library components**: Core mathematical functions (`weierstrass_playground.core`)
-- **UI components**: Interactive controls and visualization (`weierstrass_playground.visualization`)
-- **Integration components**: Trajectory computation (`weierstrass_playground.integration`)
-- **Browser adaptations**: Web-specific functionality (`weierstrass_playground.browser`)
+The playground uses a modular browser-based architecture:
+- **Core mathematical functions**: Weierstrass ℘ function computation (`weierstrass_playground.core`)
+- **Visualization components**: Interactive plotting and figure layouts (`weierstrass_playground.visualization`)  
+- **Integration components**: Trajectory computation and time-series evaluation (`weierstrass_playground.integration`)
+- **Browser interface**: Web-specific functionality and Pyodide integration (`weierstrass_playground.browser`)
 
 ### Package Installation
 

@@ -162,8 +162,6 @@ repository-root/
 ### Standard Stack
 - `numpy` - Numerical computations
 - `matplotlib` - Plotting and visualization  
-- `ipywidgets` - Interactive controls
-- `jupyter` - Notebook environment
 
 ### Additional Libraries (as needed)
 - `scipy` - Scientific computing
