@@ -8,18 +8,50 @@
     <!-- Content Security Policy -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
-        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://cdn.tiny.cloud; 
-        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
-        font-src 'self' https://cdnjs.cloudflare.com; 
-        connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tiny.cloud;
+        script-src 'self' 'unsafe-inline'; 
+        style-src 'self' 'unsafe-inline'; 
+        font-src 'self'; 
+        connect-src 'self';
         img-src 'self' data:;
     ">
     
     <link rel="stylesheet" href="board-style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <!-- TinyMCE -->
-    <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Fallback for Font Awesome icons - use Unicode symbols -->
+    <style>
+        .fas.fa-puzzle-piece::before { content: "🧩"; }
+        .fas.fa-times::before { content: "✕"; }
+        .fas.fa-sticky-note::before { content: "📝"; }
+        .fas.fa-markdown::before { content: "📄"; }
+        .fas.fa-square-root-alt::before { content: "√"; }
+        .fab.fa-python::before { content: "🐍"; }
+        .fas.fa-chart-line::before { content: "📈"; }
+        .fas.fa-infinity::before { content: "∞"; }
+        .fas.fa-chart-area::before { content: "📊"; }
+        .fas.fa-cube::before { content: "📦"; }
+        .fas.fa-database::before { content: "💾"; }
+        .fas.fa-table::before { content: "📋"; }
+        .fas.fa-file-csv::before { content: "📄"; }
+        .fas.fa-plus::before { content: "+"; }
+        .fas.fa-compress-arrows-alt::before { content: "⤡"; }
+        .fas.fa-grip-lines::before { content: "☰"; }
+        .fas.fa-chevron-up::before { content: "⌃"; }
+        .fas.fa-chevron-down::before { content: "⌄"; }
+        .fas.fa-save::before { content: "💾"; }
+        .fas.fa-folder-open::before { content: "📁"; }
+        .fas.fa-download::before { content: "⤓"; }
+        .fas.fa-play::before { content: "▶"; }
+        .fas.fa-pause::before { content: "⏸"; }
+        .fas.fa-stop::before { content: "⏹"; }
+        .fas.fa-redo::before { content: "↻"; }
+        .fas.fa-trash::before { content: "🗑"; }
+        .fas.fa-desktop::before { content: "🖥"; }
+        .fas.fa-mobile-alt::before { content: "📱"; }
+        .fas.fa-sun::before { content: "☀"; }
+        .fas.fa-moon::before { content: "🌙"; }
+        .fas.fa-edit::before { content: "✏"; }
+    </style>
+
 </head>
 <body class="desktop-mode" data-theme="dark">
     
@@ -186,14 +218,21 @@
     </div>
 
     <script>
-        // Load board application
-        function loadBoardApplication() {
-            const boardScript = document.createElement('script');
-            boardScript.src = 'board-app.js';
-            document.body.appendChild(boardScript);
-        }
-        
-        document.addEventListener('DOMContentLoaded', loadBoardApplication);
+        // Load board application directly
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize user preferences first
+            const savedTheme = localStorage.getItem('weierstrass_theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            
+            // Set initial layout mode
+            const isMobile = window.innerWidth < 1024;
+            const defaultMode = isMobile ? 'mobile' : 'desktop';
+            document.body.classList.remove('desktop-mode', 'mobile-mode');
+            document.body.classList.add(`${defaultMode}-mode`);
+            
+            console.log('Board system initializing...');
+        });
     </script>
+    <script src="board-app.js"></script>
 </body>
 </html>
