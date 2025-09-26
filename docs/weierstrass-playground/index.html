@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weierstrass ℘ Playground - Interactive Browser Version</title>
+    
+    <!-- Content Security Policy to allow CDN access -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; 
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+        font-src 'self' https://cdnjs.cloudflare.com; 
+        connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com;
+        img-src 'self' data:;
+    ">
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -230,7 +241,48 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
-    <script src="weierstrass-app.js"></script>
+    <script>
+        // Fallback loading for Pyodide with multiple CDN sources
+        function loadPyodideScript() {
+            const cdnSources = [
+                'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js',
+                'https://unpkg.com/pyodide@0.24.1/pyodide.js'
+            ];
+            
+            let currentIndex = 0;
+            
+            function tryLoadScript() {
+                if (currentIndex >= cdnSources.length) {
+                    console.error('Failed to load Pyodide from all CDN sources');
+                    document.getElementById('progress-text').textContent = 'Failed to load Pyodide. Please check your internet connection and refresh the page.';
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = cdnSources[currentIndex];
+                script.onload = function() {
+                    console.log(`Pyodide loaded successfully from: ${cdnSources[currentIndex]}`);
+                    loadMainScript();
+                };
+                script.onerror = function() {
+                    console.warn(`Failed to load Pyodide from: ${cdnSources[currentIndex]}`);
+                    currentIndex++;
+                    tryLoadScript();
+                };
+                document.head.appendChild(script);
+            }
+            
+            function loadMainScript() {
+                const mainScript = document.createElement('script');
+                mainScript.src = 'weierstrass-app.js';
+                document.body.appendChild(mainScript);
+            }
+            
+            tryLoadScript();
+        }
+        
+        // Start loading when DOM is ready
+        document.addEventListener('DOMContentLoaded', loadPyodideScript);
+    </script>
 </body>
 </html>

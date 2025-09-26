@@ -53,20 +53,34 @@ class WeierstrassApp {
     }
 
     /**
-     * Load Pyodide and required packages
+     * Load Pyodide and required packages with better error handling
      */
     async loadPyodide() {
         this.updateProgress(10, 'Loading Pyodide...');
         
-        this.pyodide = await loadPyodide({
-            indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
-        });
-        
-        this.updateProgress(30, 'Loading NumPy...');
-        await this.pyodide.loadPackage(['numpy']);
-        
-        this.updateProgress(60, 'Loading Matplotlib...');
-        await this.pyodide.loadPackage(['matplotlib']);
+        try {
+            // Check if loadPyodide is available
+            if (typeof loadPyodide === 'undefined') {
+                throw new Error('Pyodide script not loaded. This may be due to network restrictions or CDN blocking.');
+            }
+            
+            this.pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+            });
+            
+            this.updateProgress(30, 'Loading NumPy...');
+            await this.pyodide.loadPackage(['numpy']);
+            
+            this.updateProgress(60, 'Loading Matplotlib...');
+            await this.pyodide.loadPackage(['matplotlib']);
+            
+        } catch (error) {
+            console.error('Failed to load Pyodide:', error);
+            if (error.message.includes('network') || error.message.includes('CDN') || error.message.includes('loadPyodide')) {
+                throw new Error('Failed to load Pyodide from CDN. Please check your internet connection and any content blockers. If you\'re behind a firewall, you may need to allow access to cdn.jsdelivr.net and unpkg.com.');
+            }
+            throw error;
+        }
         
         this.updateProgress(80, 'Setting up visualization...');
         
