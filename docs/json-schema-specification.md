@@ -2,12 +2,50 @@
 
 ## Overview
 
-The Widget Framework uses JSON Schema to define widget interfaces, providing type safety, automatic validation, and dynamic UI generation. This document specifies the complete schema structure and validation rules.
+The Widget Framework uses **named JSON Schema references with proper URLs** to define widget interfaces, providing type safety, automatic validation, dynamic UI generation, and **schema reusability**. This system supports **GitHub Pages deployment** with relative URLs and **schema precedence** for complex widget definitions.
+
+## Schema Architecture
+
+### Named Schema System
+
+All schemas are hosted at `https://litlfred.github.io/notebooks/schemas/` and use proper JSON Schema `$id` references:
+
+- **Common schemas**: `common.json` - Reusable definitions for metadata, execution results, etc.
+- **Widget definitions**: `widget-definition.json` - Schema for widget configuration structure  
+- **Specialized schemas**: `sticky-note.json`, `python-code.json`, `weierstrass.json`, etc.
+
+### Schema Reusability  
+
+Schemas can be composed using:
+- **External references**: `"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata"`
+- **Schema composition**: `"allOf": [{"$ref": "..."}]` to combine multiple schemas
+- **Schema inheritance**: Base schemas extended by specialized widgets
+
+### Schema Precedence Order
+
+Widgets can specify **multiple schemas** for inputs/outputs with **precedence order**:
+
+```json
+{
+  "input_schemas": [
+    "https://litlfred.github.io/notebooks/schemas/weierstrass.json#/definitions/weierstrass_input",
+    {
+      "type": "object",
+      "properties": {
+        "additional_param": {"type": "string"}
+      }
+    }
+  ]
+}
+```
+
+**First schema has precedence** - properties from later schemas are merged if not conflicting.
 
 ## Widget Schema Root Structure
 
 ```json
 {
+  "$schema": "https://litlfred.github.io/notebooks/schemas/widget-definition.json",
   "widget-schemas": {
     "widget-id": {
       // Widget definition
@@ -15,6 +53,217 @@ The Widget Framework uses JSON Schema to define widget interfaces, providing typ
   }
 }
 ```
+
+## Common Schema Definitions
+
+### Base Metadata Schema
+**URL**: `https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata`
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "execution_time": {"type": "number"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "widget_id": {"type": "string"},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"}
+  }
+}
+```
+
+### Execution Result Schema
+**URL**: `https://litlfred.github.io/notebooks/schemas/common.json#/definitions/execution_result`
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "success": {"type": "boolean"},
+    "error": {"type": "string"},
+    "metadata": {"$ref": "#/definitions/metadata"}
+  },
+  "required": ["success"]
+}
+```
+
+### Markdown Content Schema
+**URL**: `https://litlfred.github.io/notebooks/schemas/common.json#/definitions/markdown_content`
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "content": {"type": "string", "default": ""},
+    "render_latex": {"type": "boolean", "default": true},
+    "variables": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
+          "type": ["string", "number", "boolean"]
+        }
+      }
+    }
+  },
+  "required": ["content"]
+}
+```
+
+### Visualization Output Schema
+**URL**: `https://litlfred.github.io/notebooks/schemas/common.json#/definitions/visualization_output`
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "image_base64": {
+      "type": "string",
+      "pattern": "^data:image/[a-zA-Z]+;base64,"
+    },
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "mime_type": {"enum": ["image/png", "image/jpeg", "image/svg+xml"]},
+    "alt_text": {"type": "string"}
+  },
+  "required": ["image_base64", "width", "height"]
+}
+```
+
+## Widget Definition Schema
+
+**URL**: `https://litlfred.github.io/notebooks/schemas/widget-definition.json`
+
+### Widget Structure
+
+```json
+{
+  "id": "widget-id",
+  "name": "Widget Name",
+  "description": "Widget description",
+  "category": "content|computation|visualization|data|utility",
+  "icon": "📝",
+  "input_schemas": [
+    "https://litlfred.github.io/notebooks/schemas/schema-name.json#/definitions/input",
+    { /* inline schema */ }
+  ],
+  "output_schemas": [
+    "https://litlfred.github.io/notebooks/schemas/schema-name.json#/definitions/output"
+  ],
+  "python_script": "widgets/widget_script.py",
+  "version": "1.0.0",
+  "author": "Author Name",
+  "tags": ["tag1", "tag2"]
+}
+```
+
+### Schema References
+
+Schema references can be:
+1. **External URL**: `"https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata"`
+2. **Inline object**: `{"type": "object", "properties": {...}}`
+
+### Multiple Schema Support
+
+**Input/Output Schema Arrays** allow composition:
+
+```json
+{
+  "input_schemas": [
+    "https://litlfred.github.io/notebooks/schemas/weierstrass.json#/definitions/weierstrass_input",
+    "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/ui_configuration", 
+    {
+      "type": "object",
+      "properties": {
+        "custom_param": {"type": "string"}
+      }
+    }
+  ]
+}
+```
+
+**Precedence Order**: First schema takes precedence for conflicting properties.
+
+## Specialized Widget Schemas
+
+### Sticky Note Widget
+**URL**: `https://litlfred.github.io/notebooks/schemas/sticky-note.json`
+
+Input combines markdown content with UI configuration:
+```json
+{
+  "allOf": [
+    {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/markdown_content"},
+    {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/ui_configuration"}
+  ],
+  "properties": {
+    "show_note": {"type": "boolean", "default": true}
+  }
+}
+```
+
+### Python Code Widget  
+**URL**: `https://litlfred.github.io/notebooks/schemas/python-code.json`
+
+Specialized for code execution:
+```json
+{
+  "input": {
+    "properties": {
+      "code": {"type": "string"},
+      "imports": {"type": "array", "items": {"type": "string"}},
+      "variables": {"type": "object"}
+    }
+  },
+  "output": {
+    "allOf": [{"$ref": "common.json#/definitions/execution_result"}],
+    "properties": {
+      "result": {"description": "Execution result"},
+      "stdout": {"type": "string"},
+      "stderr": {"type": "string"}
+    }
+  }
+}
+```
+
+### Weierstrass Function Widgets
+**URL**: `https://litlfred.github.io/notebooks/schemas/weierstrass.json`
+
+Mathematical function parameters:
+```json
+{
+  "weierstrass_input": {
+    "properties": {
+      "p": {"type": "number", "minimum": 0.1, "maximum": 20},
+      "q": {"type": "number", "minimum": 0.1, "maximum": 20}, 
+      "N": {"type": "integer", "minimum": 0, "maximum": 6},
+      "grid_size": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "integer", "minimum": 50, "maximum": 300},
+          "y": {"type": "integer", "minimum": 50, "maximum": 300}
+        }
+      }
+    }
+  }
+}
+```
+
+## GitHub Pages Deployment
+
+### URL Structure
+- **Base URL**: `https://litlfred.github.io/notebooks/schemas/`
+- **Schema files**: `common.json`, `widget-definition.json`, `sticky-note.json`, etc.
+- **Fragment references**: `#/definitions/metadata`
+
+### Relative References
+Schemas can use relative references when deployed together:
+```json
+{
+  "$ref": "./common.json#/definitions/metadata"
+}
+```
+
+### CORS Support
+GitHub Pages automatically serves JSON files with proper CORS headers for cross-origin requests.
 
 ## Widget Definition Schema
 

@@ -15,8 +15,58 @@ class WidgetExecutor:
         self.schema = widget_schema
         self.id = widget_schema['id']
         self.name = widget_schema['name']
-        self.input_schema = widget_schema['input_schema']
-        self.output_schema = widget_schema['output_schema']
+        
+        # Handle both old and new schema formats
+        if 'input_schemas' in widget_schema:
+            # New format with multiple schemas
+            self.input_schemas = widget_schema['input_schemas']
+            self.output_schemas = widget_schema['output_schemas']
+            # For backward compatibility, use first schema as primary
+            self.input_schema = self._resolve_schema_reference(self.input_schemas[0]) if self.input_schemas else {}
+            self.output_schema = self._resolve_schema_reference(self.output_schemas[0]) if self.output_schemas else {}
+        else:
+            # Old format with single schema
+            self.input_schema = widget_schema.get('input_schema', {})
+            self.output_schema = widget_schema.get('output_schema', {})
+            self.input_schemas = [self.input_schema] if self.input_schema else []
+            self.output_schemas = [self.output_schema] if self.output_schema else []
+    
+    def _resolve_schema_reference(self, schema_ref):
+        """Resolve schema reference to actual schema object"""
+        if isinstance(schema_ref, str):
+            # For now, return a basic schema structure for URL references
+            # In a full implementation, this would fetch and resolve the URL
+            if 'sticky-note' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "default": "# New Sticky Note\n\nClick edit to add your **markdown** content...\n\n- Use lists\n- Add `code`\n- Format *text*"
+                        },
+                        "show_note": {
+                            "type": "boolean",
+                            "default": True
+                        }
+                    },
+                    "required": ["content"]
+                }
+            elif 'common' in schema_ref and 'markdown_content' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "content": {"type": "string", "default": ""},
+                        "render_latex": {"type": "boolean", "default": True},
+                        "variables": {"type": "object", "default": {}}
+                    },
+                    "required": ["content"]
+                }
+            else:
+                # Default empty schema for unknown references
+                return {"type": "object", "properties": {}}
+        else:
+            # Inline schema object
+            return schema_ref
         
     def validate_input(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Validate input data against schema"""

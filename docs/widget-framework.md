@@ -22,45 +22,80 @@ An interactive canvas where widget instances can be:
 
 ## JSON Schema Structure
 
-### Widget Schema Definition
+### Named Schema System with GitHub Pages URLs
+
+The framework uses **named JSON schemas** with proper URLs designed for GitHub Pages deployment:
+
+**Base URL**: `https://litlfred.github.io/notebooks/schemas/`
+
+**Core Schemas**:
+- `common.json` - Reusable definitions (metadata, execution results, data structures)
+- `widget-definition.json` - Widget configuration structure
+- `sticky-note.json` - Sticky note widget schemas
+- `python-code.json` - Python execution widget schemas  
+- `weierstrass.json` - Mathematical function widget schemas
+- `data-visualization.json` - Data plotting widget schemas
+
+### Schema Reusability and Composition
+
+Schemas can be **reused and composed** using:
+- **External references**: `"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata"`
+- **Schema composition**: `"allOf": [{"$ref": "..."}]`
+- **Multiple schema arrays**: With precedence order
+
+### Widget Schema Definition with Multiple Schemas
 
 ```json
 {
+  "$schema": "https://litlfred.github.io/notebooks/schemas/widget-definition.json",
   "widget-schemas": {
     "widget-id": {
-      "id": "unique-widget-identifier",
-      "name": "Display Name",
-      "description": "Widget description for users",
-      "category": "content|computation|visualization|data",
+      "id": "widget-id",
+      "name": "Widget Name",
+      "description": "Widget description",
+      "category": "content|computation|visualization|data|utility",
       "icon": "📝",
-      "input_schema": {
-        "type": "object",
-        "properties": {
-          "parameter_name": {
-            "type": "string|number|boolean|array|object",
-            "description": "Parameter description",
-            "default": "default_value",
-            "minimum": 0,
-            "maximum": 100,
-            "enum": ["option1", "option2"]
-          }
-        },
-        "required": ["required_parameter"]
-      },
-      "output_schema": {
-        "type": "object", 
-        "properties": {
-          "result_name": {
-            "type": "string|number|boolean|array|object",
-            "description": "Output description"
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/markdown_content",
+        "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/ui_configuration",
+        {
+          "type": "object",
+          "properties": {
+            "custom_param": {"type": "string", "default": "value"}
           }
         }
-      },
-      "python_script": "path/to/execution/script.py"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/execution_result"
+      ],
+      "python_script": "widgets/widget_script.py",
+      "version": "1.0.0",
+      "author": "Author Name",
+      "tags": ["tag1", "tag2"]
     }
   }
 }
 ```
+
+### Schema Precedence Order
+
+**Multiple schemas with precedence**: First schema in array takes precedence for conflicting properties.
+
+```json
+{
+  "input_schemas": [
+    "https://litlfred.github.io/notebooks/schemas/weierstrass.json#/definitions/weierstrass_input",
+    {
+      "type": "object", 
+      "properties": {
+        "contours": {"type": "integer", "minimum": 0, "maximum": 30, "default": 10}
+      }
+    }
+  ]
+}
+```
+
+**Result**: Weierstrass input schema merged with additional `contours` parameter.
 
 ### Input Schema Properties
 - `type`: JSON Schema data type
