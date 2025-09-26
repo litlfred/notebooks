@@ -170,7 +170,7 @@ body {
 
 .subtitle {
     font-size: 1.1rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
@@ -178,7 +178,7 @@ body {
 .loading-section {
     text-align: center;
     padding: 4rem 2rem;
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
 }
@@ -277,7 +277,7 @@ body {
 
 /* Controls Section */
 .control-panel {
-    background: white;
+    background: var(--bg-primary);
     padding: 1.5rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -506,7 +506,7 @@ input[type="checkbox"] {
 
 /* Visualization Section */
 .visualization-section {
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -525,18 +525,18 @@ input[type="checkbox"] {
 }
 
 .computation-status.computing {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--bg-tertiary);
+    color: var(--warning-color);
 }
 
 .computation-status.error {
-    background: #f8d7da;
-    color: #721c24;
+    background: var(--bg-tertiary);
+    color: var(--accent-color);
 }
 
 .computation-status.success {
-    background: #d4edda;
-    color: #155724;
+    background: var(--bg-tertiary);
+    color: var(--success-color);
 }
 
 .plot-container {
@@ -579,7 +579,7 @@ input[type="checkbox"] {
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     padding: 2rem;
     max-width: 600px;
@@ -635,7 +635,7 @@ input[type="checkbox"] {
     text-align: center;
     margin-top: 2rem;
     padding: 1rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
