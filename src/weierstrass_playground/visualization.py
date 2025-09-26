@@ -236,8 +236,59 @@ def create_figure_layout(mode, p, q, figsize_base=8):
         
         return fig, (ax1, ax2, ax3)
         
+    elif mode == 'time_series':
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(2*figsize_base, figsize_base))
+        fig.subplots_adjust(wspace=0.3)
+        
+        # Set labels and titles for time-series
+        ax1.set_title('Re(℘(z(t))) vs Time', fontsize=16)
+        ax2.set_title('Im(℘(z(t))) vs Time', fontsize=16)
+        ax1.set_xlabel('Time t')
+        ax1.set_ylabel('Re(℘(z(t)))')
+        ax2.set_xlabel('Time t')
+        ax2.set_ylabel('Im(℘(z(t)))')
+        
+        # Add grid for better readability
+        ax1.grid(True, alpha=0.3)
+        ax2.grid(True, alpha=0.3)
+        
+        return fig, (ax1, ax2)
+        
     else:  # Default to two_panel
         return create_figure_layout('two_panel', p, q, figsize_base)
+
+
+
+def plot_time_series_on_axes(axes, trajectories_data, colors, T):
+    """
+    Plot time series data on the given axes for time-series visualization.
+    
+    Args:
+        axes: tuple of (ax1, ax2) for real and imaginary parts
+        trajectories_data: list of (times, trajectory, wp_values, blowup_point) tuples
+        colors: list of colors for each trajectory
+        T: total time for axis limits
+    """
+    ax1, ax2 = axes
+    
+    for i, (times, trajectory, wp_values, blowup_point) in enumerate(trajectories_data):
+        if len(wp_values) > 0:
+            color = colors[i % len(colors)]
+            
+            # Plot real part
+            ax1.plot(times, np.real(wp_values), color=color, alpha=0.8, linewidth=1.5)
+            
+            # Plot imaginary part  
+            ax2.plot(times, np.imag(wp_values), color=color, alpha=0.8, linewidth=1.5)
+            
+            # Mark blow-up point if it exists
+            if blowup_point is not None and len(times) > 1:
+                ax1.plot(times[-1], np.real(wp_values[-1]), 'x', color=color, markersize=10, markeredgewidth=2)
+                ax2.plot(times[-1], np.imag(wp_values[-1]), 'x', color=color, markersize=10, markeredgewidth=2)
+    
+    # Set time axis limits
+    ax1.set_xlim(0, T)
+    ax2.set_xlim(0, T)
 
 
 def plot_to_base64(fig):

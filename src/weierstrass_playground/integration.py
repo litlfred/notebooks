@@ -264,3 +264,47 @@ def adaptive_step_integration(z0, v0, T, p, q, N, rtol=1e-6, atol=1e-9,
             return np.array(trajectory), np.array(times), state[0]
     
     return np.array(trajectory), np.array(times), None
+
+
+def integrate_and_evaluate_wp(z0, v0, dt, T, p, q, N, blow_thresh=10.0, pole_eps=1e-6):
+    """
+    Integrate trajectory and evaluate ℘(z(t)) along the path for time-series visualization.
+    
+    This function combines trajectory integration with function evaluation to produce
+    time-series data for visualization.
+    
+    Args:
+        z0, v0: initial position and velocity (complex)
+        dt: time step
+        T: total time
+        p, q, N: lattice parameters
+        blow_thresh: blow-up threshold for |Δz|
+        pole_eps: pole proximity threshold
+    
+    Returns:
+        (times, trajectory, wp_values, blowup_point)
+        where wp_values contains ℘(z(t)) at each time step
+    """
+    # Get trajectory using existing integration function
+    trajectory, blowup_point = integrate_second_order_with_blowup(
+        z0, v0, dt, T, p, q, N, blow_thresh, pole_eps
+    )
+    
+    # Create time array
+    times = np.arange(len(trajectory)) * dt
+    
+    # Evaluate ℘(z(t)) for each point in trajectory
+    wp_values = []
+    for z in trajectory:
+        try:
+            wp_val = wp_rect(z, p, q, N)
+            if np.isfinite(wp_val):
+                wp_values.append(wp_val)
+            else:
+                wp_values.append(np.nan + 1j*np.nan)
+        except:
+            wp_values.append(np.nan + 1j*np.nan)
+    
+    wp_values = np.array(wp_values)
+    
+    return times, trajectory, wp_values, blowup_point
