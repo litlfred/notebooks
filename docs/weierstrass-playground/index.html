@@ -340,9 +340,17 @@
             }
             
             function loadMainScript() {
+                console.log('📜 Loading main JavaScript file: weierstrass-app.js');
                 const mainScript = document.createElement('script');
                 mainScript.src = 'weierstrass-app.js';
+                mainScript.onload = function() {
+                    console.log('✅ weierstrass-app.js loaded successfully');
+                };
+                mainScript.onerror = function() {
+                    console.error('❌ Failed to load weierstrass-app.js');
+                };
                 document.body.appendChild(mainScript);
+                console.log('📜 Main script element added to document body');
             }
             
             tryLoadScript();

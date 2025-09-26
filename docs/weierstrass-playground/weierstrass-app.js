@@ -41,13 +41,30 @@ class WeierstrassApp {
      * Initialize the application
      */
     async initialize() {
+        console.log('🎯 WeierstrassApp.initialize() called');
         try {
+            console.log('📦 Starting loadPyodide()...');
             await this.loadPyodide();
+            console.log('✅ loadPyodide() completed successfully');
+            
+            console.log('🐍 Starting setupPython()...');
             await this.setupPython();
+            console.log('✅ setupPython() completed successfully');
+            
+            console.log('👁️ Starting showMainContent()...');
             this.showMainContent();
+            console.log('✅ showMainContent() completed successfully');
+            
+            console.log('📢 Updating final status...');
             this.updateStatus('Ready to render. Configure parameters and click "Render" to generate visualization.', 'ready');
+            console.log('🎉 Application initialization completed successfully!');
         } catch (error) {
-            console.error('Failed to initialize application:', error);
+            console.error('❌ Failed to initialize application:', error);
+            console.error('❌ Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
             this.updateStatus(`Failed to load: ${error.message}`, 'error');
         }
     }
@@ -56,30 +73,44 @@ class WeierstrassApp {
      * Load Pyodide and required packages with better error handling
      */
     async loadPyodide() {
+        console.log('🔗 Starting Pyodide loading process...');
         this.updateProgress(5, 'Connecting to CDN...');
         
         try {
             // Check if loadPyodide is available
+            console.log('🔍 Checking if loadPyodide function is available...');
             if (typeof loadPyodide === 'undefined') {
+                console.error('❌ loadPyodide function is undefined');
                 throw new Error('Pyodide script not loaded. This may be due to network restrictions or CDN blocking.');
             }
+            console.log('✅ loadPyodide function is available');
             
             this.updateProgress(10, 'Initializing Pyodide runtime...');
+            console.log('🚀 Calling loadPyodide() function...');
             
             this.pyodide = await loadPyodide({
                 indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
-                stdout: (text) => console.log("Pyodide stdout:", text),
-                stderr: (text) => console.warn("Pyodide stderr:", text)
+                stdout: (text) => console.log("📤 Pyodide stdout:", text),
+                stderr: (text) => console.warn("📤 Pyodide stderr:", text)
             });
+            console.log('✅ Pyodide runtime initialized successfully');
             
             this.updateProgress(35, 'Loading NumPy...');
+            console.log('📦 Loading NumPy package...');
             await this.pyodide.loadPackage(['numpy']);
+            console.log('✅ NumPy loaded successfully');
             
             this.updateProgress(65, 'Loading Matplotlib...');
+            console.log('📦 Loading Matplotlib package...');
             await this.pyodide.loadPackage(['matplotlib']);
+            console.log('✅ Matplotlib loaded successfully');
             
         } catch (error) {
-            console.error('Failed to load Pyodide:', error);
+            console.error('❌ Failed to load Pyodide:', error);
+            console.error('❌ Error type:', error.constructor.name);
+            console.error('❌ Error message:', error.message);
+            if (error.stack) console.error('❌ Error stack:', error.stack);
+            
             if (error.message.includes('network') || error.message.includes('CDN') || error.message.includes('loadPyodide')) {
                 throw new Error('Failed to load Pyodide from CDN. Please check your internet connection and any content blockers. If you\'re behind a firewall, you may need to allow access to cdn.jsdelivr.net and unpkg.com.');
             }
@@ -87,51 +118,84 @@ class WeierstrassApp {
         }
         
         this.updateProgress(85, 'Setting up visualization...');
+        console.log('🎨 Configuring matplotlib for web display...');
         
         // Configure matplotlib for web display
-        this.pyodide.runPython(`
-            import matplotlib
-            matplotlib.use('Agg')  # Use Anti-Grain Geometry backend for PNG output
-            import matplotlib.pyplot as plt
-            plt.rcParams['figure.dpi'] = 100
-            plt.rcParams['savefig.dpi'] = 150
-            plt.rcParams['font.size'] = 10
-        `);
+        try {
+            this.pyodide.runPython(`
+                import matplotlib
+                matplotlib.use('Agg')  # Use Anti-Grain Geometry backend for PNG output
+                import matplotlib.pyplot as plt
+                plt.rcParams['figure.dpi'] = 100
+                plt.rcParams['savefig.dpi'] = 150
+                plt.rcParams['font.size'] = 10
+            `);
+            console.log('✅ Matplotlib configured successfully');
+        } catch (error) {
+            console.error('❌ Failed to configure matplotlib:', error);
+            throw error;
+        }
         
         this.updateProgress(95, 'Loading Weierstrass library...');
+        console.log('📚 Moving to setupPython() next...');
     }
 
     /**
      * Setup Python environment and load our library
      */
     async setupPython() {
-        // Load our Weierstrass playground library using new package structure
-        this.pyodide.runPython(`
-            import sys
-            sys.path.append('./python')
-            
-            # Import the weierstrass_playground package  
-            import weierstrass_playground as wp
-            from weierstrass_playground import browser
-            
-            # Set up browser-specific functions
-            import io  
-            import base64
-            from matplotlib import pyplot as plt
-            
-            def plot_to_base64(fig):
-                """Convert matplotlib figure to base64 string for web display."""
-                buf = io.BytesIO()
-                fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
-                buf.seek(0)
-                img_str = base64.b64encode(buf.read()).decode('utf-8')
-                buf.close()
-                plt.close(fig)  # Free memory
-                return img_str
-        `);
+        console.log('🐍 Starting Python environment setup...');
         
+        try {
+            console.log('📂 Loading Weierstrass playground library...');
+            // Load our Weierstrass playground library using new package structure
+            this.pyodide.runPython(`
+                print("🔧 Setting up Python sys.path...")
+                import sys
+                sys.path.append('./python')
+                print(f"✅ Python sys.path: {sys.path}")
+                
+                print("📦 Importing weierstrass_playground package...")
+                # Import the weierstrass_playground package  
+                import weierstrass_playground as wp
+                from weierstrass_playground import browser
+                print("✅ weierstrass_playground package imported successfully")
+                
+                print("🔧 Setting up browser-specific functions...")
+                # Set up browser-specific functions
+                import io  
+                import base64
+                from matplotlib import pyplot as plt
+                
+                def plot_to_base64(fig):
+                    """Convert matplotlib figure to base64 string for web display."""
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                    buf.seek(0)
+                    img_str = base64.b64encode(buf.read()).decode('utf-8')
+                    buf.close()
+                    plt.close(fig)  # Free memory
+                    return img_str
+                
+                print("✅ Browser-specific functions set up successfully")
+            `);
+            console.log('✅ Python environment setup completed successfully');
+        } catch (error) {
+            console.error('❌ Failed to setup Python environment:', error);
+            console.error('❌ Python setup error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
+            throw error;
+        }
+        
+        console.log('📈 Updating progress to 100%...');
         this.updateProgress(100, 'Ready!');
+        
+        console.log('✅ Setting isInitialized flag...');
         this.isInitialized = true;
+        console.log('🎉 setupPython() completed successfully!');
     }
 
     /**
@@ -738,24 +802,39 @@ function initializeUserPreferences() {
 
 // Initialize the application
 function initializeApp() {
-    // Initialize user preferences first
-    initializeUserPreferences();
+    console.log('🚀 Starting app initialization...');
     
+    // Initialize user preferences first
+    console.log('⚙️ Initializing user preferences...');
+    initializeUserPreferences();
+    console.log('✅ User preferences initialized');
+    
+    console.log('🏗️ Creating WeierstrassApp instance...');
     const app = new WeierstrassApp();
+    console.log('✅ WeierstrassApp instance created');
     
     // Start initialization
+    console.log('🔄 Starting app.initialize()...');
     app.initialize().catch(error => {
-        console.error('Application initialization failed:', error);
+        console.error('❌ Application initialization failed:', error);
+        console.error('❌ Error stack:', error.stack);
     });
     
     // Make app globally available for debugging
     window.weierstrassApp = app;
+    console.log('✅ App made globally available as window.weierstrassApp');
 }
 
 // Run initialization when DOM is ready or immediately if already loaded
+console.log('🔍 Checking document ready state:', document.readyState);
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
+    console.log('📋 DOM still loading, setting up DOMContentLoaded listener...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('📋 DOMContentLoaded event fired, initializing app...');
+        initializeApp();
+    });
 } else {
     // DOM is already loaded, run immediately
+    console.log('📋 DOM already loaded, initializing app immediately...');
     initializeApp();
 }
