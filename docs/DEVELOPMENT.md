@@ -205,6 +205,14 @@ Edit `docs/css/style.css`:
 
 ## 🐛 Troubleshooting
 
+### CDN Access Issues
+If you see "Failed to load Pyodide" or loading gets stuck:
+- **Corporate/School Firewalls**: Allow access to `cdn.jsdelivr.net` and `unpkg.com`
+- **Content Blockers**: Disable ad blockers or add site to allowlist
+- **Network Restrictions**: The playground requires external CDN access for Python libraries
+- **Browser Settings**: Check if "Block all cookies" or strict security settings are enabled
+- **HTTPS Required**: Some browsers block mixed content - ensure you're using HTTPS
+
 ### Slow Initial Loading
 - First load requires downloading ~50MB of WebAssembly packages
 - Subsequent visits use browser cache and load much faster

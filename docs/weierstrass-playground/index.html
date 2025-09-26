@@ -4,10 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weierstrass ℘ Playground - Interactive Browser Version</title>
+    
+    <!-- Content Security Policy to allow CDN access -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self'; 
+        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; 
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
+        font-src 'self' https://cdnjs.cloudflare.com; 
+        connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com;
+        img-src 'self' data:;
+    ">
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="desktop-mode" data-theme="dark">
     <div class="container">
         <header class="main-header">
             <h1><i class="fas fa-infinity"></i> Weierstrass ℘ Playground</h1>
@@ -230,7 +241,102 @@
         </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
-    <script src="weierstrass-app.js"></script>
+    <!-- Global Control Panel -->
+    <div class="global-control-panel" id="global-controls">
+        <button class="panel-toggle" onclick="toggleControlPanel()">
+            <i class="fas fa-chevron-up" id="panel-toggle-icon"></i>
+        </button>
+        
+        <div class="control-section">
+            <h4>Visualizations:</h4>
+            <button class="control-btn" id="play-all-btn" onclick="playAllVisualizations()">
+                <i class="fas fa-play"></i> Play All
+            </button>
+            <button class="control-btn" id="pause-all-btn" onclick="pauseAllVisualizations()">
+                <i class="fas fa-pause"></i> Pause All
+            </button>
+            <button class="control-btn danger" id="stop-all-btn" onclick="stopAllVisualizations()">
+                <i class="fas fa-stop"></i> Stop All
+            </button>
+            <button class="control-btn" id="restart-all-btn" onclick="restartAllVisualizations()">
+                <i class="fas fa-redo"></i> Restart All
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Layout:</h4>
+            <button class="control-btn" id="desktop-mode-btn" onclick="setLayoutMode('desktop')">
+                <i class="fas fa-desktop"></i> Desktop
+            </button>
+            <button class="control-btn" id="mobile-mode-btn" onclick="setLayoutMode('mobile')">
+                <i class="fas fa-mobile-alt"></i> Mobile
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Theme:</h4>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                <i class="fas fa-sun" id="theme-icon"></i>
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <button class="control-btn success" onclick="saveSession()">
+                <i class="fas fa-save"></i> Save Session
+            </button>
+            <button class="control-btn" onclick="loadSession()">
+                <i class="fas fa-folder-open"></i> Load Session
+            </button>
+        </div>
+        
+        <div class="session-status">
+            <div class="status-dot" id="session-status-dot"></div>
+            <span id="session-status-text">Ready</span>
+        </div>
+    </div>
+
+    <script>
+        // Fallback loading for Pyodide with multiple CDN sources
+        function loadPyodideScript() {
+            const cdnSources = [
+                'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js',
+                'https://unpkg.com/pyodide@0.24.1/pyodide.js'
+            ];
+            
+            let currentIndex = 0;
+            
+            function tryLoadScript() {
+                if (currentIndex >= cdnSources.length) {
+                    console.error('Failed to load Pyodide from all CDN sources');
+                    document.getElementById('progress-text').textContent = 'Failed to load Pyodide. Please check your internet connection and refresh the page.';
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = cdnSources[currentIndex];
+                script.onload = function() {
+                    console.log(`Pyodide loaded successfully from: ${cdnSources[currentIndex]}`);
+                    loadMainScript();
+                };
+                script.onerror = function() {
+                    console.warn(`Failed to load Pyodide from: ${cdnSources[currentIndex]}`);
+                    currentIndex++;
+                    tryLoadScript();
+                };
+                document.head.appendChild(script);
+            }
+            
+            function loadMainScript() {
+                const mainScript = document.createElement('script');
+                mainScript.src = 'weierstrass-app.js';
+                document.body.appendChild(mainScript);
+            }
+            
+            tryLoadScript();
+        }
+        
+        // Start loading when DOM is ready
+        document.addEventListener('DOMContentLoaded', loadPyodideScript);
+    </script>
 </body>
 </html>
