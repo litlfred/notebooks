@@ -111,6 +111,8 @@ body {
         grid-area: main;
         padding: 0;
         overflow: hidden;
+        max-width: none;
+        width: 100%;
     }
 }
 
