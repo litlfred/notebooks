@@ -56,7 +56,7 @@ class WeierstrassApp {
      * Load Pyodide and required packages with better error handling
      */
     async loadPyodide() {
-        this.updateProgress(10, 'Loading Pyodide...');
+        this.updateProgress(5, 'Connecting to CDN...');
         
         try {
             // Check if loadPyodide is available
@@ -64,14 +64,18 @@ class WeierstrassApp {
                 throw new Error('Pyodide script not loaded. This may be due to network restrictions or CDN blocking.');
             }
             
+            this.updateProgress(10, 'Initializing Pyodide runtime...');
+            
             this.pyodide = await loadPyodide({
-                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+                stdout: (text) => console.log("Pyodide stdout:", text),
+                stderr: (text) => console.warn("Pyodide stderr:", text)
             });
             
-            this.updateProgress(30, 'Loading NumPy...');
+            this.updateProgress(35, 'Loading NumPy...');
             await this.pyodide.loadPackage(['numpy']);
             
-            this.updateProgress(60, 'Loading Matplotlib...');
+            this.updateProgress(65, 'Loading Matplotlib...');
             await this.pyodide.loadPackage(['matplotlib']);
             
         } catch (error) {
@@ -82,7 +86,7 @@ class WeierstrassApp {
             throw error;
         }
         
-        this.updateProgress(80, 'Setting up visualization...');
+        this.updateProgress(85, 'Setting up visualization...');
         
         // Configure matplotlib for web display
         this.pyodide.runPython(`
@@ -94,7 +98,7 @@ class WeierstrassApp {
             plt.rcParams['font.size'] = 10
         `);
         
-        this.updateProgress(90, 'Loading Weierstrass library...');
+        this.updateProgress(95, 'Loading Weierstrass library...');
     }
 
     /**
@@ -163,9 +167,27 @@ class WeierstrassApp {
     updateProgress(percentage, text) {
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
+        const progressPercentage = document.getElementById('progress-percentage');
         
         if (progressFill) progressFill.style.width = percentage + '%';
         if (progressText) progressText.textContent = text;
+        if (progressPercentage) progressPercentage.textContent = percentage + '%';
+        
+        // Update loading details based on progress
+        const loadingDetails = document.getElementById('loading-details');
+        if (loadingDetails) {
+            if (percentage < 30) {
+                loadingDetails.innerHTML = '<small>Downloading Pyodide runtime (~3MB)...</small>';
+            } else if (percentage < 60) {
+                loadingDetails.innerHTML = '<small>Loading NumPy library...</small>';
+            } else if (percentage < 90) {
+                loadingDetails.innerHTML = '<small>Loading Matplotlib library...</small>';
+            } else if (percentage < 100) {
+                loadingDetails.innerHTML = '<small>Setting up visualization environment...</small>';
+            } else {
+                loadingDetails.innerHTML = '<small>Ready to use!</small>';
+            }
+        }
     }
 
     /**
