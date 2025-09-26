@@ -737,7 +737,7 @@ function initializeUserPreferences() {
 }
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
+function initializeApp() {
     // Initialize user preferences first
     initializeUserPreferences();
     
@@ -750,4 +750,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Make app globally available for debugging
     window.weierstrassApp = app;
-});
+}
+
+// Run initialization when DOM is ready or immediately if already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeApp);
+} else {
+    // DOM is already loaded, run immediately
+    initializeApp();
+}
