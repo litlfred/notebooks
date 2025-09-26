@@ -1,5 +1,56 @@
 {
   "widget-schemas": {
+    "sticky-note": {
+      "id": "sticky-note",
+      "name": "Sticky Note", 
+      "description": "Simple markdown note widget - the most basic widget example",
+      "category": "content",
+      "icon": "📝",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Markdown content for the note",
+            "default": "# New Sticky Note\n\nClick edit to add your **markdown** content...\n\n- Use lists\n- Add `code`\n- Format *text*"
+          },
+          "show_note": {
+            "type": "boolean",
+            "description": "Show or hide the note content", 
+            "default": true
+          }
+        },
+        "required": ["content"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether execution succeeded"
+          },
+          "rendered_html": {
+            "type": "string",
+            "description": "Rendered HTML output"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if execution failed"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "visible": {"type": "boolean"},
+              "content_length": {"type": "integer"},
+              "rendered_length": {"type": "integer"}
+            },
+            "description": "Execution metadata"
+          }
+        }
+      },
+      "python_script": "widgets/sticky_note.py"
+    },
+
     "markdown-note": {
       "id": "markdown-note",
       "name": "Markdown Note",

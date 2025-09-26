@@ -540,3 +540,110 @@ class WidgetGraph:
                 current[key] = {}
             current = current[key]
         current[keys[-1]] = value
+
+
+class StickyNoteWidget(WidgetExecutor):
+    """Simple sticky note widget - the most basic widget example"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        content = validated_input.get('content', '')
+        show_note = validated_input.get('show_note', True)
+        
+        if not show_note:
+            return {
+                'success': True,
+                'rendered_html': '<div class="sticky-note hidden">Note hidden</div>',
+                'metadata': {
+                    'visible': False,
+                    'content_length': len(content)
+                }
+            }
+        
+        # Simple markdown-like rendering
+        html_content = self.render_simple_markdown(content)
+        
+        return {
+            'success': True,
+            'rendered_html': f'<div class="sticky-note">{html_content}</div>',
+            'metadata': {
+                'visible': True,
+                'content_length': len(content),
+                'rendered_length': len(html_content)
+            }
+        }
+    
+    def render_simple_markdown(self, content: str) -> str:
+        """Simple markdown rendering for basic formatting"""
+        html = content
+        
+        # Headers
+        html = re.sub(r'^# (.*$)', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+        html = re.sub(r'^## (.*$)', r'<h2>\1</h2>', html, flags=re.MULTILINE)
+        html = re.sub(r'^### (.*$)', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+        
+        # Bold and italic
+        html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+        html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+        
+        # Code blocks and inline code
+        html = re.sub(r'```(.*?)```', r'<pre><code>\1</code></pre>', html, flags=re.DOTALL)
+        html = re.sub(r'`(.*?)`', r'<code>\1</code>', html)
+        
+        # Simple lists
+        lines = html.split('\n')
+        processed_lines = []
+        in_list = False
+        
+        for line in lines:
+            if re.match(r'^\s*[-*+]\s+', line):
+                if not in_list:
+                    processed_lines.append('<ul>')
+                    in_list = True
+                list_item = re.sub(r'^\s*[-*+]\s+', '', line)
+                processed_lines.append(f'<li>{list_item}</li>')
+            else:
+                if in_list:
+                    processed_lines.append('</ul>')
+                    in_list = False
+                processed_lines.append(line)
+        
+        if in_list:
+            processed_lines.append('</ul>')
+        
+        html = '\n'.join(processed_lines)
+        
+        # Convert line breaks to HTML
+        html = html.replace('\n\n', '</p><p>').replace('\n', '<br>')
+        html = f'<p>{html}</p>'
+        
+        # Clean up empty paragraphs
+        html = re.sub(r'<p>\s*</p>', '', html)
+        
+        return html
+
+
+def create_widget(widget_type: str, schemas: Dict[str, Any]) -> WidgetExecutor:
+    """Factory function to create widget instances based on type"""
+    if widget_type not in schemas['widget-schemas']:
+        raise ValueError(f"Unknown widget type: {widget_type}")
+    
+    schema = schemas['widget-schemas'][widget_type]
+    
+    # Map widget types to their implementation classes
+    widget_classes = {
+        'sticky-note': StickyNoteWidget,
+        'markdown-note': MarkdownWidget,
+        'python-code': PythonWidget,
+        'wp-two-panel': WeierstrassTwoPanelWidget,
+        'wp-three-panel': WeierstrassThreePanelWidget,
+        'wp-five-panel': WeierstrassFivePanelWidget,
+        'wp-trajectories': WeierstrassTrajectoryWidget,
+        'wp-lattice': WeierstrassLatticeWidget,
+        'wp-poles': WeierstrassPoleWidget,
+        'wp-contours': WeierstrassContourWidget,
+        'data-plot': DataPlotWidget,
+        'data-generator': DataGeneratorWidget,
+    }
+    
+    widget_class = widget_classes.get(widget_type, WidgetExecutor)
+    return widget_class(schema)
