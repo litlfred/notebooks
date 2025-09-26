@@ -594,3 +594,80 @@ def save_high_resolution_figure(fig, filename='weierstrass_high_res.png', dpi=30
     """Save figure at high resolution and return the filename."""
     fig.savefig(filename, dpi=dpi, bbox_inches='tight', facecolor='white')
     return filename
+
+
+def create_time_series_figure():
+    """Create a two-panel figure for time series visualization of ℘(z(t))."""
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    fig.subplots_adjust(wspace=0.3)
+    
+    # Set labels and titles
+    ax1.set_title('Re(℘(z(t))) vs Time', fontsize=16)
+    ax2.set_title('Im(℘(z(t))) vs Time', fontsize=16)
+    ax1.set_xlabel('Time t')
+    ax1.set_ylabel('Re(℘(z(t)))')
+    ax2.set_xlabel('Time t')
+    ax2.set_ylabel('Im(℘(z(t)))')
+    
+    # Add grid for better readability
+    ax1.grid(True, alpha=0.3)
+    ax2.grid(True, alpha=0.3)
+    
+    return fig, (ax1, ax2)
+
+
+def integrate_and_evaluate_wp(z0, v0, dt, T, p, q, N, blow_thresh=10.0, pole_eps=1e-6):
+    """
+    Integrate trajectory and evaluate ℘(z(t)) along the path.
+    
+    Returns:
+        (times, trajectory, wp_values, blowup_point)
+        where wp_values contains ℘(z(t)) at each time step
+    """
+    # Get trajectory
+    trajectory, blowup_point = integrate_second_order_with_blowup(
+        z0, v0, dt, T, p, q, N, blow_thresh, pole_eps
+    )
+    
+    # Create time array
+    times = np.arange(len(trajectory)) * dt
+    
+    # Evaluate ℘(z(t)) for each point in trajectory
+    wp_values = []
+    for z in trajectory:
+        try:
+            wp_val = wp_rect(z, p, q, N)
+            if np.isfinite(wp_val):
+                wp_values.append(wp_val)
+            else:
+                wp_values.append(np.nan + 1j*np.nan)
+        except:
+            wp_values.append(np.nan + 1j*np.nan)
+    
+    wp_values = np.array(wp_values)
+    
+    return times, trajectory, wp_values, blowup_point
+
+
+def plot_time_series_on_axes(axes, trajectories_data, colors, T):
+    """Plot time series data on the given axes."""
+    ax1, ax2 = axes
+    
+    for i, (times, trajectory, wp_values, blowup_point) in enumerate(trajectories_data):
+        if len(wp_values) > 0:
+            color = colors[i % len(colors)]
+            
+            # Plot real part
+            ax1.plot(times, np.real(wp_values), color=color, alpha=0.8, linewidth=1.5)
+            
+            # Plot imaginary part  
+            ax2.plot(times, np.imag(wp_values), color=color, alpha=0.8, linewidth=1.5)
+            
+            # Mark blow-up point if it exists
+            if blowup_point is not None and len(times) > 1:
+                ax1.plot(times[-1], np.real(wp_values[-1]), 'x', color=color, markersize=10, markeredgewidth=2)
+                ax2.plot(times[-1], np.imag(wp_values[-1]), 'x', color=color, markersize=10, markeredgewidth=2)
+    
+    # Set time axis limits
+    ax1.set_xlim(0, T)
+    ax2.set_xlim(0, T)

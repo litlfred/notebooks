@@ -31,7 +31,8 @@ class WeierstrassUI:
         self.mode_dropdown = widgets.Dropdown(
             options=[('Two-panel: ℘(z) and ℘′(z)', 'two_panel'),
                      ('Three-panel: ℘(z), Re(℘′(z)), Im(℘′(z))', 'three_panel'),
-                     ('Five-panel: ℘(z), ℘′(z), Re(℘(z)), Im(℘(z))', 'five_panel')],
+                     ('Five-panel: ℘(z), ℘′(z), Re(℘(z)), Im(℘(z))', 'five_panel'),
+                     ('Time-series: Re(℘(z(t))) and Im(℘(z(t))) vs t', 'time_series')],
             value='two_panel',
             description='Mode:'
         )
@@ -353,6 +354,13 @@ class WeierstrassUI:
                         omega_wrapped = (omega.real % p) + 1j * (omega.imag % q)
                         ax3.plot(omega_wrapped.real, omega_wrapped.imag, 'ko', markersize=3, alpha=0.6)
             
+            elif mode == 'time_series':
+                fig, axes = create_time_series_figure()
+                ax1, ax2 = axes
+                
+                # For time series mode, we don't need field backgrounds
+                # We'll plot the time series data later
+                
             else:  # fallback to two_panel
                 fig, axes = create_two_panel_figure(p, q)
                 ax1, ax2 = axes
@@ -380,20 +388,37 @@ class WeierstrassUI:
             
             # Integrate and plot trajectories
             trajectories = []
+            trajectories_data = []  # For time series data
             colors = plt.cm.tab10(np.linspace(0, 1, len(particles)))
             
             for i, (z0, v0) in enumerate(particles):
                 try:
-                    trajectory, blowup_point = integrate_second_order_with_blowup(
-                        z0, v0, dt, T, p, q, N, blow_thresh
-                    )
-                    trajectories.append((trajectory, blowup_point))
+                    if mode == 'time_series':
+                        # For time series, we need both trajectory and ℘ values
+                        times, trajectory, wp_values, blowup_point = integrate_and_evaluate_wp(
+                            z0, v0, dt, T, p, q, N, blow_thresh
+                        )
+                        trajectories_data.append((times, trajectory, wp_values, blowup_point))
+                        trajectories.append((trajectory, blowup_point))  # Keep for potential other uses
+                    else:
+                        # For spatial plots, use the standard integration
+                        trajectory, blowup_point = integrate_second_order_with_blowup(
+                            z0, v0, dt, T, p, q, N, blow_thresh
+                        )
+                        trajectories.append((trajectory, blowup_point))
                 except Exception as e:
                     print(f"Error integrating particle {i}: {e}")
                     trajectories.append((np.array([z0]), None))
+                    if mode == 'time_series':
+                        trajectories_data.append((np.array([0]), np.array([z0]), np.array([np.nan+1j*np.nan]), None))
             
-            # Plot trajectories on all axes
-            plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size)
+            # Plot trajectories based on mode
+            if mode == 'time_series':
+                # Plot time series data
+                plot_time_series_on_axes(axes, trajectories_data, colors, T)
+            else:
+                # Plot spatial trajectories on all axes
+                plot_trajectories_on_axes(axes, trajectories, colors, p, q, emoji_size)
             
             # Plot lattice trajectories if requested
             if show_lattice_trajectories:
@@ -411,8 +436,9 @@ class WeierstrassUI:
                         print(f"Error integrating lattice trajectory k={k}: {e}")
                         lattice_trajectories.append((np.array([z0]), None))
                 
-                # Plot lattice trajectories as dotted grey lines
-                plot_lattice_trajectories_on_axes(axes, lattice_trajectories, p, q)
+                # Plot lattice trajectories (only for spatial modes, not time_series)
+                if mode != 'time_series':
+                    plot_lattice_trajectories_on_axes(axes, lattice_trajectories, p, q)
             
             plt.tight_layout()
             self.current_fig = fig
