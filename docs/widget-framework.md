@@ -295,6 +295,57 @@ Widgets can be embedded in markdown content using custom tags:
 - Search and filtering capabilities
 - Custom widget icons and descriptions
 
+## Widget Dependency Examples
+
+### PQ-Torus and Weierstrass Widget Integration
+
+The **PQ-Torus** widget demonstrates widget dependency patterns by serving as a parameter source for Weierstrass ℘-function widgets:
+
+#### PQ-Torus Widget (Dependency Source)
+```json
+{
+  "id": "pq-torus",
+  "name": "PQ-Torus",
+  "description": "Defines torus T = ℂ / L where L = ℤp + ℤqi with prime lattice parameters",
+  "category": "computation",
+  "input": {"p": 11, "q": 5},
+  "output": {
+    "p": 11, "q": 5,
+    "torus_description": "T = ℂ / L where L = ℤ11 + ℤ5i",
+    "prime_validation": {"p_is_prime": true, "q_is_prime": true},
+    "markdown_content": "# PQ-Torus: T = ℂ / L..."
+  }
+}
+```
+
+#### Weierstrass Widget Dependencies
+The PQ-Torus output can be connected to multiple Weierstrass widgets:
+
+```javascript
+// Connect PQ-Torus to Weierstrass visualization widgets
+boardApp.connectWidgets(
+  "pq-torus-1",          // Source: torus definition
+  "wp-two-panel-1",      // Target: ℘(z) visualization
+  "p",                   // Output: prime p
+  "p"                    // Input: lattice parameter p
+);
+
+boardApp.connectWidgets(
+  "pq-torus-1",          // Same source
+  "wp-two-panel-1",      // Same target
+  "q",                   // Output: prime q  
+  "q"                    // Input: lattice parameter q
+);
+```
+
+#### Execution Flow
+1. **PQ-Torus** validates prime parameters and generates torus definition
+2. **wp-two-panel** receives `p=11, q=5` and visualizes ℘(z) and ℘′(z)
+3. **wp-trajectories** can use same parameters for particle analysis
+4. **wp-contours** creates contour plots of the field
+
+This demonstrates how one widget's mathematical output becomes another's computational input, creating complex analysis pipelines.
+
 ## Common Widget Interface
 
 ### Standard Methods

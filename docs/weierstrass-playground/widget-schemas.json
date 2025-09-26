@@ -114,6 +114,24 @@
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["data", "generator", "synthetic"]
+    },
+
+    "pq-torus": {
+      "id": "pq-torus",
+      "name": "PQ-Torus",
+      "description": "Defines torus T = ℂ / L where L = ℤp + ℤqi with prime lattice parameters",
+      "category": "computation",
+      "icon": "🔴",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/schemas/pq-torus.json#/definitions/prime_pair_input"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/schemas/pq-torus.json#/definitions/prime_pair_output"
+      ],
+      "python_script": "widgets/pq_torus.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"]
     }
   }
 }

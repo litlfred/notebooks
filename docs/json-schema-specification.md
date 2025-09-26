@@ -224,6 +224,58 @@ Specialized for code execution:
 }
 ```
 
+### PQ-Torus Widget
+**URL**: `https://litlfred.github.io/notebooks/schemas/pq-torus.json`
+
+Mathematical torus definition widget for prime lattice parameters:
+```json
+{
+  "input": {
+    "properties": {
+      "p": {
+        "type": "integer",
+        "minimum": 2,
+        "maximum": 100,
+        "default": 11,
+        "description": "First prime integer p for lattice L = Zp + Zqi"
+      },
+      "q": {
+        "type": "integer", 
+        "minimum": 2,
+        "maximum": 100,
+        "default": 5,
+        "description": "Second prime integer q for lattice L = Zp + Zqi"
+      }
+    },
+    "required": ["p", "q"]
+  },
+  "output": {
+    "properties": {
+      "p": {"type": "integer"},
+      "q": {"type": "integer"},
+      "torus_description": {"type": "string"},
+      "lattice_description": {"type": "string"},
+      "prime_validation": {
+        "type": "object",
+        "properties": {
+          "p_is_prime": {"type": "boolean"},
+          "q_is_prime": {"type": "boolean"},
+          "validation_message": {"type": "string"}
+        }
+      },
+      "markdown_content": {"type": "string"}
+    }
+  }
+}
+```
+
+**Weierstrass Compatibility**: The PQ-Torus widget defines rectangular prime lattices `T = ℂ / (ℤp + ℤqi)` compatible with Weierstrass ℘-function widgets. Its output can be connected as input to:
+- `wp-two-panel` - ℘(z) and ℘′(z) visualization
+- `wp-three-panel` - Component analysis 
+- `wp-five-panel` - Complete field analysis
+- `wp-trajectories` - Particle trajectory analysis
+- `wp-contours` - Contour plots
+
 ### Weierstrass Function Widgets
 **URL**: `https://litlfred.github.io/notebooks/schemas/weierstrass.json`
 

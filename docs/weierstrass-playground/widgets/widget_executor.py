@@ -61,6 +61,25 @@ class WidgetExecutor:
                     },
                     "required": ["content"]
                 }
+            elif 'pq-torus' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "p": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 100,
+                            "default": 11
+                        },
+                        "q": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 100,
+                            "default": 5
+                        }
+                    },
+                    "required": ["p", "q"]
+                }
             else:
                 # Default empty schema for unknown references
                 return {"type": "object", "properties": {}}
@@ -672,6 +691,127 @@ class StickyNoteWidget(WidgetExecutor):
         return html
 
 
+class PQTorusWidget(WidgetExecutor):
+    """PQ-Torus widget defining torus T = C / L where L = Zp + Zqi"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input.get('p', 11)
+        q = validated_input.get('q', 5)
+        
+        # Ensure they are integers
+        try:
+            p = int(p)
+            q = int(q)
+        except (ValueError, TypeError):
+            return {
+                'success': False,
+                'error': f"p and q must be integers, got p={p}, q={q}",
+                'p': p, 'q': q,
+                'torus_description': 'Error: invalid parameters',
+                'markdown_content': f'# Error\n\nInvalid parameters: p={p}, q={q}'
+            }
+        
+        # Check if p and q are prime
+        p_is_prime = self._is_prime(p)
+        q_is_prime = self._is_prime(q)
+        
+        # Generate descriptions
+        torus_description = f"T = ℂ / L where L = ℤ{p} + ℤ{q}i"
+        lattice_description = f"L = ℤ{p} + ℤ{q}i (rectangular prime lattice)"
+        
+        # Validation message
+        if p_is_prime and q_is_prime:
+            validation_msg = f"Both {p} and {q} are prime numbers ✓"
+        elif p_is_prime and not q_is_prime:
+            validation_msg = f"{p} is prime, but {q} is not prime ⚠️"
+        elif not p_is_prime and q_is_prime:
+            validation_msg = f"{q} is prime, but {p} is not prime ⚠️"
+        else:
+            validation_msg = f"Neither {p} nor {q} are prime numbers ⚠️"
+        
+        # Generate markdown content
+        markdown_content = self._generate_torus_markdown(p, q, p_is_prime, q_is_prime)
+        
+        return {
+            'success': True,
+            'p': p,
+            'q': q,
+            'torus_description': torus_description,
+            'lattice_description': lattice_description,
+            'prime_validation': {
+                'p_is_prime': p_is_prime,
+                'q_is_prime': q_is_prime,
+                'validation_message': validation_msg
+            },
+            'markdown_content': markdown_content,
+            'metadata': {
+                'lattice_type': 'rectangular_prime_lattice',
+                'torus_equation': f'T = ℂ / (ℤ{p} + ℤ{q}i)',
+                'fundamental_domain': {
+                    'width': p,
+                    'height': q,
+                    'area': p * q
+                },
+                'execution_time': 0.001,
+                'widget_id': 'pq-torus'
+            }
+        }
+    
+    def _is_prime(self, n: int) -> bool:
+        """Check if a number is prime"""
+        if n < 2:
+            return False
+        if n == 2:
+            return True
+        if n % 2 == 0:
+            return False
+        
+        for i in range(3, int(n**0.5) + 1, 2):
+            if n % i == 0:
+                return False
+        return True
+    
+    def _generate_torus_markdown(self, p: int, q: int, p_is_prime: bool, q_is_prime: bool) -> str:
+        """Generate markdown content displaying the torus information"""
+        
+        # Prime status indicators  
+        p_status = "✓ prime" if p_is_prime else "⚠️ not prime"
+        q_status = "✓ prime" if q_is_prime else "⚠️ not prime"
+        
+        markdown = f"""# PQ-Torus: T = ℂ / L
+
+## Lattice Definition
+**L = ℤ{p} + ℤ{q}i** (rectangular lattice)
+
+## Prime Parameters
+- **p = {p}** ({p_status})
+- **q = {q}** ({q_status})
+
+## Torus Structure
+The torus is defined as:
+```
+T = ℂ / L = ℂ / (ℤ{p} + ℤ{q}i)
+```
+
+### Fundamental Domain
+- **Width**: {p} units
+- **Height**: {q} units  
+- **Area**: {p * q} square units
+
+### Weierstrass Function Compatibility
+This torus defines a rectangular lattice suitable for ℘-function analysis with lattice parameters p={p}, q={q}.
+
+The Weierstrass ℘-function for this lattice can be used in visualization widgets:
+- **wp-two-panel**: Visualize ℘(z) and ℘′(z) 
+- **wp-three-panel**: Show ℘(z), Re(℘′(z)), Im(℘′(z))
+- **wp-five-panel**: Complete analysis including derivatives
+- **wp-trajectories**: Particle trajectories in the ℘-field
+- **wp-contours**: Contour plots of the field
+"""
+        
+        return markdown
+
+
 def create_widget(widget_type: str, schemas: Dict[str, Any]) -> WidgetExecutor:
     """Factory function to create widget instances based on type"""
     if widget_type not in schemas['widget-schemas']:
@@ -693,6 +833,7 @@ def create_widget(widget_type: str, schemas: Dict[str, Any]) -> WidgetExecutor:
         'wp-contours': WeierstrassContourWidget,
         'data-plot': DataPlotWidget,
         'data-generator': DataGeneratorWidget,
+        'pq-torus': PQTorusWidget,
     }
     
     widget_class = widget_classes.get(widget_type, WidgetExecutor)
