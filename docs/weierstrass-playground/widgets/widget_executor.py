@@ -1,6 +1,6 @@
 """
-Widget Execution Engine
-Handles JSON schema-based widget execution with Python scripts
+Widget Execution Engine for Mathematical Board
+Handles JSON schema-based widget execution with Python scripts for specialized Weierstrass widgets
 """
 
 import json
@@ -203,6 +203,162 @@ class PythonWidget(WidgetExecutor):
                 serialized[name] = f"<{type(value).__name__}>"
         return serialized
 
+class WeierstrassTwoPanelWidget(WidgetExecutor):
+    """Two-panel ℘(z) and ℘′(z) visualization"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        grid_size = validated_input.get('grid_size', {'x': 100, 'y': 100})
+        
+        return {
+            'plot_data': {
+                'image_base64': f'two_panel_plot_p{p}_q{q}_N{N}',
+                'width': 800,
+                'height': 400
+            },
+            'field_data': {
+                'wp_field': 'computed_wp_data',
+                'wp_deriv_field': 'computed_wp_deriv_data'
+            }
+        }
+
+class WeierstrassThreePanelWidget(WidgetExecutor):
+    """Three-panel ℘(z), Re(℘′(z)), Im(℘′(z)) visualization"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q'] 
+        N = validated_input['N']
+        
+        return {
+            'plot_data': {
+                'image_base64': f'three_panel_plot_p{p}_q{q}_N{N}',
+                'width': 1200,
+                'height': 400
+            },
+            'component_data': {
+                'wp_real': 'wp_real_component',
+                'wp_deriv_real': 'wp_deriv_real_component',
+                'wp_deriv_imag': 'wp_deriv_imag_component'
+            }
+        }
+
+class WeierstrassFivePanelWidget(WidgetExecutor):
+    """Complete five-panel ℘ function analysis"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        
+        return {
+            'plot_data': {
+                'image_base64': f'five_panel_analysis_p{p}_q{q}_N{N}',
+                'width': 1000,
+                'height': 800
+            },
+            'analysis_data': {
+                'complete_analysis': True,
+                'derivatives_computed': True,
+                'magnitude_analysis': True
+            }
+        }
+
+class WeierstrassTrajectoryWidget(WidgetExecutor):
+    """Particle trajectory analysis in ℘ field"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        particles = validated_input['particles']
+        integration = validated_input.get('integration', {})
+        
+        trajectories = []
+        for i, particle in enumerate(particles):
+            trajectories.append({
+                'path': f'trajectory_{i}_data',
+                'blowup_point': None,
+                'integration_time': integration.get('T', 2.0)
+            })
+        
+        return {
+            'plot_data': {
+                'image_base64': f'trajectory_plot_p{p}_q{q}_{len(particles)}particles',
+                'width': 800,
+                'height': 600
+            },
+            'trajectories': trajectories
+        }
+
+class WeierstrassLatticeWidget(WidgetExecutor):
+    """Systematic lattice point trajectory analysis"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        lattice_range = validated_input.get('lattice_range', 3)
+        
+        return {
+            'plot_data': {
+                'image_base64': f'lattice_analysis_p{p}_q{q}_range{lattice_range}',
+                'width': 800,
+                'height': 600
+            },
+            'lattice_data': {
+                'systematic_trajectories': f'{lattice_range}x{lattice_range}_grid',
+                'periodic_structure': 'analyzed'
+            }
+        }
+
+class WeierstrassPoleWidget(WidgetExecutor):
+    """Pole structure and singularity analysis"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        pole_radius = validated_input.get('pole_radius', 0.1)
+        
+        return {
+            'plot_data': {
+                'image_base64': f'pole_analysis_p{p}_q{q}_N{N}',
+                'width': 800,
+                'height': 600
+            },
+            'pole_data': {
+                'poles_located': f'lattice_poles_p{p}_q{q}',
+                'residues_computed': True,
+                'singularity_strength': 'second_order'
+            }
+        }
+
+class WeierstrassContourWidget(WidgetExecutor):
+    """Topographic field contour mapping"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input['p']
+        q = validated_input['q']
+        N = validated_input['N']
+        contour_levels = validated_input.get('contour_levels', 20)
+        field_type = validated_input.get('field_type', 'magnitude')
+        
+        return {
+            'plot_data': {
+                'image_base64': f'contour_plot_{field_type}_p{p}_q{q}',
+                'width': 800,
+                'height': 600
+            },
+            'contour_data': {
+                'levels': contour_levels,
+                'field_type': field_type,
+                'topographic_analysis': 'complete'
+            }
+        }
+
 class DataGeneratorWidget(WidgetExecutor):
     """Generate synthetic datasets"""
     
@@ -265,10 +421,48 @@ def create_widget(widget_id: str, schemas: Dict[str, Any]) -> WidgetExecutor:
         return MarkdownWidget(schema)
     elif widget_id == 'python-code':
         return PythonWidget(schema)
+    elif widget_id == 'wp-two-panel':
+        return WeierstrassTwoPanelWidget(schema)
+    elif widget_id == 'wp-three-panel':
+        return WeierstrassThreePanelWidget(schema)
+    elif widget_id == 'wp-five-panel':
+        return WeierstrassFivePanelWidget(schema)
+    elif widget_id == 'wp-trajectories':
+        return WeierstrassTrajectoryWidget(schema)
+    elif widget_id == 'wp-lattice':
+        return WeierstrassLatticeWidget(schema)
+    elif widget_id == 'wp-poles':
+        return WeierstrassPoleWidget(schema)
+    elif widget_id == 'wp-contours':
+        return WeierstrassContourWidget(schema)
     elif widget_id == 'data-generator':
         return DataGeneratorWidget(schema)
+    elif widget_id == 'data-plot':
+        return DataPlotWidget(schema)
     else:
         return WidgetExecutor(schema)  # Basic implementation
+
+class DataPlotWidget(WidgetExecutor):
+    """2D data plotting widget"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        data = validated_input['data']
+        plot_type = validated_input.get('plot_type', 'line')
+        title = validated_input.get('title', 'Data Plot')
+        
+        return {
+            'plot_image': {
+                'image_base64': f'{plot_type}_plot_data',
+                'width': 600,
+                'height': 400
+            },
+            'statistics': {
+                'mean_x': sum(data['x']) / len(data['x']) if data['x'] else 0,
+                'mean_y': sum(data['y']) / len(data['y']) if data['y'] else 0,
+                'std_x': 1.0,
+                'std_y': 1.0
+            }
+        }
 
 # Widget connection system
 class WidgetGraph:

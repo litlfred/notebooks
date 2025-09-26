@@ -105,10 +105,10 @@
       "python_script": "widgets/python_widget.py"
     },
     
-    "weierstrass-plot": {
-      "id": "weierstrass-plot",
-      "name": "Weierstrass ℘ Function",
-      "description": "Interactive Weierstrass ℘ function visualization",
+    "wp-two-panel": {
+      "id": "wp-two-panel",
+      "name": "℘ Two-Panel Plot",
+      "description": "Standard ℘(z) and ℘′(z) visualization with color mapping",
       "category": "visualization",
       "icon": "∞",
       "input_schema": {
@@ -142,11 +142,8 @@
               "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
             }
           },
-          "mode": {
-            "type": "string",
-            "enum": ["two_panel", "three_panel", "five_panel"],
-            "default": "two_panel"
-          }
+          "contours": {"type": "integer", "minimum": 0, "maximum": 30, "default": 10},
+          "saturation": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.3}
         },
         "required": ["p", "q", "N"]
       },
@@ -163,15 +160,287 @@
           },
           "field_data": {
             "type": "object",
-            "description": "Raw field computation data for further processing"
-          },
-          "parameters_used": {
-            "type": "object",
-            "description": "Final parameters used for computation"
+            "description": "℘(z) and ℘′(z) field data"
           }
         }
       },
-      "python_script": "widgets/weierstrass_widget.py"
+      "python_script": "widgets/wp_two_panel.py"
+    },
+
+    "wp-three-panel": {
+      "id": "wp-three-panel", 
+      "name": "℘ Three-Panel Plot",
+      "description": "℘(z), Re(℘′(z)), and Im(℘′(z)) in grayscale panels",
+      "category": "visualization",
+      "icon": "∞",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "grid_size": {
+            "type": "object",
+            "properties": {
+              "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100},
+              "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
+            }
+          },
+          "value_floor": {"type": "number", "minimum": 0, "maximum": 1, "default": 0.3}
+        },
+        "required": ["p", "q", "N"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"}, 
+              "height": {"type": "integer"}
+            }
+          },
+          "component_data": {
+            "type": "object",
+            "description": "Separate ℘, Re(℘′), Im(℘′) field data"
+          }
+        }
+      },
+      "python_script": "widgets/wp_three_panel.py"
+    },
+
+    "wp-five-panel": {
+      "id": "wp-five-panel",
+      "name": "℘ Five-Panel Analysis", 
+      "description": "Complete ℘ function analysis with derivatives and magnitude",
+      "category": "visualization",
+      "icon": "∞",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "grid_size": {
+            "type": "object", 
+            "properties": {
+              "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 150},
+              "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 150}
+            }
+          },
+          "show_contours": {"type": "boolean", "default": true},
+          "show_poles": {"type": "boolean", "default": true}
+        },
+        "required": ["p", "q", "N"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"}
+            }
+          },
+          "analysis_data": {
+            "type": "object",
+            "description": "Complete field analysis data"
+          }
+        }
+      },
+      "python_script": "widgets/wp_five_panel.py"
+    },
+
+    "wp-trajectories": {
+      "id": "wp-trajectories",
+      "name": "℘ Trajectory Analysis",
+      "description": "Particle trajectory integration in the ℘ field",
+      "category": "visualization", 
+      "icon": "🎯",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "particles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "z0": {"type": "string", "description": "Initial position (complex)", "default": "5+0j"},
+                "v0": {"type": "string", "description": "Initial velocity (complex)", "default": "0+1j"}
+              }
+            },
+            "minItems": 1,
+            "default": [{"z0": "5+0j", "v0": "0+1j"}]
+          },
+          "integration": {
+            "type": "object",
+            "properties": {
+              "dt": {"type": "number", "minimum": 0.001, "maximum": 0.1, "default": 0.01},
+              "T": {"type": "number", "minimum": 0.1, "maximum": 10, "default": 2.0},
+              "blow_thresh": {"type": "number", "minimum": 1, "maximum": 100, "default": 10.0}
+            }
+          }
+        },
+        "required": ["p", "q", "N", "particles"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"}
+            }
+          },
+          "trajectories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {"type": "array"},
+                "blowup_point": {"type": ["string", "null"]},
+                "integration_time": {"type": "number"}
+              }
+            }
+          }
+        }
+      },
+      "python_script": "widgets/wp_trajectories.py"
+    },
+
+    "wp-lattice": {
+      "id": "wp-lattice",
+      "name": "℘ Lattice Analysis",
+      "description": "Systematic lattice point trajectory analysis",
+      "category": "visualization",
+      "icon": "🔗",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "lattice_range": {"type": "integer", "minimum": 1, "maximum": 10, "default": 3},
+          "integration": {
+            "type": "object",
+            "properties": {
+              "dt": {"type": "number", "minimum": 0.001, "maximum": 0.1, "default": 0.01},
+              "T": {"type": "number", "minimum": 0.1, "maximum": 5, "default": 1.0}
+            }
+          }
+        },
+        "required": ["p", "q", "N"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"}
+            }
+          },
+          "lattice_data": {
+            "type": "object",
+            "description": "Lattice trajectory analysis results"
+          }
+        }
+      },
+      "python_script": "widgets/wp_lattice.py"
+    },
+
+    "wp-poles": {
+      "id": "wp-poles",
+      "name": "℘ Pole Analysis",
+      "description": "Pole structure and singularity visualization",
+      "category": "visualization",
+      "icon": "⚪",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "pole_radius": {"type": "number", "minimum": 0.01, "maximum": 1.0, "default": 0.1},
+          "show_residues": {"type": "boolean", "default": true},
+          "highlight_nearest": {"type": "boolean", "default": true}
+        },
+        "required": ["p", "q", "N"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"}
+            }
+          },
+          "pole_data": {
+            "type": "object",
+            "description": "Pole locations, residues, and singularity analysis"
+          }
+        }
+      },
+      "python_script": "widgets/wp_poles.py"
+    },
+
+    "wp-contours": {
+      "id": "wp-contours",
+      "name": "℘ Contour Plot",
+      "description": "Topographic field contour mapping",
+      "category": "visualization",
+      "icon": "📈",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "p": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 11.0},
+          "q": {"type": "number", "minimum": 0.1, "maximum": 20, "default": 5.0},
+          "N": {"type": "integer", "minimum": 0, "maximum": 6, "default": 3},
+          "contour_levels": {"type": "integer", "minimum": 5, "maximum": 50, "default": 20},
+          "field_type": {
+            "type": "string",
+            "enum": ["magnitude", "real", "imaginary", "phase"],
+            "default": "magnitude"
+          },
+          "colormap": {
+            "type": "string", 
+            "enum": ["viridis", "plasma", "inferno", "magma", "coolwarm"],
+            "default": "viridis"
+          }
+        },
+        "required": ["p", "q", "N"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "plot_data": {
+            "type": "object",
+            "properties": {
+              "image_base64": {"type": "string"},
+              "width": {"type": "integer"},
+              "height": {"type": "integer"}
+            }
+          },
+          "contour_data": {
+            "type": "object",
+            "description": "Contour levels and field analysis"
+          }
+        }
+      },
+      "python_script": "widgets/wp_contours.py"
     },
 
     "data-plot": {

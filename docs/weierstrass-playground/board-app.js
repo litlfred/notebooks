@@ -66,7 +66,7 @@ class MathematicalBoard {
             categoryDiv.className = 'widget-category';
             
             const categoryHeader = document.createElement('h4');
-            categoryHeader.innerHTML = `<i class="fas fa-${this.getCategoryIcon(categoryName)}"></i> ${this.formatCategoryName(categoryName)}`;
+            categoryHeader.innerHTML = `<span class="category-icon">${this.getCategoryIcon(categoryName)}</span> ${this.formatCategoryName(categoryName)}`;
             categoryDiv.appendChild(categoryHeader);
             
             const itemsDiv = document.createElement('div');
@@ -80,7 +80,7 @@ class MathematicalBoard {
                 itemDiv.dataset.widgetSchema = JSON.stringify(widget);
                 
                 itemDiv.innerHTML = `
-                    <i class="fas fa-${widget.icon}">${widget.icon}</i>
+                    <span class="widget-icon">${widget.icon}</span>
                     <span>${widget.name}</span>
                 `;
                 
@@ -97,16 +97,22 @@ class MathematicalBoard {
 
     getCategoryIcon(category) {
         const icons = {
-            'content': 'sticky-note',
-            'computation': 'code',
-            'visualization': 'chart-line',
-            'data': 'database'
+            'content': '📝',
+            'computation': '🐍', 
+            'visualization': '∞',
+            'data': '📋'
         };
-        return icons[category] || 'puzzle-piece';
+        return icons[category] || '🧩';
     }
 
     formatCategoryName(category) {
-        return category.charAt(0).toUpperCase() + category.slice(1);
+        const names = {
+            'content': 'CONTENT',
+            'computation': 'COMPUTATION',
+            'visualization': 'VISUALIZATION', 
+            'data': 'DATA'
+        };
+        return names[category] || category.toUpperCase();
     }
 
     /**
