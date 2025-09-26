@@ -14,11 +14,11 @@ An interactive mathematical playground running entirely in your browser using [P
 
 ## 🏗️ Common Framework Architecture
 
-This playground implements a notebook-like framework where each "page" acts like a Jupyter notebook with modular components:
+This playground implements a modular browser-based framework with reusable mathematical and visualization components:
 
 ### Component Structure
 ```
-📦 Page Components (like notebook cells)
+📦 Page Components (browser-based modules)
 ├── 🧮 Math Library Components
 │   ├── Core mathematical functions
 │   ├── Numerical computations
@@ -227,7 +227,6 @@ MIT License - see LICENSE file for details.
 ## 🙏 Acknowledgments
 
 - [Pyodide](https://pyodide.org/) team for Python-in-browser technology
-- Original Jupyter notebook implementation (PR #2)
 - Mathematical foundations from Weierstrass function theory
 
 ## 🔗 Links

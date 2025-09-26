@@ -24,7 +24,7 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
     Returns matplotlib figure optimized for web display via Pyodide.
     
     Args:
-        mode: visualization mode ('two_panel', 'three_panel', 'five_panel')
+        mode: visualization mode ('two_panel', 'time_series')
         p, q, N: lattice parameters
         nx, ny: grid resolution
         n_contours: number of contour lines
@@ -69,6 +69,35 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
         if vec_density > 0:
             visualization.vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
             visualization.vector_overlay(ax2, X2, Y2, F2, M2, vec_density, vec_width, vec_max_len)
+    
+    elif mode == 'time_series':
+        # For time-series mode, we don't need field backgrounds
+        # We'll plot the time series data directly
+        ax1, ax2 = axes
+        
+        # Integrate trajectories and evaluate ℘(z(t)) along them
+        trajectories_data = []
+        trajectory_colors = plt.cm.tab10(np.linspace(0, 1, len(particles)))
+        
+        for i, (z0_real, z0_imag, v0_real, v0_imag) in enumerate(particles):
+            z0 = complex(z0_real, z0_imag)
+            v0 = complex(v0_real, v0_imag)
+            
+            try:
+                times, trajectory, wp_values, blowup_point = integration.integrate_and_evaluate_wp(
+                    z0, v0, dt, T, p, q, N, blow_thresh
+                )
+                trajectories_data.append((times, trajectory, wp_values, blowup_point))
+            except Exception as e:
+                print(f"Error integrating particle {i}: {e}")
+                # Add empty data to maintain color consistency
+                trajectories_data.append((np.array([0]), np.array([z0]), np.array([np.nan+1j*np.nan]), None))
+        
+        # Plot time series data
+        visualization.plot_time_series_on_axes(axes, trajectories_data, trajectory_colors, T)
+        
+        # Don't plot spatial trajectories for time_series mode
+        return fig
     
     else:
         # For other modes, default to two-panel for browser compatibility

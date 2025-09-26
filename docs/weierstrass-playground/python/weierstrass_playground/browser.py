@@ -24,7 +24,7 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
     Returns matplotlib figure optimized for web display via Pyodide.
     
     Args:
-        mode: visualization mode ('two_panel', 'three_panel', 'five_panel')
+        mode: visualization mode ('two_panel', 'time_series')
         p, q, N: lattice parameters
         nx, ny: grid resolution
         n_contours: number of contour lines
