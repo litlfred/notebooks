@@ -186,7 +186,7 @@ def create_figure_layout(mode, p, q, figsize_base=8):
     Create figure and axes layout based on visualization mode.
     
     Args:
-        mode: visualization mode ('two_panel', 'three_panel', 'five_panel')
+        mode: visualization mode ('two_panel', 'three_panel', 'five_panel', 'time_series')
         p, q: lattice parameters for axis limits
         figsize_base: base figure size
         
