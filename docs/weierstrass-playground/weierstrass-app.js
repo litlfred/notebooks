@@ -535,7 +535,6 @@ image_data = plot_to_base64(fig)
         this.updateSessionStatus('Visualization stopped', 'error');
     }
 }
-}
 
 // Particle management functions (called from HTML)
 function addParticle() {

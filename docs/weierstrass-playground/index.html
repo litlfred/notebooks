@@ -309,6 +309,8 @@
                 if (currentIndex >= cdnSources.length) {
                     console.error('Failed to load Pyodide from all CDN sources');
                     document.getElementById('progress-text').textContent = 'Failed to load Pyodide. Please check your internet connection and refresh the page.';
+                    // Load main script even if Pyodide fails so UI functions work
+                    loadMainScript();
                     return;
                 }
                 
