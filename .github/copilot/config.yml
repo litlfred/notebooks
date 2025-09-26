@@ -1,0 +1,50 @@
+name: Mathematical Notebooks
+description: Interactive Python notebooks for mathematical explorations and visualizations
+
+# Development environment configuration
+environment:
+  python: "3.11"
+  dependencies:
+    - numpy>=1.20.0
+    - matplotlib>=3.5.0
+    - ipywidgets>=7.6.0
+  dev_dependencies:
+    - pytest
+    - black
+    - mypy
+
+# Repository-specific context
+context:
+  domain: "complex analysis and mathematical visualization"
+  main_feature: "Weierstrass elliptic function playground"
+  architecture: "4-file pattern: notebook, preamble, lib, ui"
+  deployment: "GitHub Pages with Jekyll and Pyodide"
+  
+# Coding standards
+standards:
+  branch_naming: "feature-descriptive-name"
+  file_structure: "modular separation of concerns"
+  testing: "mathematical correctness + browser compatibility"
+  documentation: "mathematical background + usage instructions"
+
+# Common patterns
+patterns:
+  mathematical_functions: "src/weierstrass_playground/core.py"
+  visualizations: "src/weierstrass_playground/visualization.py"
+  browser_adaptations: "src/weierstrass_playground/browser.py"
+  static_deployment: "docs/ directory with Jekyll"
+
+# Quality gates
+quality:
+  required_tests:
+    - mathematical correctness
+    - visualization generation
+    - browser compatibility
+  required_docs:
+    - function docstrings
+    - usage instructions
+    - mathematical background
+  performance_targets:
+    - grid computations under 5s
+    - trajectory integration real-time
+    - memory efficient for browser execution
