@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathematical Notebooks</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 60px;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 300;
+        }
+        .subtitle {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        .notebook-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: left;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .notebook-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .notebook-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        .notebook-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .notebook-title a:hover {
+            color: #667eea;
+        }
+        .notebook-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .feature-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+        }
+        .tech-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            font-size: 0.95em;
+            color: #555;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px;
+                margin: 20px;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .subtitle {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Mathematical Notebooks</h1>
+        <div class="subtitle">
+            Interactive browser-based mathematical playgrounds powered by Python and WebAssembly
+        </div>
+
+        <div class="notebook-card">
+            <div class="notebook-title">
+                <a href="weierstrass-playground/">℘ Weierstrass ℘ Playground</a>
+            </div>
+            <div class="notebook-description">
+                Interactive visualization of the <strong>Weierstrass ℘ function</strong> with particle trajectory dynamics. 
+                Explore elliptic functions, complex analysis, and differential equations in real-time.
+            </div>
+            <div class="features">
+                <span class="feature-tag">Complex Analysis</span>
+                <span class="feature-tag">Elliptic Functions</span>
+                <span class="feature-tag">Differential Equations</span>
+                <span class="feature-tag">Real-time Visualization</span>
+                <span class="feature-tag">Mobile Friendly</span>
+            </div>
+        </div>
+
+        <div class="tech-info">
+            <strong>🚀 Zero Installation Required</strong><br>
+            Built with <a href="https://pyodide.org/" target="_blank">Pyodide</a> - 
+            Full Python + NumPy + Matplotlib running entirely in your browser via WebAssembly.
+            Works on desktop, tablet, and mobile devices.
+        </div>
+        
+        <p style="margin-top: 30px; font-size: 0.9em; color: #888;">
+            <a href="https://github.com/litlfred/notebooks" target="_blank">View Source Code</a> | 
+            Start exploring by clicking on any notebook above
+        </p>
+    </div>
+</body>
+</html>
