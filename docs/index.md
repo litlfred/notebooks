@@ -10,7 +10,7 @@ Welcome to an interactive collection of **mathematical notebooks** that run enti
 
 ## Available Notebooks
 
-### [℘ Weierstrass ℘ Playground](/weierstrass-playground)
+### [℘ Weierstrass ℘ Playground](weierstrass-playground/)
 
 Interactive visualization of the **Weierstrass ℘ function** with particle trajectory dynamics. Explore elliptic functions, complex analysis, and differential equations in real-time.
 
