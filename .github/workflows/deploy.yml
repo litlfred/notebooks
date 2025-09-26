@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: 🚀 Deploy Mathematical Notebooks to GitHub Pages
 
 on:
   # Runs on pushes to main branch
@@ -9,13 +9,27 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Deployment environment'
+        description: '🌍 Choose deployment environment'
         required: true
         default: 'production'
         type: choice
         options:
         - production
         - staging
+      deployment_type:
+        description: '📦 Deployment type'
+        required: true
+        default: 'full'
+        type: choice
+        options:
+        - full
+        - hotfix
+        - preview
+      notify_pr:
+        description: '📢 Notify associated PR (if any)'
+        required: false
+        default: true
+        type: boolean
       
   # Runs when PR is approved (for review deployments)
   pull_request_review:
