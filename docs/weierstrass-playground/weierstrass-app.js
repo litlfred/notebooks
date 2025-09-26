@@ -423,6 +423,118 @@ image_data = plot_to_base64(fig)
     showHelp() {
         document.getElementById('help-modal').style.display = 'flex';
     }
+
+    /**
+     * Session Management - Save configuration to localStorage
+     */
+    saveSession() {
+        const sessionData = {
+            parameters: this.getParameters(),
+            theme: document.body.getAttribute('data-theme'),
+            layoutMode: document.body.classList.contains('desktop-mode') ? 'desktop' : 'mobile',
+            timestamp: new Date().toISOString(),
+            version: '1.0.0'
+        };
+        
+        localStorage.setItem('weierstrass_session', JSON.stringify(sessionData));
+        this.updateSessionStatus('Session saved', 'success');
+        console.log('Session saved:', sessionData);
+    }
+
+    /**
+     * Load session configuration from localStorage
+     */
+    loadSession() {
+        try {
+            const sessionData = JSON.parse(localStorage.getItem('weierstrass_session'));
+            if (!sessionData) {
+                this.updateSessionStatus('No saved session found', 'warning');
+                return;
+            }
+
+            // Restore parameters
+            if (sessionData.parameters) {
+                this.setParameters(sessionData.parameters);
+            }
+
+            // Restore theme
+            if (sessionData.theme) {
+                setTheme(sessionData.theme);
+            }
+
+            // Restore layout mode
+            if (sessionData.layoutMode) {
+                setLayoutMode(sessionData.layoutMode);
+            }
+
+            this.updateSessionStatus('Session loaded', 'success');
+            console.log('Session loaded:', sessionData);
+        } catch (error) {
+            console.error('Failed to load session:', error);
+            this.updateSessionStatus('Failed to load session', 'error');
+        }
+    }
+
+    /**
+     * Set parameters from session data
+     */
+    setParameters(params) {
+        Object.entries(params).forEach(([key, value]) => {
+            const element = document.getElementById(key) || document.getElementById(key.replace('_', '-'));
+            if (element) {
+                if (element.type === 'checkbox') {
+                    element.checked = value;
+                } else {
+                    element.value = value;
+                }
+            }
+        });
+    }
+
+    /**
+     * Update session status indicator
+     */
+    updateSessionStatus(message, type = 'ready') {
+        const statusText = document.getElementById('session-status-text');
+        const statusDot = document.getElementById('session-status-dot');
+        
+        if (statusText) statusText.textContent = message;
+        if (statusDot) {
+            statusDot.className = `status-dot ${type}`;
+        }
+
+        // Clear status after 3 seconds
+        setTimeout(() => {
+            if (statusText) statusText.textContent = 'Ready';
+            if (statusDot) statusDot.className = 'status-dot';
+        }, 3000);
+    }
+
+    /**
+     * Control visualization state
+     */
+    pauseVisualization() {
+        this.isComputing = false;
+        this.updateSessionStatus('Visualization paused', 'paused');
+    }
+
+    resumeVisualization() {
+        if (this.lastRenderParams && this.isInitialized) {
+            this.render();
+        }
+    }
+
+    stopVisualization() {
+        this.isComputing = false;
+        this.lastRenderParams = null;
+        const renderBtn = document.getElementById('render-btn');
+        if (renderBtn) {
+            renderBtn.innerHTML = '<i class="fas fa-play"></i> Render';
+            renderBtn.disabled = false;
+        }
+        this.updateSessionStatus('Visualization stopped', 'error');
+    }
+}
 }
 
 // Particle management functions (called from HTML)
@@ -449,8 +561,165 @@ function closeHelp() {
     document.getElementById('help-modal').style.display = 'none';
 }
 
+// ===== GLOBAL CONTROL FUNCTIONS =====
+
+/**
+ * Toggle control panel expansion on mobile
+ */
+function toggleControlPanel() {
+    const panel = document.getElementById('global-controls');
+    const icon = document.getElementById('panel-toggle-icon');
+    
+    panel.classList.toggle('expanded');
+    
+    if (panel.classList.contains('expanded')) {
+        icon.className = 'fas fa-chevron-down';
+    } else {
+        icon.className = 'fas fa-chevron-up';
+    }
+}
+
+/**
+ * Control all visualizations
+ */
+function playAllVisualizations() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.resumeVisualization();
+    }
+    updateControlButtonState('play');
+}
+
+function pauseAllVisualizations() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.pauseVisualization();
+    }
+    updateControlButtonState('pause');
+}
+
+function stopAllVisualizations() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.stopVisualization();
+    }
+    updateControlButtonState('stop');
+}
+
+function restartAllVisualizations() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.resumeVisualization();
+    }
+    updateControlButtonState('restart');
+}
+
+function updateControlButtonState(action) {
+    // Reset all button states
+    const buttons = document.querySelectorAll('#global-controls .control-btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    
+    // Set active button
+    const activeButton = document.getElementById(`${action}-all-btn`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+}
+
+/**
+ * Layout mode switching
+ */
+function setLayoutMode(mode) {
+    const body = document.body;
+    
+    // Remove existing mode classes
+    body.classList.remove('desktop-mode', 'mobile-mode');
+    
+    // Add new mode class
+    body.classList.add(`${mode}-mode`);
+    
+    // Update button states
+    document.querySelectorAll('.control-section .control-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    const activeButton = document.getElementById(`${mode}-mode-btn`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+    
+    // Save to session
+    if (window.weierstrassApp) {
+        window.weierstrassApp.updateSessionStatus(`Layout: ${mode} mode`, 'success');
+    }
+    
+    console.log(`Layout mode set to: ${mode}`);
+}
+
+/**
+ * Theme switching
+ */
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    
+    const themeIcon = document.getElementById('theme-icon');
+    if (themeIcon) {
+        themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+    }
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('weierstrass_theme', theme);
+    
+    console.log(`Theme set to: ${theme}`);
+}
+
+/**
+ * Session management functions
+ */
+function saveSession() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.saveSession();
+    }
+}
+
+function loadSession() {
+    if (window.weierstrassApp) {
+        window.weierstrassApp.loadSession();
+    }
+}
+
+/**
+ * Initialize theme and layout from localStorage
+ */
+function initializeUserPreferences() {
+    // Initialize theme
+    const savedTheme = localStorage.getItem('weierstrass_theme') || 'dark';
+    setTheme(savedTheme);
+    
+    // Initialize layout mode based on screen size
+    const isMobile = window.innerWidth < 1024;
+    const defaultMode = isMobile ? 'mobile' : 'desktop';
+    setLayoutMode(defaultMode);
+    
+    // Auto-detect layout mode changes on resize
+    window.addEventListener('resize', () => {
+        const isMobile = window.innerWidth < 1024;
+        const currentMode = document.body.classList.contains('desktop-mode') ? 'desktop' : 'mobile';
+        const preferredMode = isMobile ? 'mobile' : 'desktop';
+        
+        if (currentMode !== preferredMode) {
+            setLayoutMode(preferredMode);
+        }
+    });
+}
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize user preferences first
+    initializeUserPreferences();
+    
     const app = new WeierstrassApp();
     
     // Start initialization

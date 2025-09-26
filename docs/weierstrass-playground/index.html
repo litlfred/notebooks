@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="desktop-mode" data-theme="dark">
     <div class="container">
         <header class="main-header">
             <h1><i class="fas fa-infinity"></i> Weierstrass ℘ Playground</h1>
@@ -239,6 +239,60 @@
                Running Python + NumPy + Matplotlib entirely in your browser • 
                <a href="https://github.com/litlfred/notebooks" target="_blank">Source Code</a></p>
         </footer>
+    </div>
+
+    <!-- Global Control Panel -->
+    <div class="global-control-panel" id="global-controls">
+        <button class="panel-toggle" onclick="toggleControlPanel()">
+            <i class="fas fa-chevron-up" id="panel-toggle-icon"></i>
+        </button>
+        
+        <div class="control-section">
+            <h4>Visualizations:</h4>
+            <button class="control-btn" id="play-all-btn" onclick="playAllVisualizations()">
+                <i class="fas fa-play"></i> Play All
+            </button>
+            <button class="control-btn" id="pause-all-btn" onclick="pauseAllVisualizations()">
+                <i class="fas fa-pause"></i> Pause All
+            </button>
+            <button class="control-btn danger" id="stop-all-btn" onclick="stopAllVisualizations()">
+                <i class="fas fa-stop"></i> Stop All
+            </button>
+            <button class="control-btn" id="restart-all-btn" onclick="restartAllVisualizations()">
+                <i class="fas fa-redo"></i> Restart All
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Layout:</h4>
+            <button class="control-btn" id="desktop-mode-btn" onclick="setLayoutMode('desktop')">
+                <i class="fas fa-desktop"></i> Desktop
+            </button>
+            <button class="control-btn" id="mobile-mode-btn" onclick="setLayoutMode('mobile')">
+                <i class="fas fa-mobile-alt"></i> Mobile
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <h4>Theme:</h4>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Light/Dark Mode">
+                <i class="fas fa-sun" id="theme-icon"></i>
+            </button>
+        </div>
+        
+        <div class="control-section">
+            <button class="control-btn success" onclick="saveSession()">
+                <i class="fas fa-save"></i> Save Session
+            </button>
+            <button class="control-btn" onclick="loadSession()">
+                <i class="fas fa-folder-open"></i> Load Session
+            </button>
+        </div>
+        
+        <div class="session-status">
+            <div class="status-dot" id="session-status-dot"></div>
+            <span id="session-status-text">Ready</span>
+        </div>
     </div>
 
     <script>
