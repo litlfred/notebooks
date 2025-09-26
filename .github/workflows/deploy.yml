@@ -7,29 +7,6 @@ on:
   
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      environment:
-        description: '🌍 Choose deployment environment'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-        - production
-        - staging
-      deployment_type:
-        description: '📦 Deployment type'
-        required: true
-        default: 'full'
-        type: choice
-        options:
-        - full
-        - hotfix
-        - preview
-      notify_pr:
-        description: '📢 Notify associated PR (if any)'
-        required: false
-        default: true
-        type: boolean
       
   # Runs when PR is approved (for review deployments)
   pull_request_review:
