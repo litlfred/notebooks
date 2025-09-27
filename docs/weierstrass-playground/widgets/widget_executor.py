@@ -439,8 +439,6 @@ def create_widget(widget_id: str, schemas: Dict[str, Any]) -> WidgetExecutor:
         return DataGeneratorWidget(schema)
     elif widget_id == 'data-plot':
         return DataPlotWidget(schema)
-    elif widget_id.startswith('sympy-'):
-        return SymPyWidgetExecutor(schema)
     else:
         return WidgetExecutor(schema)  # Basic implementation
 
@@ -465,84 +463,6 @@ class DataPlotWidget(WidgetExecutor):
                 'std_y': 1.0
             }
         }
-
-class SymPyWidgetExecutor(WidgetExecutor):
-    """Widget executor for SymPy mathematical operations."""
-    
-    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute SymPy widget operations."""
-        widget_id = self.schema.get('id', '')
-        
-        try:
-            # Import SymPy
-            import sympy as sp
-            
-            # Parse expression
-            expression_str = validated_input.get('expression', 'x')
-            variables = validated_input.get('variables', ['x'])
-            
-            # Create SymPy symbols
-            symbols = {var: sp.Symbol(var) for var in variables}
-            
-            # Parse the expression
-            expr = sp.sympify(expression_str, locals=symbols)
-            
-            # Apply operations based on widget type
-            if 'add' in widget_id:
-                # Ensure it's an Add expression
-                if not isinstance(expr, sp.Add):
-                    expr = sp.Add(expr, 0)
-                result = expr
-                
-            elif 'matrix' in widget_id:
-                # Handle matrix operations
-                if isinstance(expr, sp.Matrix):
-                    result = expr
-                else:
-                    # Try to create matrix from expression
-                    try:
-                        import json
-                        matrix_data = json.loads(expression_str)
-                        result = sp.Matrix(matrix_data)
-                    except:
-                        result = sp.Matrix([[expr, 0], [0, expr]])
-                        
-            elif 'function' in widget_id or 'elementary' in widget_id:
-                # Apply function operations
-                operations = {
-                    'simplified': sp.simplify(expr),
-                    'expanded': sp.expand(expr),
-                    'derivative': sp.diff(expr, list(symbols.values())[0]) if symbols else sp.diff(expr),
-                }
-                result = operations['simplified']
-                
-            else:
-                # Generic handling
-                result = sp.simplify(expr)
-            
-            # Format output
-            result_str = str(result)
-            latex_str = sp.latex(result)
-            
-            return {
-                'result': result_str,
-                'latex': latex_str,
-                'metadata': {
-                    'widget_id': widget_id,
-                    'expression_type': type(result).__name__,
-                    'symbols_used': [str(s) for s in result.free_symbols] if hasattr(result, 'free_symbols') else []
-                }
-            }
-            
-        except Exception as e:
-            return {
-                'result': f"Error: {str(e)}",
-                'latex': "\\text{Error}",
-                'metadata': {
-                    'error': str(e),
-                    'widget_id': widget_id
-                }
-            }
 
 # Widget connection system
 class WidgetGraph:

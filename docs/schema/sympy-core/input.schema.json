@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/sympy-core/input.schema.json",
+  "title": "SymPy Core Input Schema",
+  "description": "Input parameters for SymPy core mathematical operations",
+  "type": "object",
+  "properties": {
+    "expression": {
+      "type": "string",
+      "description": "SymPy mathematical expression",
+      "default": "x + y",
+      "examples": ["x**2 + 2*x + 1", "sin(x) + cos(x)", "Matrix([[1, 2], [3, 4]])"]
+    },
+    "variables": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Variables used in the expression",
+      "default": ["x", "y"],
+      "examples": [["x"], ["x", "y", "z"], ["t"]]
+    },
+    "operation": {
+      "type": "string",
+      "description": "Type of SymPy operation to perform",
+      "default": "simplify",
+      "enum": ["simplify", "expand", "factor", "solve", "diff", "integrate", "series"]
+    }
+  },
+  "required": ["expression"],
+  "additionalProperties": false
+}
