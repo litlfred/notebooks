@@ -122,7 +122,12 @@ console.log('Schema Base:', info.schema_base_url);
 5. Set **Preview deployment type**: `branch-preview` (default)
 6. Click **"Run workflow"**
 
-This creates a preview at: `https://litlfred.github.io/notebooks/branch-preview/{branch-name}`
+**⚠️ Branch Preview Limitation:**
+GitHub Pages native deployment only allows deployments from specific branches. Branch previews require:
+1. Repository admin to configure environment branch protection in **Settings → Environments → github-pages-preview**, or
+2. Alternative deployment method (Netlify, Vercel, etc.)
+
+The workflow will build the site and create deployment artifacts, but actual deployment requires additional configuration.
 
 ### Deploying to Production
 
