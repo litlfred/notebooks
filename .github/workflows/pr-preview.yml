@@ -1,13 +1,14 @@
-name: PR Preview Deploy
+name: PR Preview Build Check
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [ main ]
 
-# Allow multiple concurrent PR deployments
+# This workflow performs build validation for PRs
+# Actual preview deployment is handled by branch-preview-deploy.yml
 concurrency:
-  group: "pr-preview-${{ github.event.number }}"
+  group: "pr-check-${{ github.event.number }}"
   cancel-in-progress: true
 
 permissions:
@@ -16,7 +17,7 @@ permissions:
   issues: write
 
 jobs:
-  build-preview:
+  validate-pr:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     
@@ -30,6 +31,15 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+    
+    - name: Validate deployment configuration
+      run: |
+        echo "🔍 Validating PR for deployment readiness..."
+        
+        # Test the deployment manager script
+        python scripts/deploy_manager.py . info
+        
+        echo "✅ Deployment configuration validated"
     
     - name: Install dependencies
       run: |
@@ -93,18 +103,34 @@ jobs:
           
           const botComment = comments.find(comment => 
             comment.user.type === 'Bot' && 
-            comment.body.includes('🔍 PR Preview Build')
+            comment.body.includes('🔍 PR Validation Complete')
           );
           
-          const body = `🔍 **PR Preview Build Complete**
+          const previewUrl = `https://litlfred.github.io/notebooks/branch-preview/${{ github.head_ref }}`;
           
-          ✅ Mathematical functions tested
-          ✅ Static files validated
-          ✅ Ready for review
+          const body = `🔍 **PR Validation Complete**
           
-          Once approved, this PR can be merged to trigger automatic deployment to GitHub Pages.
+          ✅ Build configuration validated  
+          ✅ Deployment manager tested
+          ✅ Mathematical functions checked
+          ✅ Ready for preview deployment
           
-          **Manual Deploy**: Repository maintainers can also trigger deployment manually using the \`workflow_dispatch\` event in the Actions tab.`;
+          ## 🌿 Branch Preview Information:
+          
+          Your PR will be automatically deployed to a preview URL when the branch-preview workflow completes:
+          
+          **Preview URL**: ${previewUrl}
+          
+          ---
+          
+          **📋 Next Steps:**
+          - Preview deployment will start automatically
+          - You'll receive another comment with the live preview link
+          - The preview updates automatically with new commits
+          
+          **🎯 For Production Deployment:**
+          - Merge this PR to main branch for main preview
+          - Use manual workflow dispatch for production deployment`;
           
           if (botComment) {
             await github.rest.issues.updateComment({
