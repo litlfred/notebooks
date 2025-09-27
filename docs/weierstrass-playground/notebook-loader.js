@@ -302,38 +302,46 @@ class NotebookLoader {
     /**
      * Save current board as JSON-LD notebook
      */
-    saveNotebook(filename) {
-        const notebook = this.generateNotebookData();
-        const content = JSON.stringify(notebook, null, 2);
-        
-        // Create download link
-        const blob = new Blob([content], { type: 'application/ld+json' });
-        const url = URL.createObjectURL(blob);
-        
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename || 'mathematical-notebook.jsonld';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        
-        this.boardApp.updateStatus(`Notebook saved: ${a.download}`, 'success');
+    async saveNotebook(filename) {
+        try {
+            const notebook = await this.generateNotebookData();
+            const content = JSON.stringify(notebook, null, 2);
+            
+            // Create download link
+            const blob = new Blob([content], { type: 'application/ld+json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'mathematical-notebook.jsonld';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            this.boardApp.updateStatus(`Notebook saved: ${a.download}`, 'success');
+        } catch (error) {
+            console.error('Failed to save notebook:', error);
+            this.boardApp.updateStatus(`Failed to save notebook: ${error.message}`, 'error');
+        }
     }
 
     /**
      * Generate JSON-LD notebook data from current board state
      */
-    generateNotebookData() {
+    async generateNotebookData() {
         const widgets = Array.from(this.boardApp.widgets.values());
         const timestamp = new Date().toISOString();
         
+        // Ensure deployment utils are initialized
+        if (!window.deploymentUtils.initialized) {
+            await window.deploymentUtils.initialize();
+        }
+        
+        const notebookId = Date.now();
         const notebook = {
-            "@context": [
-                "https://www.w3.org/ns/prov-o.jsonld",
-                "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
-            ],
-            "@id": `urn:notebook:${Date.now()}`,
+            "@context": window.deploymentUtils.getNotebookContext(),
+            "@id": window.deploymentUtils.getNotebookUrn(notebookId),
             "@type": ["prov:Entity", "notebook:Notebook"],
             "dct:title": "Mathematical Workspace",
             "dct:description": "Interactive computational notebook with widget workflow",
@@ -345,8 +353,12 @@ class NotebookLoader {
         // Add widgets to graph
         widgets.forEach(widget => {
             const widgetData = {
-                "@id": `urn:widget:${widget.id}`,
+                "@id": window.deploymentUtils.getWidgetUrn(widget.id),
                 "@type": ["prov:Entity", this.getWidgetJsonLdType(widget.type)],
+                "dct:conformsTo": window.deploymentUtils.getSchemaConformanceUrl(
+                    this.getWidgetSchemaName(widget.type), 
+                    'widget'
+                ),
                 "widget:instanceId": widget.id,
                 "widget:position": { x: widget.x, y: widget.y },
                 "widget:size": { width: widget.width, height: widget.height },
@@ -369,10 +381,10 @@ class NotebookLoader {
         this.boardApp.connections.forEach((connections, sourceId) => {
             connections.forEach(conn => {
                 notebook["@graph"].push({
-                    "@id": `urn:connection:${sourceId}-${conn.target}`,
+                    "@id": window.deploymentUtils.getConnectionUrn(sourceId, conn.target),
                     "@type": ["prov:Entity", "notebook:Connection"],
-                    "notebook:source": `urn:widget:${sourceId}`,
-                    "notebook:target": `urn:widget:${conn.target}`,
+                    "notebook:source": window.deploymentUtils.getWidgetUrn(sourceId),
+                    "notebook:target": window.deploymentUtils.getWidgetUrn(conn.target),
                     "notebook:dataFlow": {
                         "sourceOutput": conn.output_path,
                         "targetInput": conn.input_path
@@ -382,6 +394,22 @@ class NotebookLoader {
         });
 
         return notebook;
+    }
+
+    /**
+     * Map widget type to schema name for URL generation
+     */
+    getWidgetSchemaName(widgetType) {
+        const schemaMap = {
+            'sticky-note': 'sticky-note',
+            'pq-torus': 'pq-torus',
+            'pq-torus.weierstrass.two-panel': 'pq-torus/weierstrass/two-panel',
+            'pq-torus.weierstrass.five-panel': 'pq-torus/weierstrass/five-panel',
+            'pq-torus.weierstrass.trajectories': 'pq-torus/weierstrass/trajectories',
+            'pq-torus.weierstrass.contours': 'pq-torus/weierstrass/contours'
+        };
+        
+        return schemaMap[widgetType] || 'common';
     }
 
     /**
@@ -411,11 +439,11 @@ function loadNotebookFile() {
     }
 }
 
-function saveNotebookFile() {
+async function saveNotebookFile() {
     if (notebookLoader) {
         const filename = prompt('Enter filename for notebook:', 'my-notebook.jsonld');
         if (filename) {
-            notebookLoader.saveNotebook(filename);
+            await notebookLoader.saveNotebook(filename);
         }
     }
 }

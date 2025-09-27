@@ -1,6 +1,23 @@
 /**
  * Deployment Utilities for Branch-Aware GitHub Pages
  * Provides deployment context and URL generation for schema files
+ * 
+ * USAGE EXAMPLES:
+ * 
+ * // Basic deployment info
+ * await window.deploymentUtils.initialize();
+ * const info = window.deploymentUtils.getDeploymentInfo();
+ * console.log('Deployment type:', info.deployment_type);
+ * 
+ * // Generate schema URLs for notebook JSON-LD
+ * const context = window.deploymentUtils.getNotebookContext();
+ * const widgetUrn = window.deploymentUtils.getWidgetUrn('widget-123');
+ * const conformanceUrl = window.deploymentUtils.getSchemaConformanceUrl('sticky-note', 'widget');
+ * 
+ * // Check deployment type
+ * if (window.deploymentUtils.isProduction()) {
+ *     console.log('Running in production mode');
+ * }
  */
 
 class DeploymentUtils {
@@ -136,6 +153,97 @@ class DeploymentUtils {
      */
     getBranchName() {
         return this.deploymentInfo?.branch_name || 'unknown';
+    }
+    
+    /**
+     * Generate absolute URL for schema ontology context
+     * @returns {string} Context URL for JSON-LD
+     */
+    getSchemaContextUrl() {
+        const baseUrl = this.getSchemaBaseUrl();
+        return `${baseUrl}/ontology/context.jsonld`;
+    }
+    
+    /**
+     * Generate absolute URL for a widget schema reference
+     * @param {string} widget - Widget name (e.g., 'sticky-note', 'pq-torus')
+     * @param {string} schemaType - Schema type ('widget', 'input', 'output')
+     * @returns {string} Schema conformance URL
+     */
+    getSchemaConformanceUrl(widget, schemaType = 'widget') {
+        const baseUrl = this.getSchemaBaseUrl();
+        return `${baseUrl}/${widget}/${schemaType}.schema.json`;
+    }
+    
+    /**
+     * Generate JSON-LD context array for notebooks
+     * @returns {Array<string>} Context array for JSON-LD documents
+     */
+    getNotebookContext() {
+        return [
+            "https://www.w3.org/ns/prov-o.jsonld",
+            this.getSchemaContextUrl()
+        ];
+    }
+    
+    /**
+     * Generate notebook URN with deployment context
+     * @param {string} notebookId - Unique notebook identifier
+     * @returns {string} URN for notebook
+     */
+    getNotebookUrn(notebookId) {
+        const context = this.getDeploymentInfo();
+        const branch = context?.branch_name || 'unknown';
+        return `urn:notebook:${branch}:${notebookId}`;
+    }
+    
+    /**
+     * Generate widget URN with deployment context
+     * @param {string} widgetId - Widget instance ID
+     * @returns {string} URN for widget instance
+     */
+    getWidgetUrn(widgetId) {
+        const context = this.getDeploymentInfo();
+        const branch = context?.branch_name || 'unknown';
+        return `urn:widget:${branch}:${widgetId}`;
+    }
+    
+    /**
+     * Generate activity URN for widget execution
+     * @param {string} widgetId - Widget instance ID
+     * @param {string} executionId - Optional execution ID
+     * @returns {string} URN for activity
+     */
+    getActivityUrn(widgetId, executionId = null) {
+        const context = this.getDeploymentInfo();
+        const branch = context?.branch_name || 'unknown';
+        const execId = executionId || Date.now();
+        return `urn:activity:${branch}:${widgetId}:${execId}`;
+    }
+    
+    /**
+     * Generate output URN for widget results
+     * @param {string} widgetId - Widget instance ID
+     * @param {string} outputId - Optional output ID
+     * @returns {string} URN for output entity
+     */
+    getOutputUrn(widgetId, outputId = null) {
+        const context = this.getDeploymentInfo();
+        const branch = context?.branch_name || 'unknown';
+        const outId = outputId || Date.now();
+        return `urn:output:${branch}:${widgetId}:${outId}`;
+    }
+    
+    /**
+     * Generate connection URN for widget connections
+     * @param {string} sourceId - Source widget ID
+     * @param {string} targetId - Target widget ID
+     * @returns {string} URN for connection
+     */
+    getConnectionUrn(sourceId, targetId) {
+        const context = this.getDeploymentInfo();
+        const branch = context?.branch_name || 'unknown';
+        return `urn:connection:${branch}:${sourceId}-${targetId}`;
     }
     
     /**
