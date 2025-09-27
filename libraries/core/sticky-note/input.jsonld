@@ -1,0 +1,11 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/ontology/context.jsonld"
+  ],
+  "@type": ["prov:Entity", "sticky:input"],
+  "dct:conformsTo": "./input.schema.json",
+  "@id": "https://litlfred.github.io/notebooks/schema/sticky-note/input.jsonld",
+  "dct:title": "Sticky Note Input",
+  "dct:description": "JSON-LD context for sticky note widget input parameters"
+}

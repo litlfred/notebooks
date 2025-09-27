@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus/weierstrass/two-panel/input.schema.json",
+  "title": "Weierstrass Two-Panel Function Input Schema",
+  "description": "Input parameters for Weierstrass ℘(z) and ℘′(z) two-panel visualization widget (inherits from PQ-Torus)",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "integer",
+      "description": "First prime integer p for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    },
+    "q": {
+      "type": "integer",
+      "description": "Second prime integer q for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    },
+    "N": {
+      "type": "integer",
+      "description": "Truncation level for two-panel Weierstrass computation",
+      "minimum": 0,
+      "maximum": 6,
+      "default": 3
+    },
+    "plot_resolution": {
+      "type": "integer",
+      "description": "Resolution for two-panel plot rendering",
+      "default": 100,
+      "minimum": 50,
+      "maximum": 500
+    },
+    "color_scheme": {
+      "type": "string", 
+      "description": "Color scheme for two-panel visualization",
+      "default": "viridis",
+      "enum": ["viridis", "plasma", "inferno", "magma"]
+    },
+    "grid_size": {
+      "type": "object",
+      "properties": {
+        "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100},
+        "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
+      },
+      "default": {"x": 100, "y": 100}
+    }
+  },
+  "required": ["p", "q", "N"],
+  "additionalProperties": false
+}

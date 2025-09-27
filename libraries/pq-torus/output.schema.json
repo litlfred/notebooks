@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus/output.schema.json",
+  "title": "PQ-Torus Output Schema",
+  "description": "Output data from PQ-Torus widget - validated prime parameters with mathematical analysis",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Execution time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when computation completed"
+    },
+    "p": {
+      "type": "integer",
+      "description": "Validated first prime integer p"
+    },
+    "q": {
+      "type": "integer",
+      "description": "Validated second prime integer q"
+    },
+    "torus_description": {
+      "type": "string",
+      "description": "Mathematical description of the torus T = C / L"
+    },
+    "lattice_description": {
+      "type": "string", 
+      "description": "Description of the lattice L = Zp + Zqi"
+    },
+    "prime_validation": {
+      "type": "object",
+      "properties": {
+        "p_is_prime": {"type": "boolean"},
+        "q_is_prime": {"type": "boolean"},
+        "validation_message": {"type": "string"}
+      },
+      "required": ["p_is_prime", "q_is_prime", "validation_message"]
+    },
+    "markdown_content": {
+      "type": "string",
+      "description": "Markdown formatted display of the torus and prime values"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "lattice_type": {"type": "string", "enum": ["rectangular_prime_lattice"]},
+        "torus_equation": {"type": "string"},
+        "fundamental_domain": {
+          "type": "object",
+          "properties": {
+            "width": {"type": "integer"},
+            "height": {"type": "integer"},
+            "area": {"type": "integer"}
+          }
+        }
+      }
+    }
+  },
+  "required": ["success", "timestamp", "p", "q", "prime_validation"],
+  "additionalProperties": false
+}

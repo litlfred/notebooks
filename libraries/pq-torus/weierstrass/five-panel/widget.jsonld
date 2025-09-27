@@ -1,0 +1,12 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/ontology/context.jsonld"
+  ],
+  "@type": ["prov:Entity", "weier:five-panel-widget"],
+  "dct:conformsTo": "./widget.schema.json",
+  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/widget.jsonld",
+  "dct:title": "Weierstrass Five-Panel Widget",
+  "dct:description": "JSON-LD context for complete Weierstrass ℘ function five-panel analysis widget instances",
+  "prov:wasDerivedFrom": "../../widget.jsonld"
+}
