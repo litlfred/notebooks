@@ -88,6 +88,58 @@
           "default": false
         }
       }
+    },
+    "svg_visualization": {
+      "type": "object",
+      "description": "Optional SVG representation for widget visualization and edge routing",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether SVG visualization is enabled",
+          "default": false
+        },
+        "widget_rect": {
+          "type": "object",
+          "description": "SVG rectangle coordinates for edge routing",
+          "properties": {
+            "x": {"type": "number", "description": "Top-left X coordinate in SVG space"},
+            "y": {"type": "number", "description": "Top-left Y coordinate in SVG space"},
+            "width": {"type": "number", "description": "Widget width in SVG space"},
+            "height": {"type": "number", "description": "Widget height in SVG space"}
+          }
+        },
+        "connection_ports": {
+          "type": "object",
+          "description": "Edge connection points for snap-to-arrowhead functionality",
+          "properties": {
+            "top": {"type": "array", "items": {"type": "number"}, "description": "X offsets for top edge connections"},
+            "bottom": {"type": "array", "items": {"type": "number"}, "description": "X offsets for bottom edge connections"},
+            "left": {"type": "array", "items": {"type": "number"}, "description": "Y offsets for left edge connections"},
+            "right": {"type": "array", "items": {"type": "number"}, "description": "Y offsets for right edge connections"}
+          }
+        },
+        "edge_routing": {
+          "type": "object",
+          "description": "Configuration for arrow edge routing and snapping",
+          "properties": {
+            "snap_to_border": {
+              "type": "boolean",
+              "description": "Whether arrowheads snap exactly to widget border",
+              "default": true
+            },
+            "border_padding": {
+              "type": "number",
+              "description": "Padding from widget border for edge termination",
+              "default": 2
+            },
+            "rounded_corner_support": {
+              "type": "boolean",
+              "description": "Support for rounded/non-rectangular borders",
+              "default": false
+            }
+          }
+        }
+      }
     }
   },
   "required": ["widget_id", "widget_type"],

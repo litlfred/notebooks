@@ -409,17 +409,34 @@ body {
 .widget-sticky-note {
     min-width: 250px;
     min-height: 180px;
-    background: var(--warning-color);
-    color: var(--text-primary);
+    background: #f4e4c1; /* Soft desert sand */
+    color: #6b5544; /* Desert brown text */
 }
 
 .widget-sticky-note .widget-header {
-    background: rgba(241, 196, 15, 0.9);
-    color: var(--text-primary);
+    background: #e6d7b8; /* Warm beige */
+    color: #6b5544; /* Desert brown text */
 }
 
 .widget-sticky-note .widget-content {
-    background: rgba(241, 196, 15, 0.7);
+    background: #f9f2e5; /* Light desert cream */
+    color: #6b5544; /* Desert brown text */
+}
+
+/* Desert tones for light mode */
+[data-theme="light"] .widget-sticky-note {
+    background: #f7ecd2; /* Lighter desert sand */
+    color: #8b6f47; /* Warmer desert brown */
+}
+
+[data-theme="light"] .widget-sticky-note .widget-header {
+    background: #ede0c7; /* Light warm beige */
+    color: #8b6f47;
+}
+
+[data-theme="light"] .widget-sticky-note .widget-content {
+    background: #faf6ed; /* Very light desert cream */
+    color: #8b6f47;
 }
 
 .widget-weierstrass {
@@ -726,6 +743,116 @@ body {
 .btn-secondary:hover {
     background: var(--bg-secondary);
     transform: translateY(-1px);
+}
+
+/* ===== SVG VISUALIZATION SUPPORT ===== */
+
+/* SVG Widget Styling */
+.svg-widget {
+    stroke: var(--border-color);
+    stroke-width: 1;
+    fill: var(--widget-bg);
+    transition: all 0.3s ease;
+}
+
+.svg-widget.widget-sticky-note {
+    fill: #f4e4c1; /* Soft desert sand */
+    stroke: #e6d7b8;
+}
+
+.svg-widget.widget-pq-torus {
+    fill: var(--bg-secondary);
+    stroke: rgba(231, 76, 60, 0.5);
+}
+
+.svg-widget.widget-weierstrass {
+    fill: var(--bg-secondary);
+    stroke: rgba(52, 152, 219, 0.5);
+}
+
+/* SVG Widget Status States */
+.svg-widget.running {
+    stroke: var(--warning-color);
+    stroke-width: 2;
+    animation: svg-pulse 1.5s ease-in-out infinite;
+}
+
+.svg-widget.completed {
+    stroke: var(--success-color);
+    stroke-width: 2;
+}
+
+.svg-widget.error {
+    stroke: var(--accent-color);
+    stroke-width: 2;
+}
+
+/* SVG Edge Styling */
+.svg-edge {
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    fill: none;
+    marker-end: url(#arrowhead);
+    transition: all 0.3s ease;
+}
+
+.svg-edge:hover {
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    cursor: pointer;
+}
+
+.svg-edge.dependency {
+    stroke-dasharray: 5,5;
+    stroke: var(--primary-color);
+}
+
+/* SVG Arrowhead Markers */
+.svg-arrowhead {
+    fill: var(--text-secondary);
+}
+
+.svg-edge:hover .svg-arrowhead {
+    fill: var(--primary-color);
+}
+
+/* SVG Animation Keyframes */
+@keyframes svg-pulse {
+    0% { stroke-opacity: 1; }
+    50% { stroke-opacity: 0.5; }
+    100% { stroke-opacity: 1; }
+}
+
+/* SVG Connection Ports */
+.svg-port {
+    fill: var(--primary-color);
+    stroke: var(--bg-primary);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.svg-widget:hover .svg-port {
+    opacity: 1;
+}
+
+.svg-port.active {
+    opacity: 1;
+    fill: var(--success-color);
+}
+
+/* Light mode overrides for SVG */
+[data-theme="light"] .svg-widget.widget-sticky-note {
+    fill: #f7ecd2; /* Lighter desert sand for light mode */
+    stroke: #ede0c7;
+}
+
+[data-theme="light"] .svg-edge {
+    stroke: var(--text-primary);
+}
+
+[data-theme="light"] .svg-arrowhead {
+    fill: var(--text-primary);
 }
 
 /* ===== DRAG AND DROP ===== */
