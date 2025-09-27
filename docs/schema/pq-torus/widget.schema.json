@@ -140,6 +140,73 @@
           }
         }
       }
+    },
+    "actions": {
+      "type": "object",
+      "description": "Available widget actions with localized names and icons",
+      "patternProperties": {
+        "^[a-z]+(-[a-z]+)*$": {
+          "type": "object",
+          "description": "Action definition with slug naming pattern",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "pattern": "^[a-z]+(-[a-z]+)*$",
+              "description": "Action identifier (lowercase letters and dashes)"
+            },
+            "names": {
+              "type": "object",
+              "description": "Localized human-readable action names",
+              "patternProperties": {
+                "^[a-z]{2}(-[A-Z]{2})?$": {"type": "string"}
+              },
+              "properties": {
+                "en": {"type": "string"},
+                "en-US": {"type": "string"},
+                "es": {"type": "string"},
+                "fr": {"type": "string"},
+                "de": {"type": "string"}
+              },
+              "required": ["en"]
+            },
+            "icon": {
+              "type": "string",
+              "description": "Emoji or icon identifier for the action",
+              "maxLength": 10
+            },
+            "description": {
+              "type": "object",
+              "description": "Localized action descriptions",
+              "patternProperties": {
+                "^[a-z]{2}(-[A-Z]{2})?$": {"type": "string"}
+              },
+              "properties": {
+                "en": {"type": "string"}
+              },
+              "required": ["en"]
+            },
+            "menu_category": {
+              "type": "string",
+              "description": "Hierarchical menu category for hamburger menu",
+              "default": "actions"
+            },
+            "output_format": {
+              "type": "string",
+              "enum": ["json", "html", "svg", "png", "pdf", "markdown"],
+              "description": "Primary output format for this action",
+              "default": "json"
+            },
+            "validation_required": {
+              "type": "boolean",
+              "description": "Whether input JSON schema validation is required before execution",
+              "default": true
+            }
+          },
+          "required": ["slug", "names", "icon"],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "required": ["widget_id", "widget_type"],

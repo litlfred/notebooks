@@ -16,7 +16,58 @@
       "python_script": "widgets/sticky_note.py",
       "version": "1.0.0",
       "author": "Widget Framework",
-      "tags": ["markdown", "content", "note"]
+      "tags": ["markdown", "content", "note"],
+      "actions": {
+        "render-markdown": {
+          "slug": "render-markdown",
+          "names": {
+            "en": "Render Markdown",
+            "es": "Renderizar Markdown",
+            "fr": "Rendre Markdown",
+            "de": "Markdown Rendern"
+          },
+          "icon": "📝",
+          "description": {
+            "en": "Render markdown content with LaTeX support",
+            "es": "Renderizar contenido markdown con soporte LaTeX"
+          },
+          "menu_category": "display",
+          "output_format": "html",
+          "validation_required": true
+        },
+        "export-pdf": {
+          "slug": "export-pdf",
+          "names": {
+            "en": "Export PDF",
+            "es": "Exportar PDF", 
+            "fr": "Exporter PDF",
+            "de": "PDF Exportieren"
+          },
+          "icon": "📄",
+          "description": {
+            "en": "Export note as PDF document"
+          },
+          "menu_category": "export",
+          "output_format": "pdf",
+          "validation_required": true
+        },
+        "export-html": {
+          "slug": "export-html",
+          "names": {
+            "en": "Export HTML",
+            "es": "Exportar HTML",
+            "fr": "Exporter HTML", 
+            "de": "HTML Exportieren"
+          },
+          "icon": "🌐",
+          "description": {
+            "en": "Export note as standalone HTML file"
+          },
+          "menu_category": "export",
+          "output_format": "html",
+          "validation_required": true
+        }
+      }
     },
 
     "markdown-note": {
@@ -77,7 +128,74 @@
       "python_script": "widgets/wp_two_panel.py",
       "version": "1.0.0",
       "author": "Widget Framework", 
-      "tags": ["weierstrass", "mathematics", "visualization"]
+      "tags": ["weierstrass", "mathematics", "visualization"],
+      "actions": {
+        "render-png": {
+          "slug": "render-png",
+          "names": {
+            "en": "Render PNG",
+            "es": "Renderizar PNG",
+            "fr": "Rendre PNG",
+            "de": "PNG Rendern"
+          },
+          "icon": "🖼️",
+          "description": {
+            "en": "Generate high-quality PNG visualization of ℘-function",
+            "es": "Generar visualización PNG de alta calidad de función ℘"
+          },
+          "menu_category": "render",
+          "output_format": "png",
+          "validation_required": true
+        },
+        "render-svg": {
+          "slug": "render-svg",
+          "names": {
+            "en": "Render SVG",
+            "es": "Renderizar SVG",
+            "fr": "Rendre SVG",
+            "de": "SVG Rendern"
+          },
+          "icon": "📐",
+          "description": {
+            "en": "Generate scalable SVG visualization of ℘-function"
+          },
+          "menu_category": "render",
+          "output_format": "svg",
+          "validation_required": true
+        },
+        "export-pdf": {
+          "slug": "export-pdf",
+          "names": {
+            "en": "Export PDF",
+            "es": "Exportar PDF",
+            "fr": "Exporter PDF",
+            "de": "PDF Exportieren"
+          },
+          "icon": "📄",
+          "description": {
+            "en": "Export publication-ready PDF of visualization"
+          },
+          "menu_category": "export", 
+          "output_format": "pdf",
+          "validation_required": true
+        },
+        "analyze-properties": {
+          "slug": "analyze-properties",
+          "names": {
+            "en": "Analyze Properties",
+            "es": "Analizar Propiedades",
+            "fr": "Analyser Propriétés",
+            "de": "Eigenschaften Analysieren"
+          },
+          "icon": "🔍",
+          "description": {
+            "en": "Mathematical analysis of ℘-function properties"
+          },
+          "menu_category": "analysis",
+          "output_format": "json",
+          "validation_required": true
+        }
+      }
     },
 
     "data-plot": {
@@ -131,7 +249,58 @@
       "python_script": "widgets/pq_torus.py",
       "version": "1.0.0",
       "author": "Widget Framework",
-      "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"]
+      "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"],
+      "actions": {
+        "compute-lattice": {
+          "slug": "compute-lattice",
+          "names": {
+            "en": "Compute Lattice",
+            "es": "Calcular Retícula",
+            "fr": "Calculer Treillis",
+            "de": "Gitter Berechnen"
+          },
+          "icon": "🔢",
+          "description": {
+            "en": "Compute rectangular prime lattice parameters and validation",
+            "es": "Calcular parámetros de retícula prima rectangular y validación"
+          },
+          "menu_category": "computation",
+          "output_format": "json",
+          "validation_required": true
+        },
+        "export-latex": {
+          "slug": "export-latex",
+          "names": {
+            "en": "Export LaTeX",
+            "es": "Exportar LaTeX",
+            "fr": "Exporter LaTeX",
+            "de": "LaTeX Exportieren"
+          },
+          "icon": "📐",
+          "description": {
+            "en": "Export torus definition as LaTeX mathematical notation"
+          },
+          "menu_category": "export",
+          "output_format": "markdown",
+          "validation_required": true
+        },
+        "generate-summary": {
+          "slug": "generate-summary", 
+          "names": {
+            "en": "Generate Summary",
+            "es": "Generar Resumen",
+            "fr": "Générer Résumé",
+            "de": "Zusammenfassung Generieren"
+          },
+          "icon": "📋",
+          "description": {
+            "en": "Generate mathematical summary of torus properties"
+          },
+          "menu_category": "analysis",
+          "output_format": "html",
+          "validation_required": true
+        }
+      }
     }
   }
 }

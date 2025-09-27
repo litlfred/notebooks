@@ -902,3 +902,106 @@ body {
         margin-bottom: 0.25rem;
     }
 }
+
+/* Widget Action Menu Styles */
+.widget-hamburger-menu {
+    position: relative;
+}
+
+.hamburger-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 180px;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.menu-category {
+    padding: 4px 0;
+}
+
+.menu-category-header {
+    padding: 8px 12px 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 4px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 0.9em;
+}
+
+.menu-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.menu-item-empty {
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.85em;
+}
+
+.menu-icon {
+    margin-right: 8px;
+    font-size: 1.1em;
+    width: 16px;
+    text-align: center;
+}
+
+.menu-text {
+    flex: 1;
+}
+
+/* Action Result Styling */
+.action-result {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.action-result h3 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.action-result p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+
+/* Output Format Specific Styling */
+.output-svg {
+    text-align: center;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.output-markdown {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 12px;
+    white-space: pre-wrap;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.85em;
+}
