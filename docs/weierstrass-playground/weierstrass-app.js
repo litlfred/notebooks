@@ -146,40 +146,15 @@ class WeierstrassApp {
     async setupPython() {
         console.log('🐍 Starting Python environment setup...');
         
+        // Set a timeout for Python setup to prevent infinite hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Python setup timed out after 30 seconds')), 30000);
+        });
+        
+        const setupPromise = this.performPythonSetup();
+        
         try {
-            console.log('📂 Loading Weierstrass playground library...');
-            // Load our Weierstrass playground library using new package structure
-            this.pyodide.runPython(`
-                print("🔧 Setting up Python sys.path...")
-                import sys
-                sys.path.append('./python')
-                print(f"✅ Python sys.path: {sys.path}")
-                
-                print("📦 Importing weierstrass_playground package...")
-                # Import the weierstrass_playground package  
-                import weierstrass_playground as wp
-                from weierstrass_playground import browser
-                print("✅ weierstrass_playground package imported successfully")
-                
-                print("🔧 Setting up browser-specific functions...")
-                # Set up browser-specific functions
-                import io  
-                import base64
-                from matplotlib import pyplot as plt
-                
-                def plot_to_base64(fig):
-                    """Convert matplotlib figure to base64 string for web display."""
-                    buf = io.BytesIO()
-                    fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
-                    buf.seek(0)
-                    img_str = base64.b64encode(buf.read()).decode('utf-8')
-                    buf.close()
-                    plt.close(fig)  # Free memory
-                    return img_str
-                
-                print("✅ Browser-specific functions set up successfully")
-            `);
-            console.log('✅ Python environment setup completed successfully');
+            await Promise.race([setupPromise, timeoutPromise]);
         } catch (error) {
             console.error('❌ Failed to setup Python environment:', error);
             console.error('❌ Python setup error details:', {
@@ -187,15 +162,126 @@ class WeierstrassApp {
                 stack: error.stack,
                 name: error.name
             });
-            throw error;
+            
+            // Try to provide a basic fallback if the custom package fails
+            if (error.message.includes('weierstrass_playground')) {
+                console.log('⚠️ Attempting fallback without custom weierstrass_playground package...');
+                try {
+                    this.pyodide.runPython(`
+                        print("⚠️ Running in fallback mode without weierstrass_playground package")
+                        # Basic setup without custom package
+                        import io  
+                        import base64
+                        from matplotlib import pyplot as plt
+                        
+                        def plot_to_base64(fig):
+                            """Convert matplotlib figure to base64 string for web display."""
+                            buf = io.BytesIO()
+                            fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                            buf.seek(0)
+                            img_str = base64.b64encode(buf.read()).decode('utf-8')
+                            buf.close()
+                            plt.close(fig)  # Free memory
+                            return img_str
+                        
+                        print("✅ Fallback mode initialized successfully")
+                    `);
+                    console.log('✅ Fallback Python environment setup completed');
+                    this.updateProgress(100, 'Ready (Limited Mode)!');
+                    this.updateStatus('Loaded in limited mode - some features may not be available', 'warning');
+                } catch (fallbackError) {
+                    console.error('❌ Fallback setup also failed:', fallbackError);
+                    throw error; // Throw original error
+                }
+            } else {
+                throw error;
+            }
         }
         
-        console.log('📈 Updating progress to 100%...');
         this.updateProgress(100, 'Ready!');
-        
-        console.log('✅ Setting isInitialized flag...');
         this.isInitialized = true;
         console.log('🎉 setupPython() completed successfully!');
+    }
+    
+    /**
+     * Perform the actual Python setup with detailed logging
+     */
+    async performPythonSetup() {
+        console.log('📂 Loading Weierstrass playground library...');
+        console.log('🔧 Step 1: Setting up Python sys.path...');
+        this.pyodide.runPython(`
+            print("🔧 Setting up Python sys.path...")
+            import sys
+            sys.path.append('./python')
+            print(f"✅ Python sys.path: {sys.path}")
+        `);
+        console.log('✅ Step 1 completed: sys.path configured');
+        
+        console.log('📦 Step 2: Checking if weierstrass_playground directory exists...');
+        this.pyodide.runPython(`
+            import os
+            wp_path = './python/weierstrass_playground'
+            if os.path.exists(wp_path):
+                print(f"✅ Found weierstrass_playground directory: {wp_path}")
+                files = os.listdir(wp_path)
+                print(f"📁 Directory contents: {files}")
+            else:
+                print(f"❌ weierstrass_playground directory not found: {wp_path}")
+                print(f"📁 Current directory contents: {os.listdir('.')}")
+                raise FileNotFoundError(f"weierstrass_playground directory not found at {wp_path}")
+        `);
+        console.log('✅ Step 2 completed: directory check');
+        
+        console.log('📦 Step 3: Attempting to import weierstrass_playground package...');
+        this.pyodide.runPython(`
+            print("📦 Importing weierstrass_playground package...")
+            try:
+                import weierstrass_playground as wp
+                print("✅ weierstrass_playground base package imported successfully")
+            except Exception as e:
+                print(f"❌ Failed to import weierstrass_playground: {e}")
+                import traceback
+                traceback.print_exc()
+                raise e
+        `);
+        console.log('✅ Step 3 completed: base package imported');
+        
+        console.log('📦 Step 4: Importing browser module...');
+        this.pyodide.runPython(`
+            print("📦 Importing browser module...")
+            try:
+                from weierstrass_playground import browser
+                print("✅ browser module imported successfully")
+            except Exception as e:
+                print(f"❌ Failed to import browser module: {e}")
+                import traceback
+                traceback.print_exc()
+                raise e
+        `);
+        console.log('✅ Step 4 completed: browser module imported');
+        
+        console.log('🔧 Step 5: Setting up browser-specific functions...');
+        this.pyodide.runPython(`
+            print("🔧 Setting up browser-specific functions...")
+            # Set up browser-specific functions
+            import io  
+            import base64
+            from matplotlib import pyplot as plt
+            
+            def plot_to_base64(fig):
+                """Convert matplotlib figure to base64 string for web display."""
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                buf.seek(0)
+                img_str = base64.b64encode(buf.read()).decode('utf-8')
+                buf.close()
+                plt.close(fig)  # Free memory
+                return img_str
+            
+            print("✅ Browser-specific functions set up successfully")
+        `);
+        console.log('✅ Step 5 completed: browser functions configured');
+        console.log('✅ Python environment setup completed successfully');
     }
 
     /**
