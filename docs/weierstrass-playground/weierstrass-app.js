@@ -213,12 +213,13 @@ class WeierstrassApp {
             console.log('🔧 Step 1: Loading Python package files from server...');
             
             // Load Python package files directly from server
+            // Load core modules first, then __init__.py last to handle relative imports properly
             const pythonFiles = [
-                '__init__.py',
                 'core.py',
-                'visualization.py',
+                'visualization.py', 
                 'integration.py',
-                'browser.py'
+                'browser.py',
+                '__init__.py'
             ];
             
             const packageCode = {};
@@ -272,6 +273,13 @@ class WeierstrassApp {
             for (const [fileName, code] of Object.entries(packageCode)) {
                 const moduleName = fileName.replace('.py', '');
                 console.log(`📦 Installing module: ${moduleName} (from ${fileName})`);
+                
+                // Handle __init__.py specially - don't execute its code due to relative imports
+                if (fileName === '__init__.py') {
+                    console.log(`⚠️ Skipping __init__.py code execution (has relative imports)`);
+                    console.log(`🔧 Will set up package structure manually...`);
+                    continue;
+                }
                 
                 try {
                     console.log(`🔧 Creating module object for ${moduleName}...`);
@@ -335,37 +343,43 @@ class WeierstrassApp {
                     import sys
                     wp_package = sys.modules['weierstrass_playground']
                     
-                    # Set package attributes from __init__.py
+                    # Set package attributes (from __init__.py metadata)
                     wp_package.__version__ = "1.0.0"
                     wp_package.__author__ = "Weierstrass Playground Contributors"
+                    wp_package.__file__ = "__init__.py"
                     print("✅ Package metadata set")
                     
                     try:
-                        # Import main functions for convenience (from __init__.py)
-                        print("📥 Importing core functions...")
-                        from weierstrass_playground.core import wp_rect, wp_deriv, field_grid
-                        print("✅ Core functions imported")
+                        # Import main functions for convenience (manually instead of from __init__.py)
+                        # These would normally be: from .core import wp_rect, wp_deriv, field_grid
+                        print("📥 Setting up convenience imports...")
                         
-                        print("📥 Importing integration functions...")
-                        from weierstrass_playground.integration import integrate_second_order_with_blowup
-                        print("✅ Integration functions imported")
+                        # Get functions from individual modules
+                        core_module = sys.modules.get('weierstrass_playground.core')
+                        integration_module = sys.modules.get('weierstrass_playground.integration') 
+                        visualization_module = sys.modules.get('weierstrass_playground.visualization')
+                        browser_module = sys.modules.get('weierstrass_playground.browser')
                         
-                        print("📥 Importing visualization functions...")
-                        from weierstrass_playground.visualization import soft_background, add_topo_contours, vector_overlay
-                        print("✅ Visualization functions imported")
+                        if core_module:
+                            wp_package.wp_rect = getattr(core_module, 'wp_rect', None)
+                            wp_package.wp_deriv = getattr(core_module, 'wp_deriv', None)
+                            wp_package.field_grid = getattr(core_module, 'field_grid', None)
+                            print("✅ Core function imports set up")
                         
-                        # Set convenience attributes
-                        wp_package.wp_rect = wp_rect
-                        wp_package.wp_deriv = wp_deriv
-                        wp_package.field_grid = field_grid
-                        wp_package.integrate_second_order_with_blowup = integrate_second_order_with_blowup
-                        wp_package.soft_background = soft_background
-                        wp_package.add_topo_contours = add_topo_contours
-                        wp_package.vector_overlay = vector_overlay
-                        print("✅ Convenience functions set up")
+                        if integration_module:
+                            wp_package.integrate_second_order_with_blowup = getattr(integration_module, 'integrate_second_order_with_blowup', None)
+                            print("✅ Integration function imports set up")
                         
-                    except ImportError as import_err:
-                        print(f"⚠️ Import warning: {import_err}")
+                        if visualization_module:
+                            wp_package.soft_background = getattr(visualization_module, 'soft_background', None)
+                            wp_package.add_topo_contours = getattr(visualization_module, 'add_topo_contours', None)
+                            wp_package.vector_overlay = getattr(visualization_module, 'vector_overlay', None)
+                            print("✅ Visualization function imports set up")
+                        
+                        print("✅ Convenience functions set up successfully")
+                        
+                    except Exception as import_err:
+                        print(f"⚠️ Import setup warning: {import_err}")
                         print("📋 Available modules:", list(sys.modules.keys()))
                         print("📋 Package modules:", [key for key in sys.modules.keys() if key.startswith('weierstrass_playground')])
                     
