@@ -5,10 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weierstrass ℘ Playground - Interactive Browser Version</title>
     
-    <!-- Content Security Policy to allow CDN access -->
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>∞</text></svg>">
+    
+    <!-- Content Security Policy to allow CDN access and WebAssembly -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
-        script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; 
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com; 
         style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; 
         font-src 'self' https://cdnjs.cloudflare.com; 
         connect-src 'self' https://cdn.jsdelivr.net https://unpkg.com;
@@ -16,7 +19,9 @@
     ">
     
     <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Lazy load Font Awesome only when needed -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'; this.onload=null;">
+    <noscript><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"></noscript>
 </head>
 <body class="desktop-mode" data-theme="dark">
     <div class="container">
@@ -29,10 +34,16 @@
             <div class="loader">
                 <i class="fas fa-cog fa-spin"></i>
                 <p>Loading Pyodide and mathematical libraries...</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-percentage" id="progress-percentage">0%</div>
                 </div>
                 <p class="progress-text" id="progress-text">Initializing...</p>
+                <div class="loading-details" id="loading-details">
+                    <small>This may take a few moments on first load...</small>
+                </div>
             </div>
         </div>
 
@@ -309,6 +320,8 @@
                 if (currentIndex >= cdnSources.length) {
                     console.error('Failed to load Pyodide from all CDN sources');
                     document.getElementById('progress-text').textContent = 'Failed to load Pyodide. Please check your internet connection and refresh the page.';
+                    // Load main script even if Pyodide fails so UI functions work
+                    loadMainScript();
                     return;
                 }
                 
@@ -327,9 +340,17 @@
             }
             
             function loadMainScript() {
+                console.log('📜 Loading main JavaScript file: weierstrass-app.js');
                 const mainScript = document.createElement('script');
                 mainScript.src = 'weierstrass-app.js';
+                mainScript.onload = function() {
+                    console.log('✅ weierstrass-app.js loaded successfully');
+                };
+                mainScript.onerror = function() {
+                    console.error('❌ Failed to load weierstrass-app.js');
+                };
                 document.body.appendChild(mainScript);
+                console.log('📜 Main script element added to document body');
             }
             
             tryLoadScript();

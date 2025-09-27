@@ -41,13 +41,30 @@ class WeierstrassApp {
      * Initialize the application
      */
     async initialize() {
+        console.log('🎯 WeierstrassApp.initialize() called');
         try {
+            console.log('📦 Starting loadPyodide()...');
             await this.loadPyodide();
+            console.log('✅ loadPyodide() completed successfully');
+            
+            console.log('🐍 Starting setupPython()...');
             await this.setupPython();
+            console.log('✅ setupPython() completed successfully');
+            
+            console.log('👁️ Starting showMainContent()...');
             this.showMainContent();
+            console.log('✅ showMainContent() completed successfully');
+            
+            console.log('📢 Updating final status...');
             this.updateStatus('Ready to render. Configure parameters and click "Render" to generate visualization.', 'ready');
+            console.log('🎉 Application initialization completed successfully!');
         } catch (error) {
-            console.error('Failed to initialize application:', error);
+            console.error('❌ Failed to initialize application:', error);
+            console.error('❌ Error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
             this.updateStatus(`Failed to load: ${error.message}`, 'error');
         }
     }
@@ -56,78 +73,436 @@ class WeierstrassApp {
      * Load Pyodide and required packages with better error handling
      */
     async loadPyodide() {
-        this.updateProgress(10, 'Loading Pyodide...');
+        console.log('🔗 Starting Pyodide loading process...');
+        this.updateProgress(5, 'Connecting to CDN...');
         
         try {
             // Check if loadPyodide is available
+            console.log('🔍 Checking if loadPyodide function is available...');
             if (typeof loadPyodide === 'undefined') {
+                console.error('❌ loadPyodide function is undefined');
                 throw new Error('Pyodide script not loaded. This may be due to network restrictions or CDN blocking.');
             }
+            console.log('✅ loadPyodide function is available');
+            
+            this.updateProgress(10, 'Initializing Pyodide runtime...');
+            console.log('🚀 Calling loadPyodide() function...');
             
             this.pyodide = await loadPyodide({
-                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/"
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+                stdout: (text) => console.log("📤 Pyodide stdout:", text),
+                stderr: (text) => console.warn("📤 Pyodide stderr:", text)
             });
+            console.log('✅ Pyodide runtime initialized successfully');
             
-            this.updateProgress(30, 'Loading NumPy...');
+            this.updateProgress(35, 'Loading NumPy...');
+            console.log('📦 Loading NumPy package...');
             await this.pyodide.loadPackage(['numpy']);
+            console.log('✅ NumPy loaded successfully');
             
-            this.updateProgress(60, 'Loading Matplotlib...');
-            await this.pyodide.loadPackage(['matplotlib']);
+            this.updateProgress(65, 'Loading Matplotlib...');
+            console.log('📦 Loading Matplotlib package...');
+            console.log('🔄 Starting pyodide.loadPackage([\'matplotlib\'])...');
+            
+            try {
+                await this.pyodide.loadPackage(['matplotlib']);
+                console.log('✅ pyodide.loadPackage([\'matplotlib\']) completed');
+                console.log('✅ Matplotlib loaded successfully');
+            } catch (matplotlibError) {
+                console.error('❌ Matplotlib loading failed:', matplotlibError);
+                console.error('❌ Matplotlib error type:', matplotlibError.constructor.name);
+                console.error('❌ Matplotlib error message:', matplotlibError.message);
+                if (matplotlibError.stack) console.error('❌ Matplotlib error stack:', matplotlibError.stack);
+                throw matplotlibError;
+            }
             
         } catch (error) {
-            console.error('Failed to load Pyodide:', error);
+            console.error('❌ Failed to load Pyodide:', error);
+            console.error('❌ Error type:', error.constructor.name);
+            console.error('❌ Error message:', error.message);
+            if (error.stack) console.error('❌ Error stack:', error.stack);
+            
             if (error.message.includes('network') || error.message.includes('CDN') || error.message.includes('loadPyodide')) {
                 throw new Error('Failed to load Pyodide from CDN. Please check your internet connection and any content blockers. If you\'re behind a firewall, you may need to allow access to cdn.jsdelivr.net and unpkg.com.');
             }
             throw error;
         }
         
-        this.updateProgress(80, 'Setting up visualization...');
+        this.updateProgress(85, 'Setting up visualization...');
+        console.log('🎨 Configuring matplotlib for web display...');
         
         // Configure matplotlib for web display
-        this.pyodide.runPython(`
-            import matplotlib
-            matplotlib.use('Agg')  # Use Anti-Grain Geometry backend for PNG output
-            import matplotlib.pyplot as plt
-            plt.rcParams['figure.dpi'] = 100
-            plt.rcParams['savefig.dpi'] = 150
-            plt.rcParams['font.size'] = 10
-        `);
+        try {
+            console.log('🔄 Starting matplotlib configuration...');
+            this.pyodide.runPython(`
+                print("🐍 Setting up matplotlib backend...")
+                import matplotlib
+                matplotlib.use('Agg')  # Use Anti-Grain Geometry backend for PNG output
+                print("✅ matplotlib backend set to Agg")
+                
+                import matplotlib.pyplot as plt
+                print("✅ matplotlib.pyplot imported")
+                
+                plt.rcParams['figure.dpi'] = 100
+                plt.rcParams['savefig.dpi'] = 150
+                plt.rcParams['font.size'] = 10
+                print("✅ matplotlib rcParams configured")
+                print("✅ matplotlib configuration complete")
+            `);
+            console.log('✅ Matplotlib configured successfully');
+        } catch (error) {
+            console.error('❌ Failed to configure matplotlib:', error);
+            console.error('❌ Matplotlib config error type:', error.constructor.name);
+            console.error('❌ Matplotlib config error message:', error.message);
+            if (error.stack) console.error('❌ Matplotlib config error stack:', error.stack);
+            throw error;
+        }
         
-        this.updateProgress(90, 'Loading Weierstrass library...');
+        this.updateProgress(95, 'Loading Weierstrass library...');
+        console.log('📚 Moving to setupPython() next...');
     }
 
     /**
      * Setup Python environment and load our library
      */
     async setupPython() {
-        // Load our Weierstrass playground library using new package structure
-        this.pyodide.runPython(`
-            import sys
-            sys.path.append('./python')
+        console.log('🐍 Starting Python environment setup...');
+        
+        // Set a timeout for Python setup to prevent infinite hanging
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Python setup timed out after 30 seconds')), 30000);
+        });
+        
+        const setupPromise = this.performPythonSetup();
+        
+        try {
+            await Promise.race([setupPromise, timeoutPromise]);
+        } catch (error) {
+            console.error('❌ Failed to setup Python environment:', error);
+            console.error('❌ Python setup error details:', {
+                message: error.message,
+                stack: error.stack,
+                name: error.name
+            });
             
-            # Import the weierstrass_playground package  
-            import weierstrass_playground as wp
-            from weierstrass_playground import browser
-            
-            # Set up browser-specific functions
-            import io  
-            import base64
-            from matplotlib import pyplot as plt
-            
-            def plot_to_base64(fig):
-                """Convert matplotlib figure to base64 string for web display."""
-                buf = io.BytesIO()
-                fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
-                buf.seek(0)
-                img_str = base64.b64encode(buf.read()).decode('utf-8')
-                buf.close()
-                plt.close(fig)  # Free memory
-                return img_str
-        `);
+            // Try to provide a basic fallback if the custom package fails
+            if (error.message.includes('weierstrass_playground')) {
+                console.log('⚠️ Attempting fallback without custom weierstrass_playground package...');
+                try {
+                    this.pyodide.runPython(`
+                        print("⚠️ Running in fallback mode without weierstrass_playground package")
+                        # Basic setup without custom package
+                        import io  
+                        import base64
+                        from matplotlib import pyplot as plt
+                        
+                        def plot_to_base64(fig):
+                            """Convert matplotlib figure to base64 string for web display."""
+                            buf = io.BytesIO()
+                            fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                            buf.seek(0)
+                            img_str = base64.b64encode(buf.read()).decode('utf-8')
+                            buf.close()
+                            plt.close(fig)  # Free memory
+                            return img_str
+                        
+                        print("✅ Fallback mode initialized successfully")
+                    `);
+                    console.log('✅ Fallback Python environment setup completed');
+                    this.updateProgress(100, 'Ready (Limited Mode)!');
+                    this.updateStatus('Loaded in limited mode - some features may not be available', 'warning');
+                } catch (fallbackError) {
+                    console.error('❌ Fallback setup also failed:', fallbackError);
+                    throw error; // Throw original error
+                }
+            } else {
+                throw error;
+            }
+        }
         
         this.updateProgress(100, 'Ready!');
         this.isInitialized = true;
+        console.log('🎉 setupPython() completed successfully!');
+    }
+    
+    /**
+     * Perform the actual Python setup with detailed logging
+     */
+    async performPythonSetup() {
+        console.log('📂 Loading Weierstrass playground library...');
+        
+        try {
+            console.log('🔧 Step 1: Loading Python package files from server...');
+            
+            // Load Python package files directly from server
+            // Load core modules first, then __init__.py last to handle relative imports properly
+            const pythonFiles = [
+                'core.py',
+                'visualization.py', 
+                'integration.py',
+                'browser.py',
+                '__init__.py'
+            ];
+            
+            const packageCode = {};
+            
+            console.log(`📋 Will load ${pythonFiles.length} Python files: ${pythonFiles.join(', ')}`);
+            
+            for (const fileName of pythonFiles) {
+                console.log(`📥 Loading ${fileName}...`);
+                const fullUrl = `python/weierstrass_playground/${fileName}`;
+                try {
+                    console.log(`🌐 Fetching from URL: ${fullUrl}`);
+                    console.log(`🔍 Full URL check - fileName: "${fileName}", length: ${fileName.length}`);
+                    console.log(`🔍 Character codes: ${[...fileName].map(c => c.charCodeAt(0)).join(',')}`);
+                    
+                    const response = await fetch(fullUrl);
+                    console.log(`📡 Response status: ${response.status} ${response.statusText} for ${fileName}`);
+                    
+                    if (!response.ok) {
+                        console.error(`❌ HTTP ${response.status} error for ${fileName}`);
+                        console.error(`❌ Response URL was: ${response.url}`);
+                        console.error(`❌ Response headers:`, [...response.headers.entries()]);
+                        throw new Error(`HTTP ${response.status}: Failed to load "${fileName}" from "${fullUrl}"`);
+                    }
+                    
+                    const content = await response.text();
+                    packageCode[fileName] = content;
+                    console.log(`✅ Loaded ${fileName} (${content.length} chars) successfully`);
+                } catch (fetchError) {
+                    console.error(`❌ Failed to fetch "${fileName}" from "${fullUrl}":`, fetchError);
+                    console.error(`❌ Fetch error type: ${fetchError.constructor.name}`);
+                    console.error(`❌ Fetch error message: ${fetchError.message}`);
+                    console.error(`❌ FileName details: "${fileName}", length: ${fileName.length}`);
+                    if (fetchError.stack) console.error(`❌ Fetch error stack:`, fetchError.stack);
+                    
+                    // More specific error message
+                    if (fetchError.message.includes('404')) {
+                        throw new Error(`File not found: "${fileName}" at URL "${fullUrl}". Check if the file exists and the path is correct.`);
+                    } else {
+                        throw new Error(`Network error loading "${fileName}" from "${fullUrl}": ${fetchError.message}`);
+                    }
+                }
+            }
+            
+            console.log('✅ Step 1 completed: All Python files loaded from server');
+            
+            console.log('🔧 Step 2: Creating Python package in Pyodide...');
+            
+            // Create the package directory and install files
+            this.pyodide.runPython(`
+                print("🔧 Creating weierstrass_playground package...")
+                import sys
+                import types
+                
+                # Create the package module
+                wp_package = types.ModuleType('weierstrass_playground')
+                sys.modules['weierstrass_playground'] = wp_package
+                print("✅ Created weierstrass_playground package module")
+            `);
+            
+            console.log('✅ Step 2 completed: Package module created');
+            
+            console.log('🔧 Step 3: Installing Python package modules...');
+            
+            // Install each Python file as a module
+            for (const [fileName, code] of Object.entries(packageCode)) {
+                const moduleName = fileName.replace('.py', '');
+                console.log(`📦 Installing module: ${moduleName} (from ${fileName})`);
+                
+                // Handle __init__.py specially - don't execute its code due to relative imports
+                if (fileName === '__init__.py') {
+                    console.log(`⚠️ Skipping __init__.py code execution (has relative imports)`);
+                    console.log(`🔧 Will set up package structure manually...`);
+                    continue;
+                }
+                
+                try {
+                    console.log(`🔧 Creating module object for ${moduleName}...`);
+                    // Use pyodide.runPython with proper code handling
+                    this.pyodide.runPython(`
+                        print(f"📦 Installing module: ${moduleName}")
+                        import sys
+                        import types
+                        
+                        # Create module
+                        module = types.ModuleType('weierstrass_playground.${moduleName}')
+                        module.__package__ = 'weierstrass_playground'
+                        module.__file__ = '${fileName}'
+                        
+                        print(f"✅ Module ${moduleName} created, executing code...")
+                    `);
+                    
+                    console.log(`🐍 Executing Python code for ${moduleName} (${code.length} chars)...`);
+                    // Store the code in a global variable and execute it
+                    this.pyodide.globals.set("module_code", code);
+                    this.pyodide.runPython(`
+                        try:
+                            # Execute module code in module namespace
+                            exec(module_code, module.__dict__)
+                            print(f"✅ Code execution completed for ${moduleName}")
+                            
+                            # Install in sys.modules
+                            sys.modules['weierstrass_playground.${moduleName}'] = module
+                            print(f"✅ Module ${moduleName} registered in sys.modules")
+                            
+                            # Add to package
+                            wp_package = sys.modules['weierstrass_playground']
+                            setattr(wp_package, '${moduleName}', module)
+                            print(f"✅ Module ${moduleName} added to package")
+                            
+                            print(f"✅ Module ${moduleName} installed successfully")
+                        except Exception as e:
+                            print(f"❌ Error during ${moduleName} installation: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            raise e
+                    `);
+                    
+                    console.log(`✅ Module ${moduleName} installed successfully`);
+                } catch (moduleError) {
+                    console.error(`❌ Failed to install module ${moduleName}:`, moduleError);
+                    console.error(`❌ Module error type: ${moduleError.constructor.name}`);
+                    console.error(`❌ Module error message: ${moduleError.message}`);
+                    if (moduleError.stack) console.error(`❌ Module error stack: ${moduleError.stack}`);
+                    throw new Error(`Failed to install Python module ${moduleName}: ${moduleError.message}`);
+                }
+            }
+            
+            console.log('✅ Step 3 completed: All modules installed');
+            
+            console.log('📦 Step 4: Finalizing package setup...');
+            try {
+                console.log('🔗 Setting up package imports and convenience functions...');
+                this.pyodide.runPython(`
+                    print("📦 Finalizing weierstrass_playground package...")
+                    import sys
+                    wp_package = sys.modules['weierstrass_playground']
+                    
+                    # Set package attributes (from __init__.py metadata)
+                    wp_package.__version__ = "1.0.0"
+                    wp_package.__author__ = "Weierstrass Playground Contributors"
+                    wp_package.__file__ = "__init__.py"
+                    print("✅ Package metadata set")
+                    
+                    try:
+                        # Import main functions for convenience (manually instead of from __init__.py)
+                        # These would normally be: from .core import wp_rect, wp_deriv, field_grid
+                        print("📥 Setting up convenience imports...")
+                        
+                        # Get functions from individual modules
+                        core_module = sys.modules.get('weierstrass_playground.core')
+                        integration_module = sys.modules.get('weierstrass_playground.integration') 
+                        visualization_module = sys.modules.get('weierstrass_playground.visualization')
+                        browser_module = sys.modules.get('weierstrass_playground.browser')
+                        
+                        if core_module:
+                            wp_package.wp_rect = getattr(core_module, 'wp_rect', None)
+                            wp_package.wp_deriv = getattr(core_module, 'wp_deriv', None)
+                            wp_package.field_grid = getattr(core_module, 'field_grid', None)
+                            print("✅ Core function imports set up")
+                        
+                        if integration_module:
+                            wp_package.integrate_second_order_with_blowup = getattr(integration_module, 'integrate_second_order_with_blowup', None)
+                            print("✅ Integration function imports set up")
+                        
+                        if visualization_module:
+                            wp_package.soft_background = getattr(visualization_module, 'soft_background', None)
+                            wp_package.add_topo_contours = getattr(visualization_module, 'add_topo_contours', None)
+                            wp_package.vector_overlay = getattr(visualization_module, 'vector_overlay', None)
+                            print("✅ Visualization function imports set up")
+                        
+                        print("✅ Convenience functions set up successfully")
+                        
+                    except Exception as import_err:
+                        print(f"⚠️ Import setup warning: {import_err}")
+                        print("📋 Available modules:", list(sys.modules.keys()))
+                        print("📋 Package modules:", [key for key in sys.modules.keys() if key.startswith('weierstrass_playground')])
+                    
+                    print("✅ weierstrass_playground package finalized successfully")
+                    print(f"📊 Package contents: {[attr for attr in dir(wp_package) if not attr.startswith('_')]}")
+                `);
+                console.log('✅ Step 4 completed: Package finalized');
+            } catch (finalizeError) {
+                console.error('❌ Failed to finalize package:', finalizeError);
+                console.error('❌ Finalize error details:', {
+                    type: finalizeError.constructor.name,
+                    message: finalizeError.message,
+                    stack: finalizeError.stack
+                });
+                // Don't throw - continue with basic setup
+                console.log('⚠️ Continuing with basic package setup...');
+            }
+            
+            console.log('🔧 Step 5: Setting up browser-specific functions...');
+            this.pyodide.runPython(`
+                print("🔧 Setting up browser-specific functions...")
+                # Set up browser-specific functions
+                import io  
+                import base64
+                from matplotlib import pyplot as plt
+                
+                def plot_to_base64(fig):
+                    """Convert matplotlib figure to base64 string for web display."""
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                    buf.seek(0)
+                    img_str = base64.b64encode(buf.read()).decode('utf-8')
+                    buf.close()
+                    plt.close(fig)  # Free memory
+                    return img_str
+                
+                print("✅ Browser-specific functions set up successfully")
+            `);
+            console.log('✅ Step 5 completed: browser functions configured');
+            
+            // Test the package import
+            console.log('🧪 Step 6: Testing package import...');
+            try {
+                console.log('🔍 Testing basic package import...');
+                this.pyodide.runPython(`
+                    print("🧪 Testing weierstrass_playground import...")
+                    try:
+                        import weierstrass_playground as wp
+                        print("✅ Basic package import successful")
+                        
+                        print("🧪 Testing browser module import...")
+                        from weierstrass_playground import browser
+                        print("✅ Browser module import successful")
+                        
+                        print("✅ weierstrass_playground package imported successfully")
+                        print(f"📦 Available functions: {[attr for attr in dir(wp) if not attr.startswith('_')]}")
+                        
+                        # Test a simple function call
+                        print("🧪 Testing a simple function call...")
+                        import numpy as np
+                        test_result = wp.wp_rect(1.0 + 1.0j, 2.0, 2.0, 3)
+                        print(f"✅ Function test successful: wp_rect(1+1j, 2, 2, 3) = {test_result}")
+                        
+                    except Exception as test_error:
+                        print(f"❌ Import test failed: {test_error}")
+                        import traceback
+                        traceback.print_exc()
+                        raise test_error
+                `);
+                console.log('✅ Step 6 completed: Package import test successful');
+            } catch (testError) {
+                console.error('❌ Package test failed:', testError);
+                console.error('❌ Test error details:', {
+                    type: testError.constructor.name,
+                    message: testError.message,
+                    stack: testError.stack
+                });
+                // Don't throw - package might still be usable
+                console.log('⚠️ Package test failed, but continuing...');
+            }
+            
+            console.log('✅ Python environment setup completed successfully');
+            
+        } catch (error) {
+            console.error('❌ Python setup failed:', error);
+            throw error;
+        }
     }
 
     /**
@@ -163,9 +538,27 @@ class WeierstrassApp {
     updateProgress(percentage, text) {
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
+        const progressPercentage = document.getElementById('progress-percentage');
         
         if (progressFill) progressFill.style.width = percentage + '%';
         if (progressText) progressText.textContent = text;
+        if (progressPercentage) progressPercentage.textContent = percentage + '%';
+        
+        // Update loading details based on progress
+        const loadingDetails = document.getElementById('loading-details');
+        if (loadingDetails) {
+            if (percentage < 30) {
+                loadingDetails.innerHTML = '<small>Downloading Pyodide runtime (~3MB)...</small>';
+            } else if (percentage < 60) {
+                loadingDetails.innerHTML = '<small>Loading NumPy library...</small>';
+            } else if (percentage < 90) {
+                loadingDetails.innerHTML = '<small>Loading Matplotlib library...</small>';
+            } else if (percentage < 100) {
+                loadingDetails.innerHTML = '<small>Setting up visualization environment...</small>';
+            } else {
+                loadingDetails.innerHTML = '<small>Ready to use!</small>';
+            }
+        }
     }
 
     /**
@@ -535,7 +928,6 @@ image_data = plot_to_base64(fig)
         this.updateSessionStatus('Visualization stopped', 'error');
     }
 }
-}
 
 // Particle management functions (called from HTML)
 function addParticle() {
@@ -716,17 +1108,40 @@ function initializeUserPreferences() {
 }
 
 // Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize user preferences first
-    initializeUserPreferences();
+function initializeApp() {
+    console.log('🚀 Starting app initialization...');
     
+    // Initialize user preferences first
+    console.log('⚙️ Initializing user preferences...');
+    initializeUserPreferences();
+    console.log('✅ User preferences initialized');
+    
+    console.log('🏗️ Creating WeierstrassApp instance...');
     const app = new WeierstrassApp();
+    console.log('✅ WeierstrassApp instance created');
     
     // Start initialization
+    console.log('🔄 Starting app.initialize()...');
     app.initialize().catch(error => {
-        console.error('Application initialization failed:', error);
+        console.error('❌ Application initialization failed:', error);
+        console.error('❌ Error stack:', error.stack);
     });
     
     // Make app globally available for debugging
     window.weierstrassApp = app;
-});
+    console.log('✅ App made globally available as window.weierstrassApp');
+}
+
+// Run initialization when DOM is ready or immediately if already loaded
+console.log('🔍 Checking document ready state:', document.readyState);
+if (document.readyState === 'loading') {
+    console.log('📋 DOM still loading, setting up DOMContentLoaded listener...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('📋 DOMContentLoaded event fired, initializing app...');
+        initializeApp();
+    });
+} else {
+    // DOM is already loaded, run immediately
+    console.log('📋 DOM already loaded, initializing app immediately...');
+    initializeApp();
+}

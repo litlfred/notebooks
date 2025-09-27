@@ -111,6 +111,8 @@ body {
         grid-area: main;
         padding: 0;
         overflow: hidden;
+        max-width: none;
+        width: 100%;
     }
 }
 
@@ -168,7 +170,7 @@ body {
 
 .subtitle {
     font-size: 1.1rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-style: italic;
 }
 
@@ -176,7 +178,7 @@ body {
 .loading-section {
     text-align: center;
     padding: 4rem 2rem;
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
 }
@@ -193,14 +195,22 @@ body {
     color: var(--text-color);
 }
 
-.progress-bar {
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
     width: 100%;
     max-width: 400px;
-    height: 8px;
-    background: var(--bg-light);
-    border-radius: 4px;
     margin: 1rem auto;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 12px;
+    background: var(--bg-tertiary);
+    border-radius: 6px;
     overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .progress-fill {
@@ -208,12 +218,53 @@ body {
     background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
     width: 0%;
     transition: width 0.3s ease;
+    border-radius: 6px;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        rgba(255,255,255,0.3) 50%, 
+        transparent 100%);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-percentage {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    min-width: 35px;
+    text-align: right;
 }
 
 .progress-text {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-top: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0.5rem 0;
+    font-weight: 500;
+}
+
+.loading-details {
+    margin-top: 1rem;
+    opacity: 0.7;
+}
+
+.loading-details small {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
 }
 
 /* Main Content */
@@ -226,7 +277,7 @@ body {
 
 /* Controls Section */
 .control-panel {
-    background: white;
+    background: var(--bg-primary);
     padding: 1.5rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
@@ -455,7 +506,7 @@ input[type="checkbox"] {
 
 /* Visualization Section */
 .visualization-section {
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     overflow: hidden;
@@ -474,18 +525,18 @@ input[type="checkbox"] {
 }
 
 .computation-status.computing {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--bg-tertiary);
+    color: var(--warning-color);
 }
 
 .computation-status.error {
-    background: #f8d7da;
-    color: #721c24;
+    background: var(--bg-tertiary);
+    color: var(--accent-color);
 }
 
 .computation-status.success {
-    background: #d4edda;
-    color: #155724;
+    background: var(--bg-tertiary);
+    color: var(--success-color);
 }
 
 .plot-container {
@@ -528,7 +579,7 @@ input[type="checkbox"] {
 }
 
 .modal-content {
-    background: white;
+    background: var(--bg-primary);
     border-radius: var(--border-radius);
     padding: 2rem;
     max-width: 600px;
@@ -584,7 +635,7 @@ input[type="checkbox"] {
     text-align: center;
     margin-top: 2rem;
     padding: 1rem;
-    color: #7f8c8d;
+    color: var(--text-secondary);
     font-size: 0.9rem;
 }
 
