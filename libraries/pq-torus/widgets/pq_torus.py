@@ -35,7 +35,29 @@ class PQTorusWidget(WidgetExecutor):
     Output: same pair with validation, torus description, and markdown display
     """
     
-    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_input(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate input data against PQ-Torus schema"""
+        validated = {}
+        
+        # Get p and q values with defaults
+        p = input_data.get('p', 11)
+        q = input_data.get('q', 5)
+        
+        # Ensure they are integers
+        try:
+            validated['p'] = int(p)
+            validated['q'] = int(q)
+        except (ValueError, TypeError):
+            raise ValueError(f"p and q must be integers, got p={p}, q={q}")
+        
+        # Validate range
+        if not (2 <= validated['p'] <= 100):
+            raise ValueError(f"p must be between 2 and 100, got {validated['p']}")
+        if not (2 <= validated['q'] <= 100):
+            raise ValueError(f"q must be between 2 and 100, got {validated['q']}")
+        
+        return validated
+    
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the PQ-Torus widget"""
         p = validated_input['p']

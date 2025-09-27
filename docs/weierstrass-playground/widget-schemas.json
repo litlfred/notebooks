@@ -1,5 +1,5 @@
 {
-  "$schema": "https://litlfred.github.io/notebooks/libraries/widget-definition.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "widget-schemas": {
     "sticky-note": {
       "id": "sticky-note",
