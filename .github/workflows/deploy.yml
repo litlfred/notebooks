@@ -1,20 +1,23 @@
 name: 🚀 Deploy Mathematical Notebooks to GitHub Pages
 
 on:
-  # Runs on pushes to main branch
+  # Runs on pushes to main branch (creates preview at /branch-preview/main)
   push:
     branches: [ main ]
   
-  # Allows you to run this workflow manually from the Actions tab
+  # Manual production deployment (deploys to root URL)
   workflow_dispatch:
     inputs:
-      deploy_branch:
-        description: '🌿 Branch to deploy from (defaults to current branch)'
-        required: false
-        default: ''
-        type: string
+      deploy_type:
+        description: '🎯 Deployment type'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+        - preview
+        - production
       
-  # Runs when PR is approved (for review deployments)
+  # Runs when PR to main is approved (creates main branch preview)
   pull_request_review:
     types: [submitted]
 
@@ -25,17 +28,19 @@ permissions:
   id-token: write
   pull-requests: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment per type
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.event.inputs.deploy_type || 'preview' }}"
   cancel-in-progress: false
 
 jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')))
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.ref == 'refs/heads/main' && (github.event_name == 'push' || 
+      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')))
     
     steps:
     - name: Checkout
@@ -43,16 +48,21 @@ jobs:
     
     - name: Display deployment info
       run: |
-        echo "🚀 Deployment Information"
-        echo "========================"
+        echo "🚀 Main Branch Deployment Information"
+        echo "===================================="
         echo "📦 Repository: ${{ github.repository }}"
         echo "🌿 Branch: ${{ github.ref_name }}"
         echo "⚡ Trigger: ${{ github.event_name }}"
+        echo "🎯 Deploy Type: ${{ github.event.inputs.deploy_type || 'preview' }}"
+        if [ "${{ github.event.inputs.deploy_type }}" = "production" ]; then
+          echo "📱 Production URL: https://litlfred.github.io/notebooks"
+        else
+          echo "📱 Preview URL: https://litlfred.github.io/notebooks/branch-preview/main"
+        fi
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           echo "👤 Triggered by: ${{ github.actor }}"
-          echo "ℹ️  Manual deployment from branch: ${{ github.ref_name }}"
         fi
-        echo "========================"
+        echo "===================================="
     
     - name: Post deployment start comment
       if: github.event.pull_request.number != null || github.event_name == 'pull_request_review'
@@ -112,6 +122,24 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
+    
+    - name: Configure deployment context
+      run: |
+        echo "🔧 Configuring deployment context..."
+        # Set deployment type for the Python script
+        if [ "${{ github.event.inputs.deploy_type }}" = "production" ]; then
+          export INPUT_DEPLOY_TYPE=production
+          echo "🎯 Configuring for PRODUCTION deployment"
+        else
+          export INPUT_DEPLOY_TYPE=preview
+          echo "🌿 Configuring for PREVIEW deployment (main branch)"
+        fi
+        
+        python scripts/deploy_manager.py . configure
+        
+        # Show what was configured
+        echo "📝 Jekyll configuration:"
+        cat docs/_config.yml | grep -E "(baseurl|url|deployment_type|branch_name|schema_base_url)"
     
     - name: Install dependencies
       run: |
@@ -211,19 +239,25 @@ jobs:
           📦 Repository: \`${{ github.repository }}\`
           🌿 Branch: \`${{ github.ref_name }}\`
           ⚡ Trigger: \`${{ github.event_name }}\`
+          🎯 Deploy Type: \`${{ github.event.inputs.deploy_type || 'preview' }}\`
           👤 Started by: @${{ github.actor }}
           🕐 Completed at: ${new Date().toUTCString()}
           
-          ## 🎉 Preview your deployment:
+          ## 🎉 View your deployment:
           
           <div align="center">
           
-          [![🌐 View Live Preview](https://img.shields.io/badge/🌐_View_Live_Preview-brightgreen?style=for-the-badge&logo=github-pages)](${deploymentUrl})
+          [![🌐 View Live Site](https://img.shields.io/badge/🌐_View_Live_Site-brightgreen?style=for-the-badge&logo=github-pages)](${deploymentUrl})
           
           </div>
           
           ---
-          📱 **Direct URL**: ${deploymentUrl}`;
+          📱 **Direct URL**: ${deploymentUrl}
+          
+          ${ '${{ github.event.inputs.deploy_type }}' === 'production' ? 
+            '🎯 **This is a PRODUCTION deployment** - Live at the main site URL!' : 
+            '🌿 **This is a PREVIEW deployment** - Main branch preview for testing before production.' 
+          }`;
           
           if (botComment) {
             await github.rest.issues.updateComment({
