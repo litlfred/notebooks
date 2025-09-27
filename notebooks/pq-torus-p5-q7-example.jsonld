@@ -1,0 +1,179 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld", 
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "@id": "urn:notebook:pq-torus-p5-q7-example",
+      "@type": ["prov:Entity", "notebook:Document"],
+      "dct:title": "PQ-Torus Analysis: p=5, q=7 with Weierstrass Visualizations",
+      "dct:description": "Complete mathematical analysis of the torus T = ℂ / L where L = ℤ5 + ℤ7i with comprehensive Weierstrass ℘-function visualizations",
+      "dct:created": "2024-01-15T10:30:00Z",
+      "dct:modified": "2024-01-15T11:45:00Z",
+      "notebook:widgets": [
+        "urn:widget:pq-torus-p5q7",
+        "urn:widget:sticky-note-intro",
+        "urn:widget:weierstrass-two-panel-p5q7",
+        "urn:widget:weierstrass-five-panel-p5q7",
+        "urn:widget:weierstrass-trajectories-p5q7"
+      ]
+    },
+    {
+      "@id": "urn:widget:sticky-note-intro",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "widget_id": "sticky-note-1",
+      "widget_type": "sticky-note",
+      "prov:generatedAtTime": "2024-01-15T10:30:00Z",
+      "layout": {
+        "position": {"x": 50, "y": 50},
+        "size": {"width": 320, "height": 220},
+        "z_index": 1
+      },
+      "config": {
+        "content": "# PQ-Torus Mathematical Analysis\n\nThis notebook demonstrates the analysis of the **prime lattice torus** with parameters:\n\n- **p = 5** (prime)\n- **q = 7** (prime)\n\nThe torus is defined as **T = ℂ / L** where **L = ℤ5 + ℤ7i**.\n\n## Fundamental Domain\n- **Area**: 5 × 7 = 35\n- **Lattice Type**: Rectangular prime lattice\n- **Mathematical Properties**: Suitable for Weierstrass ℘-function analysis",
+        "theme": "desert",
+        "show_note": true
+      }
+    },
+    {
+      "@id": "urn:widget:pq-torus-p5q7",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.schema.json",
+      "widget_id": "pq-torus-1",
+      "widget_type": "pq-torus",
+      "prov:generatedAtTime": "2024-01-15T10:32:00Z",
+      "layout": {
+        "position": {"x": 400, "y": 50},
+        "size": {"width": 350, "height": 280},
+        "z_index": 1
+      },
+      "config": {
+        "p": 5,
+        "q": 7
+      }
+    },
+    {
+      "@id": "urn:output:pq-torus-p5q7",
+      "@type": ["prov:Entity", "pqt:output"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/output.schema.json",
+      "prov:value": {
+        "success": true,
+        "p": 5,
+        "q": 7,
+        "torus_description": "T = ℂ / L where L = ℤ5 + ℤ7i",
+        "lattice_properties": {
+          "fundamental_domain_area": 35,
+          "lattice_type": "rectangular_prime",
+          "basis_vectors": ["5", "7i"]
+        },
+        "prime_validation": {
+          "p_is_prime": true,
+          "q_is_prime": true,
+          "validation_message": "Both 5 and 7 are prime numbers ✓"
+        },
+        "mathematical_notation": "\\mathcal{T} = \\mathbb{C} / (\\mathbb{Z} \\cdot 5 + \\mathbb{Z} \\cdot 7i)"
+      },
+      "prov:wasGeneratedBy": "urn:activity:pq-torus-p5q7",
+      "prov:generatedAtTime": "2024-01-15T10:32:01Z"
+    },
+    {
+      "@id": "urn:widget:weierstrass-two-panel-p5q7",
+      "@type": ["prov:Entity", "weier:two-panel"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/widget.schema.json",
+      "widget_id": "weierstrass-two-panel-1",
+      "widget_type": "pq-torus.weierstrass.two-panel",
+      "prov:generatedAtTime": "2024-01-15T10:35:00Z",
+      "layout": {
+        "position": {"x": 50, "y": 350},
+        "size": {"width": 450, "height": 320},
+        "z_index": 1
+      },
+      "config": {
+        "p": 5,
+        "q": 7,
+        "N": 4,
+        "plot_resolution": 200,
+        "color_scheme": "viridis"
+      },
+      "dependencies": [
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "p",
+          "target_input_path": "p"
+        },
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "q",
+          "target_input_path": "q"
+        }
+      ]
+    },
+    {
+      "@id": "urn:widget:weierstrass-five-panel-p5q7",
+      "@type": ["prov:Entity", "weier:five-panel"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/widget.schema.json",
+      "widget_id": "weierstrass-five-panel-1",
+      "widget_type": "pq-torus.weierstrass.five-panel",
+      "prov:generatedAtTime": "2024-01-15T10:40:00Z",
+      "layout": {
+        "position": {"x": 520, "y": 350},
+        "size": {"width": 600, "height": 450},
+        "z_index": 1
+      },
+      "config": {
+        "p": 5,
+        "q": 7,
+        "N": 4,
+        "analysis_depth": "complete",
+        "include_derivatives": true
+      },
+      "dependencies": [
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "p",
+          "target_input_path": "p"
+        },
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "q",
+          "target_input_path": "q"
+        }
+      ]
+    },
+    {
+      "@id": "urn:widget:weierstrass-trajectories-p5q7",
+      "@type": ["prov:Entity", "weier:trajectories"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/trajectories/widget.schema.json",
+      "widget_id": "weierstrass-trajectories-1", 
+      "widget_type": "pq-torus.weierstrass.trajectories",
+      "prov:generatedAtTime": "2024-01-15T10:45:00Z",
+      "layout": {
+        "position": {"x": 50, "y": 720},
+        "size": {"width": 550, "height": 350},
+        "z_index": 1
+      },
+      "config": {
+        "p": 5,
+        "q": 7,
+        "N": 4,
+        "num_trajectories": 20,
+        "integration_time": 10.0,
+        "initial_conditions": "random_grid"
+      },
+      "dependencies": [
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "p",
+          "target_input_path": "p"
+        },
+        {
+          "source_widget": "urn:widget:pq-torus-p5q7",
+          "source_output_path": "q",
+          "target_input_path": "q"
+        }
+      ]
+    }
+  ]
+}

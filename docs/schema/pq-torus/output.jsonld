@@ -1,0 +1,11 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@type": ["prov:Entity", "pqt:output"],
+  "dct:conformsTo": "./output.schema.json",
+  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/output.jsonld",
+  "dct:title": "PQ-Torus Output",
+  "dct:description": "JSON-LD context for PQ-Torus prime lattice computation results"
+}

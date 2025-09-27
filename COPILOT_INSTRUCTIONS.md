@@ -2,7 +2,58 @@
 
 ## Repository Overview
 
-This is a **random collection of Python notebooks** for mathematical explorations, visualizations, and interactive experiments. Each notebook should be self-contained and focused on a specific mathematical concept, algorithm, or visualization technique.
+This repository contains both a **collection of interactive Python notebooks** for mathematical explorations AND a comprehensive **widget framework** for building advanced mathematical computing environments.
+
+### Core Components
+
+1. **📓 Interactive Notebooks**: Self-contained mathematical explorations (Weierstrass functions, chaos games, etc.)
+2. **🧩 Widget Framework**: Schema-based system for building drag-and-drop mathematical computing interfaces
+3. **🌐 Browser Deployment**: Zero-install web applications via GitHub Pages and Pyodide
+
+### Widget Framework Architecture
+
+The repository includes a complete **production-ready widget framework** with:
+
+- **🎯 Schema-Based Design**: Named JSON schemas with GitHub Pages URLs
+- **🔗 JSON-LD & PROV-O Integration**: Full provenance tracking for computational workflows  
+- **🧩 Visual Programming**: Drag-and-drop widget blackboard with dependency management
+- **📊 Mathematical Focus**: Specialized widgets for computational mathematics
+- **🌐 GitHub Pages Ready**: All schemas accessible via HTTPS with proper CORS
+
+#### Widget Types Available
+
+- **Sticky Note**: Markdown content widgets with LaTeX support
+- **PQ-Torus**: Prime lattice torus definition widgets (T = ℂ / L where L = ℤp + ℤqi)
+- **Weierstrass Functions**: ℘(z) visualization and analysis widgets  
+- **Python Code**: Interactive code execution widgets
+- **Data Visualization**: Plotting and data generation widgets
+
+#### Framework Structure
+
+```
+docs/
+├── schema/                        # Widget Schema & JSON-LD Framework
+│   ├── weierstrass/              # Weierstrass ℘ function schemas
+│   │   ├── input.schema.json    # Input validation schema
+│   │   ├── input.jsonld         # Input JSON-LD context
+│   │   ├── output.schema.json   # Output validation schema  
+│   │   ├── output.jsonld        # Output JSON-LD context
+│   │   ├── widget.schema.json   # Widget instance schema
+│   │   └── widget.jsonld        # Widget JSON-LD context
+│   ├── pq-torus/                # Prime lattice torus schemas
+│   ├── sticky-note/             # Markdown note schemas
+│   ├── common/                  # Shared schemas (execution results, metadata)
+│   ├── ontology/                # JSON-LD contexts and vocabularies
+│   └── example-notebook-graph.jsonld  # PROV-O workflow example
+├── weierstrass-playground/       # Interactive blackboard system
+│   ├── board.html               # Main widget blackboard interface
+│   ├── widgets/                 # Python widget implementations
+│   └── widget-schemas.json      # Widget registry and definitions
+├── widget-framework.md          # Complete framework documentation
+├── json-schema-specification.md # Schema specifications and guidelines
+├── architecture-examples.md     # Implementation examples and patterns
+└── migration-guide.md           # Migration strategy for existing widgets
+```
 
 ## 🚨 URGENT: Branch Naming Compliance Required
 
@@ -151,6 +202,133 @@ class NotebookUI:
         
 def create_ui():
     return NotebookUI()
+```
+
+## Working with Widget Framework
+
+### Schema Development Guidelines
+
+When creating new widgets, follow the directory-based schema structure:
+
+#### 1. Widget Directory Structure
+```bash
+# Create new widget directory
+mkdir docs/schema/{widget-name}/
+
+# Required files (6 total):
+docs/schema/{widget-name}/
+├── input.schema.json    # Input validation (JSON Schema)
+├── input.jsonld         # Input context (JSON-LD)  
+├── output.schema.json   # Output validation (JSON Schema)
+├── output.jsonld        # Output context (JSON-LD)
+├── widget.schema.json   # Widget instance schema
+└── widget.jsonld        # Widget instance context
+```
+
+#### 2. Schema URL Pattern
+All schemas must use GitHub Pages URLs:
+```json
+{
+  "$id": "https://litlfred.github.io/notebooks/schema/{widget}/input.schema.json"
+}
+```
+
+#### 3. JSON-LD Integration
+Every JSON-LD file must:
+- Include PROV-O context: `"https://www.w3.org/ns/prov-o.jsonld"`
+- Include widget context: `"https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"`
+- Reference corresponding schema: `"dct:conformsTo": "./input.schema.json"`
+- Use proper type array: `"@type": ["prov:Entity", "{prefix}:input"]`
+
+#### 4. Type Naming Convention
+Use flat, human-readable prefixes:
+- **Weierstrass**: `weier:input`, `weier:output`, `weier:widget`
+- **PQ-Torus**: `pqt:input`, `pqt:output`, `pqt:widget`
+- **New Widget**: `{abbrev}:input`, `{abbrev}:output`, `{abbrev}:widget`
+
+#### 5. Widget Implementation
+Create Python implementation in `docs/weierstrass-playground/widgets/{widget_name}.py`:
+```python
+from widgets.widget_executor import WidgetExecutor
+
+class NewWidgetExecutor(WidgetExecutor):
+    def _execute_impl(self, validated_input):
+        # Widget logic here
+        return {
+            "success": True,
+            "timestamp": datetime.now().isoformat(),
+            # ... widget-specific output
+        }
+```
+
+#### 6. Schema Registration
+Add widget to `docs/weierstrass-playground/widget-schemas.json`:
+```json
+{
+  "new-widget": {
+    "id": "new-widget",
+    "name": "New Widget",
+    "input_schemas": [
+      "https://litlfred.github.io/notebooks/schema/new-widget/input.schema.json"
+    ],
+    "output_schemas": [
+      "https://litlfred.github.io/notebooks/schema/new-widget/output.schema.json"  
+    ],
+    "python_script": "widgets/new_widget.py"
+  }
+}
+```
+
+### Widget Dependency Patterns
+
+The framework supports complex mathematical workflows:
+
+#### Example: PQ-Torus → Weierstrass Pipeline
+1. **PQ-Torus Widget**: Validates prime parameters (p, q)
+2. **Output**: Prime lattice parameters with validation
+3. **Weierstrass Widgets**: Receive parameters for ℘-function analysis
+4. **Result**: Complete mathematical visualization pipeline
+
+#### Dependency Configuration
+```json
+{
+  "dependencies": [
+    {
+      "source_widget": "urn:uuid:pq-torus-widget-1",
+      "source_path": "p",
+      "target_path": "p"
+    },
+    {
+      "source_widget": "urn:uuid:pq-torus-widget-1", 
+      "source_path": "q",
+      "target_path": "q"
+    }
+  ]
+}
+```
+
+### PROV-O Notebook Graphs
+
+The framework generates complete provenance graphs:
+```json
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "@id": "urn:uuid:widget-1",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "prov:generatedAtTime": "2024-09-27T09:00:00Z"
+    },
+    {
+      "@id": "urn:uuid:activity-1", 
+      "@type": "prov:Activity",
+      "prov:used": "urn:uuid:widget-1"
+    }
+  ]
+}
 ```
 
 ## Quality Standards

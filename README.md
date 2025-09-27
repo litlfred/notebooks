@@ -43,7 +43,7 @@ Integration uses RK4 method with automatic blow-up detection near poles.
 
 ## Repository Structure
 
-This repository contains a modular framework for mathematical visualizations:
+This repository contains a comprehensive widget framework for interactive mathematical computing:
 
 ```
 ├── src/weierstrass_playground/    # Main Python package
@@ -52,12 +52,23 @@ This repository contains a modular framework for mathematical visualizations:
 │   ├── visualization.py          # Visualization and plotting
 │   ├── integration.py            # Trajectory integration and ODEs
 │   └── browser.py                # Browser-specific adaptations
-├── docs/                          # Browser playground (GitHub Pages)
+├── docs/                          # Widget framework & GitHub Pages
 │   ├── index.html                # Main web interface  
-│   ├── css/style.css            # Styling
-│   ├── js/weierstrass-app.js    # JavaScript application
-│   ├── python/weierstrass_playground/  # Browser-compatible package copy
-│   └── README.md                # Detailed development docs
+│   ├── schema/                   # Widget Schema & JSON-LD Framework
+│   │   ├── weierstrass/         # Weierstrass ℘ function widgets
+│   │   ├── pq-torus/            # Prime lattice torus widgets
+│   │   ├── sticky-note/         # Markdown note widgets
+│   │   ├── common/              # Shared schemas
+│   │   ├── ontology/            # JSON-LD contexts
+│   │   └── README.md            # Schema documentation
+│   ├── weierstrass-playground/   # Interactive blackboard system
+│   │   ├── board.html           # Widget blackboard interface
+│   │   ├── widgets/             # Widget implementations
+│   │   └── widget-schemas.json  # Widget registry
+│   ├── widget-framework.md      # Complete framework documentation
+│   ├── json-schema-specification.md  # Schema specifications
+│   ├── architecture-examples.md # Implementation examples
+│   └── migration-guide.md       # Migration strategy
 ├── weierstrass_lib.py           # Legacy library (maintained for compatibility)
 ├── weierstrass_ui.py            # Legacy UI components
 ├── weierstrass_preamble.py      # Setup and documentation
@@ -65,6 +76,34 @@ This repository contains a modular framework for mathematical visualizations:
 ├── setup.py & pyproject.toml    # Package configuration
 └── requirements.txt             # Dependencies
 ```
+
+### Widget Framework
+
+The repository includes a complete **widget framework** for building interactive mathematical computing environments:
+
+- **🎯 Schema-Based**: JSON Schema validation with named, reusable schemas
+- **🔗 JSON-LD Integration**: PROV-O compliant for provenance tracking
+- **🧩 Modular Widgets**: Drag-and-drop visual programming interface
+- **📊 Mathematical Focus**: Specialized for computational mathematics
+- **🌐 GitHub Pages Ready**: All schemas accessible via HTTPS URLs
+
+#### Available Widgets
+
+- **Sticky Note**: Simple markdown content widget
+- **PQ-Torus**: Prime lattice torus definition (T = ℂ / L where L = ℤp + ℤqi)
+- **Weierstrass Functions**: ℘(z) visualization and analysis widgets
+- **Python Code**: Interactive code execution
+- **Data Visualization**: Plotting and data generation
+
+#### Widget Dependencies
+
+The framework supports sophisticated mathematical workflows through widget dependencies:
+```
+PQ-Torus → Weierstrass Widgets → Visualizations
+```
+Example: Define prime lattice parameters in PQ-Torus, use them for ℘-function analysis in Weierstrass widgets.
+
+**🚀 [Try the widget framework: https://litlfred.github.io/notebooks/weierstrass-playground/board.html](https://litlfred.github.io/notebooks/weierstrass-playground/board.html)**
 
 ## Common Framework
 

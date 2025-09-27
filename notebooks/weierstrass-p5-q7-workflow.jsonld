@@ -1,0 +1,161 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@id": "urn:notebook:weierstrass-p5-q7-workflow",
+  "@type": ["prov:Entity", "nb:Notebook"],
+  "dct:title": "Weierstrass Function Analysis with Prime Lattice p=5, q=7",
+  "dct:description": "Complete mathematical workflow demonstrating PQ-Torus lattice definition and subsequent Weierstrass ℘-function visualizations",
+  "dct:created": "2024-01-15T10:30:00Z",
+  "dct:creator": "Widget Framework Demo",
+  "nb:version": "1.0.0",
+  "nb:tags": ["mathematics", "weierstrass", "elliptic-functions", "lattice-theory"],
+  
+  "@graph": [
+    {
+      "@id": "urn:widget:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.schema.json",
+      "nb:widgetType": "pq-torus",
+      "nb:instanceId": "pq-torus-1",
+      "nb:position": {
+        "x": 100,
+        "y": 100,
+        "width": 300,
+        "height": 250
+      },
+      "prov:value": {
+        "p": 5,
+        "q": 7,
+        "note": "# Prime Lattice Definition\n\nThis widget defines the fundamental torus **T = ℂ / L** where:\n- **L = ℤp + ℤqi** (rectangular prime lattice)\n- **p = 5** (first prime parameter)\n- **q = 7** (second prime parameter)\n\nThe lattice has:\n- **Area**: 35\n- **Fundamental parallelogram**: Rectangle with sides p=5 and q=7\n- **Both parameters are prime**: ✓ Verified\n\nThis lattice serves as the foundation for all Weierstrass ℘-function analysis in this workflow."
+      },
+      "nb:executionStatus": "completed",
+      "nb:lastExecuted": "2024-01-15T10:31:00Z"
+    },
+    
+    {
+      "@id": "urn:widget:weierstrass-two-panel-1",
+      "@type": ["prov:Entity", "weier:two-panel"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/widget.schema.json",
+      "nb:widgetType": "pq-torus.weierstrass.two-panel",
+      "nb:instanceId": "weierstrass-two-panel-1",
+      "nb:parent": "urn:widget:pq-torus-1",
+      "nb:position": {
+        "x": 450,
+        "y": 100,
+        "width": 400,
+        "height": 300
+      },
+      "prov:wasDerivedFrom": "urn:widget:pq-torus-1",
+      "prov:value": {
+        "p": 5,
+        "q": 7,
+        "plot_resolution": 150,
+        "color_scheme": "viridis",
+        "show_lattice_points": true,
+        "analysis_region": {
+          "x_min": -2.5,
+          "x_max": 2.5,
+          "y_min": -3.5,
+          "y_max": 3.5
+        }
+      },
+      "nb:executionStatus": "completed",
+      "nb:lastExecuted": "2024-01-15T10:32:00Z",
+      "nb:note": "# Weierstrass Two-Panel Visualization\n\nShows the **℘(z)** and **℘′(z)** functions over the lattice **L = ℤ5 + ℤ7i**.\n\n**Left Panel**: ℘(z) - The Weierstrass elliptic function  \n**Right Panel**: ℘′(z) - Its derivative\n\n**Lattice Parameters**: p={{p}}, q={{q}}  \n**Resolution**: {{plot_resolution}}×{{plot_resolution}}  \n**Analysis Region**: {{analysis_region.x_min}} ≤ Re(z) ≤ {{analysis_region.x_max}}, {{analysis_region.y_min}} ≤ Im(z) ≤ {{analysis_region.y_max}}"
+    },
+    
+    {
+      "@id": "urn:widget:weierstrass-five-panel-1", 
+      "@type": ["prov:Entity", "weier:five-panel"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/widget.schema.json",
+      "nb:widgetType": "pq-torus.weierstrass.five-panel",
+      "nb:instanceId": "weierstrass-five-panel-1",
+      "nb:parent": "urn:widget:pq-torus-1",
+      "nb:position": {
+        "x": 100,
+        "y": 400,
+        "width": 500,
+        "height": 400
+      },
+      "prov:wasDerivedFrom": "urn:widget:pq-torus-1",
+      "prov:value": {
+        "p": 5,
+        "q": 7,
+        "plot_resolution": 120,
+        "show_derivatives": true,
+        "show_invariants": true,
+        "color_scheme": "plasma",
+        "analysis_depth": "complete"
+      },
+      "nb:executionStatus": "completed", 
+      "nb:lastExecuted": "2024-01-15T10:33:00Z",
+      "nb:note": "# Complete Weierstrass Analysis\n\n**Five-panel comprehensive view** of the Weierstrass ℘-function system:\n\n1. **℘(z)** - Main elliptic function\n2. **Re(℘′(z))** - Real part of derivative  \n3. **Im(℘′(z))** - Imaginary part of derivative\n4. **|℘′(z)|** - Magnitude of derivative\n5. **℘′′(z)** - Second derivative\n\n**Mathematical Properties**:\n- **g₂ invariant**: Computed from lattice\n- **g₃ invariant**: Computed from lattice  \n- **Discriminant**: Δ = g₂³ - 27g₃²\n- **j-invariant**: j = 1728g₂³/Δ\n\n**Lattice**: L = ℤ{{p}} + ℤ{{q}}i with area {{p}}×{{q}} = 35"
+    },
+    
+    {
+      "@id": "urn:widget:sticky-note-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "nb:widgetType": "sticky-note",
+      "nb:instanceId": "sticky-note-1",
+      "nb:position": {
+        "x": 650,
+        "y": 450,
+        "width": 280,
+        "height": 200
+      },
+      "prov:value": {
+        "content": "# Research Notes\n\n## Prime Lattice p=5, q=7\n\nThis notebook demonstrates a complete **Weierstrass ℘-function analysis** workflow:\n\n✅ **PQ-Torus Definition**: Fundamental lattice L = ℤ5 + ℤ7i  \n✅ **Two-Panel Visualization**: ℘(z) and ℘′(z) plots  \n✅ **Five-Panel Analysis**: Complete mathematical breakdown\n\n### Key Insights:\n- Prime lattice provides **clean mathematical structure**\n- **Rectangular symmetry** simplifies analysis\n- **Area = 35** determines function scaling\n\n### Next Steps:\n- [ ] Add trajectory analysis\n- [ ] Include contour plots\n- [ ] Compare with different prime pairs",
+        "show_note": true,
+        "theme": "desert"
+      },
+      "nb:executionStatus": "completed",
+      "nb:lastExecuted": "2024-01-15T10:34:00Z"
+    }
+  ],
+  
+  "prov:wasGeneratedBy": {
+    "@id": "urn:activity:notebook-creation-1",
+    "@type": "prov:Activity",
+    "prov:startedAtTime": "2024-01-15T10:30:00Z",
+    "prov:endedAtTime": "2024-01-15T10:34:00Z",
+    "prov:wasAssociatedWith": "Widget Framework Demo System"
+  },
+  
+  "nb:dependencies": [
+    {
+      "source": "urn:widget:pq-torus-1",
+      "target": "urn:widget:weierstrass-two-panel-1",
+      "relationship": "provides-lattice-parameters"
+    },
+    {
+      "source": "urn:widget:pq-torus-1", 
+      "target": "urn:widget:weierstrass-five-panel-1",
+      "relationship": "provides-lattice-parameters"
+    }
+  ],
+  
+  "nb:layout": {
+    "canvas": {
+      "width": 1200,
+      "height": 800,
+      "zoom": 1.0,
+      "center": [600, 400]
+    },
+    "grid": {
+      "enabled": true,
+      "size": 20,
+      "snap": true
+    }
+  },
+  
+  "nb:metadata": {
+    "mathematical_domain": "elliptic_functions",
+    "complexity_level": "advanced",
+    "estimated_execution_time": "30-45 seconds",
+    "educational_purpose": "Demonstrates hierarchical mathematical widget relationships",
+    "prerequisites": ["complex_analysis", "lattice_theory", "elliptic_functions"]
+  }
+}

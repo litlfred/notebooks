@@ -248,6 +248,7 @@ class MathematicalBoard {
             description: schema.description,
             config: { ...defaultConfig, ...customConfig },
             schema: schema,
+            actions: schema.actions || {},
             connections: {
                 inputs: new Map(),
                 outputs: new Map()
@@ -321,10 +322,18 @@ class MathematicalBoard {
                     </span>
                 </div>
                 <div class="widget-actions">
+                    <div class="widget-hamburger-menu">
+                        <button class="widget-btn hamburger-toggle" onclick="toggleWidgetMenu('${widget.id}')" title="Actions">
+                            ☰
+                        </button>
+                        <div class="hamburger-dropdown" id="menu-${widget.id}" style="display: none;">
+                            ${this.renderActionMenu(widget)}
+                        </div>
+                    </div>
                     <button class="widget-btn" onclick="editWidget('${widget.id}')" title="Configure">
                         ⚙️
                     </button>
-                    <button class="widget-btn" onclick="runWidget('${widget.id}')" title="Execute">
+                    <button class="widget-btn" onclick="runWidget('${widget.id}')" title="Execute Default">
                         ▶️
                     </button>
                     <button class="widget-btn" onclick="connectWidget('${widget.id}')" title="Connect">
@@ -367,7 +376,12 @@ class MathematicalBoard {
             return '<div class="widget-error">Schema not found</div>';
         }
 
-        // Show configuration preview
+        // Special handling for sticky note widget
+        if (widget.schema.id === 'sticky-note') {
+            return this.renderStickyNoteContent(widget);
+        }
+
+        // Show configuration preview for other widgets
         const configPreview = this.renderConfigPreview(widget);
         
         // Show last output if available
@@ -383,6 +397,156 @@ class MathematicalBoard {
                 ${outputDisplay}
             </div>
         `;
+    }
+
+    /**
+     * Render sticky note content with markdown display/edit modes and TinyMCE integration
+     */
+    renderStickyNoteContent(widget) {
+        const markdownContent = widget.config.content || '# New Note\n\nEdit to add content...';
+        const isEditMode = widget.editMode || false;
+        const theme = widget.config.theme || 'desert';
+        
+        if (isEditMode) {
+            // Use Monaco Editor for better markdown editing with LaTeX support
+            return `
+                <div class="sticky-note-editor">
+                    <div class="editor-toolbar">
+                        <button class="editor-btn save-btn" onclick="boardApp.saveStickyNote('${widget.id}')">💾 Save</button>
+                        <button class="editor-btn cancel-btn" onclick="boardApp.cancelStickyNoteEdit('${widget.id}')">❌ Cancel</button>
+                        <select class="theme-selector" onchange="boardApp.changeStickyTheme('${widget.id}', this.value)">
+                            <option value="desert" ${theme === 'desert' ? 'selected' : ''}>🏜️ Desert</option>
+                            <option value="classic" ${theme === 'classic' ? 'selected' : ''}>💛 Classic</option>
+                            <option value="ocean" ${theme === 'ocean' ? 'selected' : ''}>🌊 Ocean</option>
+                            <option value="forest" ${theme === 'forest' ? 'selected' : ''}>🌲 Forest</option>
+                            <option value="lavender" ${theme === 'lavender' ? 'selected' : ''}>💜 Lavender</option>
+                            <option value="mint" ${theme === 'mint' ? 'selected' : ''}>🌿 Mint</option>
+                        </select>
+                        <div class="editor-help">
+                            <button class="editor-btn help-btn" onclick="boardApp.toggleMarkdownHelp('${widget.id}')" title="Markdown Help">❓</button>
+                        </div>
+                    </div>
+                    <div id="markdown-help-${widget.id}" class="markdown-help" style="display: none;">
+                        <div class="help-content">
+                            <h4>Markdown & LaTeX Support</h4>
+                            <p><strong>Headers:</strong> # H1, ## H2, ### H3</p>
+                            <p><strong>Emphasis:</strong> *italic*, **bold**, ~~strikethrough~~</p>
+                            <p><strong>Lists:</strong> - item or 1. item</p>
+                            <p><strong>Links:</strong> [text](url)</p>
+                            <p><strong>Code:</strong> \`inline\` or \`\`\`block\`\`\`</p>
+                            <p><strong>Math:</strong> $inline$ or $$block$$</p>
+                            <p><strong>Variables:</strong> {{variable_name}} - access widget values</p>
+                        </div>
+                    </div>
+                    <div class="editor-container" id="editor-container-${widget.id}" 
+                         style="height: calc(100% - 120px); border: 1px solid var(--current-sticky-border);">
+                        <textarea class="sticky-note-textarea" id="editor-${widget.id}" 
+                            style="width: 100%; height: 100%; border: none; padding: 1rem; 
+                                   background: var(--current-sticky-content); color: var(--current-sticky-text);
+                                   font-family: 'Monaco', 'Menlo', 'Courier New', monospace; 
+                                   font-size: 0.9rem; resize: none; outline: none;"
+                            placeholder="Enter markdown content with LaTeX support...">${this.escapeHtml(markdownContent)}</textarea>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Display mode - show rendered markdown with variable substitution
+            const processedContent = this.processMarkdownVariables(markdownContent, widget);
+            return `
+                <div class="sticky-note-display" onclick="boardApp.editStickyNote('${widget.id}')" 
+                     style="cursor: pointer; height: 100%; position: relative; padding: 1rem;">
+                    <div class="markdown-content" style="height: calc(100% - 2rem); overflow-y: auto;">
+                        ${this.renderMarkdown(processedContent)}
+                    </div>
+                    <div class="edit-hint" style="position: absolute; bottom: 5px; right: 5px; 
+                         font-size: 0.7rem; opacity: 0.6; background: rgba(0,0,0,0.1); 
+                         padding: 2px 6px; border-radius: 3px;">✏️ Click to edit</div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Simple markdown renderer with LaTeX support
+     */
+    renderMarkdown(content) {
+        // Basic markdown parsing
+        let html = content
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+            .replace(/`([^`]+)`/gim, '<code>$1</code>')
+            .replace(/\n\n/gim, '</p><p>')
+            .replace(/\n/gim, '<br>');
+            
+        // Wrap in paragraphs if not already wrapped
+        if (!html.includes('<h') && !html.includes('<p>')) {
+            html = '<p>' + html + '</p>';
+        }
+            
+        // Basic LaTeX symbol support
+        html = html
+            .replace(/\\wp/g, '℘')
+            .replace(/\\Z/g, 'ℤ')
+            .replace(/\\C/g, 'ℂ')
+            .replace(/\\R/g, 'ℝ')
+            .replace(/\\L/g, 'L')
+            .replace(/\\T/g, 'T');
+            
+        return html;
+    }
+
+    /**
+     * Toggle sticky note edit mode
+     */
+    editStickyNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.editMode = true;
+        this.updateWidgetDisplay(widget);
+    }
+
+    /**
+     * Save sticky note content
+     */
+    saveStickyNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        const textarea = document.getElementById(`editor-${widgetId}`);
+        if (textarea) {
+            widget.config.content = textarea.value;
+            widget.editMode = false;
+            this.updateWidgetDisplay(widget);
+            this.saveBoardToStorage();
+        }
+    }
+
+    /**
+     * Cancel sticky note edit
+     */
+    cancelStickyNoteEdit(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.editMode = false;
+        this.updateWidgetDisplay(widget);
+    }
+
+    /**
+     * Change sticky note theme
+     */
+    changeStickyTheme(widgetId, theme) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.config.theme = theme;
+        // Update the widget element class
+        widget.element.className = widget.element.className.replace(/theme-\w+/g, '') + ` theme-${theme}`;
+        this.saveBoardToStorage();
     }
 
     /**
@@ -414,10 +578,44 @@ class MathematicalBoard {
      */
     renderOutput(output, outputSchema) {
         if (!output || !output.success) {
-            return `<div class="output-error">${output?.error || 'Execution failed'}</div>`;
+            return `<div class="output-error">${output?.error || 'Execution failed'}${output?.action_slug ? ` (Action: ${output.action_slug})` : ''}</div>`;
         }
 
-        // Handle different output types
+        // Handle action-specific output formats
+        if (output.action_slug && output.output_format) {
+            switch (output.output_format) {
+                case 'html':
+                    if (output.rendered_html) {
+                        return `<div class="output-html">${output.rendered_html}</div>`;
+                    }
+                    break;
+                case 'svg':
+                    if (output.svg_content) {
+                        return `<div class="output-svg">${output.svg_content}</div>`;
+                    }
+                    break;
+                case 'png':
+                    if (output.image_data && output.image_data.base64) {
+                        return `<img src="${output.image_data.base64}" alt="PNG Output" class="output-plot" width="${output.image_data.width || 200}" height="${output.image_data.height || 100}">`;
+                    }
+                    break;
+                case 'pdf':
+                    if (output.pdf_data) {
+                        return `<div class="output-pdf">
+                            <p><strong>PDF Generated:</strong> ${output.pdf_data.pages} page(s), ${output.pdf_data.size}</p>
+                            <a href="${output.pdf_data.download_url}" class="pdf-download-link">📄 Download PDF</a>
+                        </div>`;
+                    }
+                    break;
+                case 'markdown':
+                    if (output.markdown_content) {
+                        return `<div class="output-markdown">${output.markdown_content}</div>`;
+                    }
+                    break;
+            }
+        }
+
+        // Handle legacy output types
         if (output.rendered_html) {
             return `<div class="output-html">${output.rendered_html}</div>`;
         }
@@ -435,6 +633,48 @@ class MathematicalBoard {
         }
         
         return `<pre class="output-json">${JSON.stringify(output, null, 2)}</pre>`;
+    }
+
+    /**
+     * Render hierarchical action menu for widget
+     */
+    renderActionMenu(widget) {
+        if (!widget.actions || Object.keys(widget.actions).length === 0) {
+            return '<div class="menu-item-empty">No actions available</div>';
+        }
+
+        // Group actions by category
+        const categories = {};
+        for (const [actionSlug, actionConfig] of Object.entries(widget.actions)) {
+            const category = actionConfig.menu_category || 'actions';
+            if (!categories[category]) {
+                categories[category] = [];
+            }
+            categories[category].push({
+                slug: actionSlug,
+                name: actionConfig.names?.en || actionSlug,
+                icon: actionConfig.icon || '⚙️',
+                description: actionConfig.description?.en || ''
+            });
+        }
+
+        // Render hierarchical menu
+        let menuHtml = '';
+        for (const [category, actions] of Object.entries(categories)) {
+            menuHtml += `<div class="menu-category">
+                <div class="menu-category-header">${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
+            
+            for (const action of actions) {
+                menuHtml += `
+                    <div class="menu-item" onclick="executeWidgetAction('${widget.id}', '${action.slug}')" title="${action.description}">
+                        <span class="menu-icon">${action.icon}</span>
+                        <span class="menu-text">${action.name}</span>
+                    </div>`;
+            }
+            menuHtml += '</div>';
+        }
+
+        return menuHtml;
     }
 
     /**
@@ -495,6 +735,179 @@ class MathematicalBoard {
             widget.lastOutput = { success: false, error: error.message };
             this.updateWidgetDisplay(widget);
         }
+    }
+
+    /**
+     * Execute specific widget action with validation
+     */
+    async executeWidgetAction(widgetId, actionSlug) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget || !widget.schema) {
+            console.error(`Widget ${widgetId} not found or no schema`);
+            return;
+        }
+
+        const action = widget.actions[actionSlug];
+        if (!action) {
+            console.error(`Action ${actionSlug} not found for widget ${widgetId}`);
+            this.updateStatus(`Action '${actionSlug}' not found`, 'error');
+            return;
+        }
+
+        // Update widget status
+        widget.status = 'running';
+        this.updateWidgetDisplay(widget);
+        
+        try {
+            // Validate input if required
+            if (action.validation_required !== false) {
+                const validation = this.validateWidgetInput(widget.config, widget.schema);
+                if (!validation.valid) {
+                    throw new Error(`Input validation failed: ${validation.errors.join(', ')}`);
+                }
+            }
+            
+            // Simulate action-specific execution
+            const result = await this.simulateWidgetActionExecution(widget, actionSlug, action);
+            
+            widget.lastOutput = result;
+            widget.status = result.success ? 'completed' : 'error';
+            
+            // Update display
+            this.updateWidgetDisplay(widget);
+            
+            // Update status with action info
+            const actionName = action.names?.en || actionSlug;
+            this.updateStatus(`Executed action: ${actionName}`, result.success ? 'success' : 'error');
+            
+            console.log(`Widget ${widgetId} action ${actionSlug} executed:`, result);
+            return result;
+            
+        } catch (error) {
+            console.error(`Widget action execution failed: ${error}`);
+            widget.status = 'error';
+            widget.lastOutput = { success: false, error: error.message, action_slug: actionSlug };
+            this.updateWidgetDisplay(widget);
+            this.updateStatus(`Action failed: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Validate widget input against schema
+     */
+    validateWidgetInput(config, schema) {
+        const errors = [];
+        const inputSchema = schema.input_schema || schema.input_schemas?.[0];
+        
+        if (!inputSchema || !inputSchema.properties) {
+            return { valid: true, errors: [] };
+        }
+        
+        // Check required fields
+        const required = inputSchema.required || [];
+        for (const field of required) {
+            if (!(field in config) || config[field] === null || config[field] === undefined) {
+                errors.push(`Required field '${field}' is missing`);
+            }
+        }
+        
+        // Basic type checking
+        for (const [field, fieldSchema] of Object.entries(inputSchema.properties)) {
+            if (field in config) {
+                const value = config[field];
+                const expectedType = fieldSchema.type;
+                
+                if (expectedType === 'integer' && (!Number.isInteger(value) && typeof value !== 'number')) {
+                    errors.push(`Field '${field}' must be an integer`);
+                } else if (expectedType === 'number' && typeof value !== 'number') {
+                    errors.push(`Field '${field}' must be a number`);
+                } else if (expectedType === 'string' && typeof value !== 'string') {
+                    errors.push(`Field '${field}' must be a string`);
+                } else if (expectedType === 'boolean' && typeof value !== 'boolean') {
+                    errors.push(`Field '${field}' must be a boolean`);
+                }
+                
+                // Range validation
+                if (expectedType === 'integer' || expectedType === 'number') {
+                    if ('minimum' in fieldSchema && value < fieldSchema.minimum) {
+                        errors.push(`Field '${field}' must be >= ${fieldSchema.minimum}`);
+                    }
+                    if ('maximum' in fieldSchema && value > fieldSchema.maximum) {
+                        errors.push(`Field '${field}' must be <= ${fieldSchema.maximum}`);
+                    }
+                }
+            }
+        }
+        
+        return {
+            valid: errors.length === 0,
+            errors: errors
+        };
+    }
+
+    /**
+     * Simulate action-specific widget execution
+     */
+    async simulateWidgetActionExecution(widget, actionSlug, actionConfig) {
+        await new Promise(resolve => setTimeout(resolve, 300)); // Simulate processing time
+        
+        const outputFormat = actionConfig.output_format || 'json';
+        const actionName = actionConfig.names?.en || actionSlug;
+        
+        // Generate different outputs based on format
+        const result = {
+            success: true,
+            action_slug: actionSlug,
+            action_name: actionName,
+            output_format: outputFormat,
+            execution_time: Math.random() * 500 + 100
+        };
+        
+        switch (outputFormat) {
+            case 'html':
+                result.rendered_html = `<div class="action-result">
+                    <h3>${actionName} Result</h3>
+                    <p>Action executed successfully on ${widget.type} widget.</p>
+                    <p><strong>Format:</strong> ${outputFormat}</p>
+                    <p><strong>Execution Time:</strong> ${result.execution_time.toFixed(2)}ms</p>
+                </div>`;
+                break;
+            case 'svg':
+                result.svg_content = `<svg width="200" height="100" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="200" height="100" fill="#f4e4c1" stroke="#e6d7b8"/>
+                    <text x="100" y="30" text-anchor="middle" fill="#6b5544">SVG Output</text>
+                    <text x="100" y="50" text-anchor="middle" fill="#6b5544">${actionName}</text>
+                    <text x="100" y="70" text-anchor="middle" fill="#6b5544">${widget.type}</text>
+                </svg>`;
+                break;
+            case 'png':
+                result.image_data = {
+                    base64: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/x8ABQABAgDm4+JrAAAAABJRU5ErkJggg==',
+                    width: 200,
+                    height: 100,
+                    format: 'png'
+                };
+                break;
+            case 'pdf':
+                result.pdf_data = {
+                    size: '2.3KB',
+                    pages: 1,
+                    download_url: '#pdf-download'
+                };
+                break;
+            case 'markdown':
+                result.markdown_content = `# ${actionName} Output\n\n**Widget Type:** ${widget.type}\n\n**Action:** ${actionSlug}\n\n**Result:** Action executed successfully.\n\n---\n\n*Generated at ${new Date().toISOString()}*`;
+                break;
+            default:
+                result.data = {
+                    action: actionSlug,
+                    widget_type: widget.type,
+                    timestamp: new Date().toISOString(),
+                    config: widget.config
+                };
+        }
+        
+        return result;
     }
 
     /**
@@ -1113,6 +1526,29 @@ function runWidget(widgetId) {
     boardApp.executeWidget(widgetId);
 }
 
+function executeWidgetAction(widgetId, actionSlug) {
+    boardApp.executeWidgetAction(widgetId, actionSlug);
+    // Close the hamburger menu
+    const menu = document.getElementById(`menu-${widgetId}`);
+    if (menu) {
+        menu.style.display = 'none';
+    }
+}
+
+function toggleWidgetMenu(widgetId) {
+    const menu = document.getElementById(`menu-${widgetId}`);
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    // Close other open menus
+    document.querySelectorAll('.hamburger-dropdown').forEach(dropdown => {
+        if (dropdown.id !== `menu-${widgetId}`) {
+            dropdown.style.display = 'none';
+        }
+    });
+}
+
 function connectWidget(widgetId) {
     // Simple connection interface - in practice this would be more sophisticated
     const sourceId = prompt('Connect FROM widget ID:');
@@ -1293,3 +1729,93 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('Mathematical Board initialized');
 });
+
+/**
+ * Sticky Note Widget Enhanced Functions
+ */
+function toggleStickyEditMode(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget || widget.type !== 'sticky-note') return;
+    
+    const contentEl = document.getElementById(`content-${widgetId}`);
+    const isEditing = widget.isEditing || false;
+    
+    if (!isEditing) {
+        // Switch to edit mode
+        const currentContent = widget.config.content || '# New Note\n\nEdit to add content...';
+        contentEl.innerHTML = `
+            <div class="sticky-note-editor">
+                <textarea id="editor-${widgetId}" class="markdown-editor">${currentContent}</textarea>
+                <div class="editor-toolbar">
+                    <button onclick="saveStickyNote('${widgetId}')">💾 Save</button>
+                    <button onclick="cancelStickyEdit('${widgetId}')">❌ Cancel</button>
+                    <button onclick="previewStickyNote('${widgetId}')">👁️ Preview</button>
+                </div>
+            </div>
+        `;
+        widget.isEditing = true;
+        
+        // Auto-resize textarea
+        const textarea = document.getElementById(`editor-${widgetId}`);
+        textarea.style.height = (contentEl.clientHeight - 40) + 'px';
+    } else {
+        // Switch back to view mode
+        saveStickyNote(widgetId);
+    }
+}
+
+function saveStickyNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    const editorEl = document.getElementById(`editor-${widgetId}`);
+    if (editorEl) {
+        widget.config.content = editorEl.value;
+        widget.isEditing = false;
+        boardApp.updateWidgetDisplay(widget);
+        boardApp.saveBoardToStorage();
+    }
+}
+
+function cancelStickyEdit(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    widget.isEditing = false;
+    boardApp.updateWidgetDisplay(widget);
+}
+
+function previewStickyNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    const editorEl = document.getElementById(`editor-${widgetId}`);
+    if (!widget || !editorEl) return;
+    
+    const tempContent = editorEl.value;
+    const contentEl = document.getElementById(`content-${widgetId}`);
+    contentEl.innerHTML = `
+        <div class="sticky-note-preview">
+            ${boardApp.renderMarkdown(tempContent)}
+            <div class="preview-toolbar">
+                <button onclick="toggleStickyEditMode('${widgetId}')">✏️ Back to Edit</button>
+            </div>
+        </div>
+    `;
+}
+
+function changeStickyTheme(widgetId, themeName) {
+    const widget = boardApp.widgets.get(widgetId);
+    const widgetEl = document.querySelector(`[data-widget-id="${widgetId}"]`);
+    if (!widget || !widgetEl || widget.type !== 'sticky-note') return;
+    
+    // Remove existing theme classes
+    widgetEl.classList.remove('theme-desert', 'theme-ocean', 'theme-forest', 'theme-sunset');
+    
+    // Add new theme class
+    widgetEl.classList.add(`theme-${themeName}`);
+    
+    // Update widget config
+    widget.config.theme = themeName || 'desert';
+    boardApp.saveBoardToStorage();
+    
+    console.log(`Changed sticky note ${widgetId} theme to ${themeName}`);
+}

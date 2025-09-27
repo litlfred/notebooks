@@ -1,0 +1,204 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@type": ["prov:Entity", "notebook:Notebook"],
+  "@id": "urn:notebook:weierstrass-p5-q7-complete",
+  "dct:title": "Weierstrass Analysis: Prime Lattice p=5, q=7",
+  "dct:description": "Complete mathematical analysis of Weierstrass ℘-functions using prime lattice parameters p=5 and q=7",
+  "dct:created": "2024-01-15T10:30:00Z",
+  "dct:creator": "Mathematical Workspace",
+  
+  "@graph": [
+    {
+      "@id": "urn:widget:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.schema.json",
+      "widget:slug": "pq-torus",
+      "widget:instance_id": "pq-torus-1",
+      "widget:position": {
+        "x": 100,
+        "y": 150,
+        "width": 350,
+        "height": 280
+      },
+      "widget:input": {
+        "@type": ["prov:Entity", "pqt:input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/input.schema.json",
+        "p": 5,
+        "q": 7,
+        "description": "Prime lattice parameters for torus T = ℂ / (ℤ5 + ℤ7i)"
+      },
+      "widget:output": {
+        "@type": ["prov:Entity", "pqt:output"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/output.schema.json",
+        "lattice_parameters": {
+          "p": 5,
+          "q": 7,
+          "is_p_prime": true,
+          "is_q_prime": true,
+          "fundamental_domain_area": 35,
+          "lattice_type": "rectangular_prime"
+        },
+        "torus_definition": "T = ℂ / (ℤ5 + ℤ7i)",
+        "mathematical_properties": {
+          "genus": 1,
+          "euler_characteristic": 0,
+          "lattice_basis": ["5", "7i"],
+          "fundamental_parallelogram": {
+            "vertices": [[0,0], [5,0], [5,7], [0,7]]
+          }
+        }
+      }
+    },
+    
+    {
+      "@id": "urn:widget:weierstrass-two-panel-1",
+      "@type": ["prov:Entity", "weier:two-panel-widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/widget.schema.json",
+      "widget:slug": "pq-torus.weierstrass.two-panel",
+      "widget:instance_id": "weierstrass-two-panel-1",
+      "widget:parent": "urn:widget:pq-torus-1",
+      "widget:position": {
+        "x": 500,
+        "y": 100,
+        "width": 450,
+        "height": 350
+      },
+      "prov:wasDerivedFrom": "urn:widget:pq-torus-1",
+      "widget:input": {
+        "@type": ["prov:Entity", "weier:two-panel-input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/input.schema.json",
+        "p": 5,
+        "q": 7,
+        "plot_resolution": 200,
+        "complex_range": {
+          "real_min": -2.5,
+          "real_max": 2.5,
+          "imag_min": -3.5,
+          "imag_max": 3.5
+        },
+        "color_scheme": "viridis"
+      },
+      "widget:output": {
+        "@type": ["prov:Entity", "weier:two-panel-output"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/output.schema.json",
+        "plot_data": {
+          "weierstrass_function": "℘(z; 5, 7i)",
+          "derivative_function": "℘'(z; 5, 7i)",
+          "image_format": "svg",
+          "resolution": "200x200"
+        },
+        "mathematical_analysis": {
+          "singularities": "At lattice points ℤ5 + ℤ7i",
+          "periodicity": "Doubly periodic with periods 5 and 7i",
+          "analytic_properties": "Meromorphic function with double poles"
+        }
+      }
+    },
+    
+    {
+      "@id": "urn:widget:weierstrass-five-panel-1",
+      "@type": ["prov:Entity", "weier:five-panel-widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/widget.schema.json",
+      "widget:slug": "pq-torus.weierstrass.five-panel",
+      "widget:instance_id": "weierstrass-five-panel-1",
+      "widget:parent": "urn:widget:pq-torus-1",
+      "widget:position": {
+        "x": 100,
+        "y": 500,
+        "width": 850,
+        "height": 450
+      },
+      "prov:wasDerivedFrom": "urn:widget:pq-torus-1",
+      "widget:input": {
+        "@type": ["prov:Entity", "weier:five-panel-input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/input.schema.json",
+        "p": 5,
+        "q": 7,
+        "analysis_depth": "complete",
+        "include_derivatives": true,
+        "show_singularities": true,
+        "mathematical_annotations": true
+      },
+      "widget:output": {
+        "@type": ["prov:Entity", "weier:five-panel-output"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/output.schema.json",
+        "panels": {
+          "panel_1": "℘(z) - Main function",
+          "panel_2": "℘'(z) - First derivative",
+          "panel_3": "Re(℘'(z)) - Real part of derivative",
+          "panel_4": "Im(℘'(z)) - Imaginary part of derivative", 
+          "panel_5": "|℘'(z)| - Magnitude of derivative"
+        },
+        "comprehensive_analysis": {
+          "invariants": {
+            "g2": "Calculated for lattice ℤ5 + ℤ7i",
+            "g3": "Calculated for lattice ℤ5 + ℤ7i",
+            "discriminant": "g2³ - 27g3²"
+          },
+          "elliptic_curve": "y² = 4x³ - g2x - g3",
+          "period_matrix": [[5, 0], [0, 7]]
+        }
+      }
+    },
+    
+    {
+      "@id": "urn:widget:sticky-note-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "widget:slug": "sticky-note",
+      "widget:instance_id": "sticky-note-1",
+      "widget:position": {
+        "x": 1000,
+        "y": 100,
+        "width": 300,
+        "height": 200
+      },
+      "widget:input": {
+        "@type": ["prov:Entity", "sticky:input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/input.schema.json",
+        "content": "# Weierstrass Analysis Notes\n\n**Lattice**: T = ℂ / (ℤ5 + ℤ7i)\n\n**Key Properties**:\n- Prime parameters: p=5, q=7\n- Fundamental domain area: 35\n- Doubly periodic ℘-function\n\n**Mathematical Significance**:\nThis configuration provides a clean example of elliptic function theory with prime lattice parameters, avoiding complications from composite period structures.\n\n**Related**: See panels for complete ℘(z) and ℘'(z) analysis.",
+        "theme": "desert",
+        "show_note": true
+      },
+      "widget:output": {
+        "@type": ["prov:Entity", "sticky:output"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/output.schema.json",
+        "rendered_content": "HTML rendered markdown with LaTeX support",
+        "theme_applied": "desert",
+        "character_count": 445
+      }
+    }
+  ],
+  
+  "prov:Activity": [
+    {
+      "@id": "urn:activity:notebook-creation",
+      "@type": "prov:Activity",
+      "prov:startedAtTime": "2024-01-15T10:30:00Z",
+      "prov:endedAtTime": "2024-01-15T10:45:00Z",
+      "prov:used": ["urn:widget:pq-torus-1"],
+      "prov:generated": [
+        "urn:widget:weierstrass-two-panel-1",
+        "urn:widget:weierstrass-five-panel-1",
+        "urn:widget:sticky-note-1"
+      ],
+      "dct:description": "Created complete Weierstrass analysis workflow for prime lattice p=5, q=7"
+    }
+  ],
+  
+  "notebook:metadata": {
+    "widget_count": 4,
+    "mathematical_domain": "elliptic_functions",
+    "complexity_level": "advanced",
+    "lattice_parameters": {"p": 5, "q": 7},
+    "dependencies": {
+      "pq-torus-1": [],
+      "weierstrass-two-panel-1": ["pq-torus-1"],
+      "weierstrass-five-panel-1": ["pq-torus-1"],
+      "sticky-note-1": []
+    }
+  }
+}
