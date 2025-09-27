@@ -1,7 +1,7 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
   ],
   "@type": ["prov:Entity", "pqt:input"],
   "dct:conformsTo": "./input.schema.json",

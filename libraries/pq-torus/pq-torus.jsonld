@@ -1,7 +1,7 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
   ],
   "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
   "@type": ["prov:Collection", "library:WidgetLibrary"],

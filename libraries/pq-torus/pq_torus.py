@@ -6,7 +6,7 @@ Defines the torus T = C / L where L = Zp + Zqi with p and q prime.
 import re
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'core', 'widgets'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
 
 from base_widget import WidgetExecutor
 from typing import Dict, Any

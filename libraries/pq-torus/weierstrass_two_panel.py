@@ -5,7 +5,7 @@ Provides ℘(z) and ℘′(z) two-panel visualization using PQ-Torus lattice par
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'core', 'widgets'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
 
 from base_widget import WidgetExecutor
 from typing import Dict, Any
