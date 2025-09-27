@@ -12,19 +12,19 @@ def update_completeness_report():
     """Update the completeness report with current progress."""
     
     # Count generated widgets in hierarchical structure
-    widgets_dir = Path("docs/sympy/widgets")
+    widgets_dir = Path("docs/libraries/sympy/widgets")
     widget_files = list(widgets_dir.rglob("*.py"))  # Use rglob to find files recursively
     implemented_widgets = len(widget_files)
     
     # Load schema to get total widgets
-    schema_path = Path("docs/sympy/widget_schemas.json")
+    schema_path = Path("docs/libraries/sympy/widget_schemas.json")
     with open(schema_path, 'r') as f:
         schemas = json.load(f)
     
     total_widgets = len(schemas['widget-schemas'])
     
     # Load hierarchy analysis for class/method counts
-    hierarchy_path = Path("docs/sympy/hierarchy_analysis.json")
+    hierarchy_path = Path("docs/libraries/sympy/hierarchy_analysis.json")
     with open(hierarchy_path, 'r') as f:
         hierarchy = json.load(f)
     
@@ -142,7 +142,7 @@ if __name__ == "__main__":
     report = update_completeness_report()
     
     # Save updated report
-    report_path = Path("docs/sympy/COMPLETENESS_REPORT.md")
+    report_path = Path("docs/libraries/sympy/COMPLETENESS_REPORT.md")
     with open(report_path, 'w') as f:
         f.write(report)
     

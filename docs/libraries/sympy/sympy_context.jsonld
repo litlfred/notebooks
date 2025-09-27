@@ -1,8 +1,8 @@
 {
   "@context": {
     "@vocab": "https://schema.org/",
-    "sympy": "https://sympy.org/",
-    "widget": "https://widgets.sympy.org/",
+    "sympy": "https://litlfred.github.io/notebooks/libraries/sympy/",
+    "widget": "https://litlfred.github.io/notebooks/schema/libraries/sympy/",
     "SoftwareApplication": "https://schema.org/SoftwareApplication",
     "ComputationalWidget": "widget:ComputationalWidget",
     "MathematicalFunction": "widget:MathematicalFunction"
@@ -10,7 +10,7 @@
   "@graph": [
     {
       "@type": "SoftwareApplication",
-      "@id": "sympy:sympy.core",
+      "@id": "https://litlfred.github.io/notebooks/libraries/sympy/core",
       "name": "sympy.core",
       "applicationCategory": "Mathematical Software",
       "classes": [

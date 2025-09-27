@@ -9,7 +9,7 @@ import os
 
 def load_widget_schemas():
     """Load the generated widget schemas."""
-    schema_path = Path("docs/sympy/widget_schemas.json")
+    schema_path = Path("docs/libraries/sympy/widget_schemas.json")
     with open(schema_path, 'r') as f:
         return json.load(f)
 
@@ -100,7 +100,7 @@ class {widget_class_name}:
 def generate_widget_files():
     """Generate Python files for all SymPy widgets."""
     schemas = load_widget_schemas()
-    widgets_dir = Path("docs/sympy/widgets")
+    widgets_dir = Path("docs/libraries/sympy/widgets")
     widgets_dir.mkdir(exist_ok=True)
     
     generated_count = 0

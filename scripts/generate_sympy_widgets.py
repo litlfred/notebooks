@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 class SymPyWidgetGenerator:
     """Main class for generating SymPy widgets and documentation."""
     
-    def __init__(self, output_dir: str = "docs/sympy"):
+    def __init__(self, output_dir: str = "docs/libraries/sympy"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         
