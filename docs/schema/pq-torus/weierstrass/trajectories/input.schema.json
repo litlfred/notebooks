@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/trajectories/input.schema.json",
+  "title": "Weierstrass Trajectories Input Schema",
+  "description": "Input parameters for particle trajectory analysis in Weierstrass ℘ field",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "integer",
+      "description": "First prime integer p for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11
+    },
+    "q": {
+      "type": "integer",
+      "description": "Second prime integer q for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5
+    },
+    "initial_conditions": {
+      "type": "object",
+      "description": "Initial conditions for trajectory integration",
+      "properties": {
+        "position": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+        "velocity": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2}
+      },
+      "required": ["position", "velocity"]
+    },
+    "integration_time": {
+      "type": "number",
+      "description": "Total time for trajectory integration",
+      "default": 10.0,
+      "minimum": 0.1,
+      "maximum": 100.0
+    },
+    "num_trajectories": {
+      "type": "integer",
+      "description": "Number of particle trajectories to compute",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 20
+    }
+  },
+  "required": ["p", "q", "initial_conditions"]
+}
