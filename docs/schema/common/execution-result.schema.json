@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/common/execution-result.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/common/execution-result.schema.json",
   "title": "Common Execution Result Schema",
   "description": "Shared schema for widget execution results",
   "type": "object",

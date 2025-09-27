@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/three-panel/input.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/weierstrass/three-panel/input.schema.json",
   "title": "Weierstrass Three-Panel Function Input Schema",
   "description": "Input parameters for Weierstrass ℘(z), Re(℘′(z)), Im(℘′(z)) three-panel visualization",
   "type": "object",

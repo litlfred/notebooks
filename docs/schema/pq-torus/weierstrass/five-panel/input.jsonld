@@ -1,11 +1,11 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/ontology/context.jsonld"
   ],
   "@type": ["prov:Entity", "weier:five-panel-input"],
   "dct:conformsTo": "./input.schema.json", 
-  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/input.jsonld",
+  "@id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/weierstrass/five-panel/input.jsonld",
   "dct:title": "Weierstrass Five-Panel Function Input",
   "dct:description": "JSON-LD context for complete Weierstrass ℘ function five-panel input parameters",
   "prov:wasDerivedFrom": "../../widget.jsonld"

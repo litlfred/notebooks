@@ -1,11 +1,11 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/ontology/context.jsonld"
   ],
   "@type": ["prov:Entity", "pqt:input"],
   "dct:conformsTo": "./input.schema.json",
-  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/input.jsonld",
+  "@id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/input.jsonld",
   "dct:title": "PQ-Torus Input",
   "dct:description": "JSON-LD context for PQ-Torus prime lattice input parameters"
 }

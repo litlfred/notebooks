@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/widget.schema.json",
   "title": "PQ-Torus Widget Schema",
   "description": "Schema for PQ-Torus widget instances",
   "type": "object",

@@ -1,11 +1,11 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/ontology/context.jsonld"
   ],
   "@type": ["prov:Entity", "weier:two-panel-output"],
   "dct:conformsTo": "./output.schema.json",
-  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/output.jsonld",
+  "@id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/weierstrass/two-panel/output.jsonld",
   "dct:title": "Weierstrass Two-Panel Function Output",
   "dct:description": "JSON-LD context for Weierstrass ℘(z) and ℘′(z) two-panel computation results",
   "prov:wasDerivedFrom": "../../widget.jsonld"

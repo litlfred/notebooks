@@ -132,51 +132,31 @@ class DeploymentManager:
         print(f"✅ Updated {files_updated} schema files with deployment URLs")
     
     def _update_json_file_urls(self, file_path: Path, schema_base: str) -> bool:
-        """Update URLs in a single JSON/JSON-LD file"""
+        """Update template variables and hardcoded URLs in JSON/JSON-LD files"""
         try:
             with open(file_path, 'r') as f:
-                data = json.load(f)
+                content = f.read()
             
-            updated = False
+            original_content = content
             
-            # Update $id fields in JSON Schema files
-            if '$id' in data:
-                old_url = data['$id']
-                if 'litlfred.github.io/notebooks/schema' in old_url:
-                    # Extract the path after /schema/
-                    schema_path = old_url.split('/schema/')[-1]
-                    data['$id'] = f"{schema_base}/{schema_path}"
-                    updated = True
+            # Replace template variables first
+            content = content.replace('{{SCHEMA_BASE_URL}}', schema_base)
             
-            # Update @id fields in JSON-LD files
-            if '@id' in data:
-                old_url = data['@id']
-                if 'litlfred.github.io/notebooks/schema' in old_url:
-                    schema_path = old_url.split('/schema/')[-1]
-                    data['@id'] = f"{schema_base}/{schema_path}"
-                    updated = True
+            # For backwards compatibility, also handle hardcoded URLs
+            old_patterns = [
+                'https://litlfred.github.io/notebooks/schema',
+            ]
             
-            # Update @context URLs
-            if '@context' in data:
-                context_data = data['@context']
-                if isinstance(context_data, list):
-                    for i, ctx in enumerate(context_data):
-                        if isinstance(ctx, str) and 'litlfred.github.io/notebooks/schema' in ctx:
-                            schema_path = ctx.split('/schema/')[-1]
-                            data['@context'][i] = f"{schema_base}/{schema_path}"
-                            updated = True
-                elif isinstance(context_data, str) and 'litlfred.github.io/notebooks/schema' in context_data:
-                    schema_path = context_data.split('/schema/')[-1]
-                    data['@context'] = f"{schema_base}/{schema_path}"
-                    updated = True
+            for old_pattern in old_patterns:
+                content = content.replace(old_pattern, schema_base)
             
-            # Write back if updated
-            if updated:
+            # Write back if changed
+            if content != original_content:
                 with open(file_path, 'w') as f:
-                    json.dump(data, f, indent=2)
+                    f.write(content)
                 return True
             
-        except (json.JSONDecodeError, Exception) as e:
+        except Exception as e:
             print(f"⚠️  Error updating {file_path}: {e}")
         
         return False

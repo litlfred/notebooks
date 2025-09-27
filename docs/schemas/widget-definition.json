@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/widget-definition.json",
+  "$id": "{{SCHEMA_BASE_URL}}/widget-definition.json",
   "title": "Widget Definition Schema",
   "description": "Schema for defining widget configurations in the framework",
   "type": "object",
