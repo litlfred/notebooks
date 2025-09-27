@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/input.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/weierstrass/five-panel/input.schema.json",
   "title": "Weierstrass Five-Panel Function Input Schema",
   "description": "Input parameters for complete Weierstrass ℘ function analysis widget (inherits from PQ-Torus)",
   "type": "object",

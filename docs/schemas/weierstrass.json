@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/weierstrass.json",
+  "$id": "{{SCHEMA_BASE_URL}}/weierstrass.json",
   "title": "Weierstrass Function Widget Schemas",
   "description": "Input and output schemas for Weierstrass ℘ function widgets",
   "definitions": {
@@ -47,11 +47,11 @@
       "title": "Weierstrass Function Output Schema",
       "description": "Output data from Weierstrass ℘ function widgets",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+        {"$ref": "{{SCHEMA_BASE_URL}}/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "plot_data": {
-          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/visualization_output"
+          "$ref": "{{SCHEMA_BASE_URL}}/common.json#/definitions/visualization_output"
         },
         "field_data": {
           "type": "object",

@@ -19,6 +19,21 @@ class MathematicalBoard {
         this.setupEventListeners();
         this.initializeUserPreferences();
         this.loadWidgetSchemas();
+        this.initializeDeploymentContext();
+    }
+
+    /**
+     * Initialize deployment-aware URL services
+     */
+    async initializeDeploymentContext() {
+        try {
+            if (window.deploymentUtils) {
+                await window.deploymentUtils.initialize();
+                console.log('Deployment context initialized:', window.deploymentUtils.getDeploymentInfo());
+            }
+        } catch (error) {
+            console.warn('Could not initialize deployment context:', error);
+        }
     }
 
     /**

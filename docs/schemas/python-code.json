@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/python-code.json",
+  "$id": "{{SCHEMA_BASE_URL}}/python-code.json",
   "title": "Python Code Widget Schemas",
   "description": "Input and output schemas for the Python code execution widget",
   "definitions": {
@@ -35,7 +35,7 @@
       "title": "Python Code Output Schema",
       "description": "Output data from Python code execution",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+        {"$ref": "{{SCHEMA_BASE_URL}}/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "result": {

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus.json",
+  "$id": "{{SCHEMA_BASE_URL}}/pq-torus.json",
   "title": "PQ-Torus Widget Schemas",
   "description": "Input and output schemas for PQ-Torus widget defining torus T = C / L where L = Zp + Zqi",
   "definitions": {
@@ -36,7 +36,7 @@
       "title": "PQ-Torus Prime Pair Output Schema",
       "description": "Output data from PQ-Torus widget - same as input with validation results",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+        {"$ref": "{{SCHEMA_BASE_URL}}/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "p": {
@@ -69,7 +69,7 @@
         },
         "metadata": {
           "allOf": [
-            {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/metadata"}
+            {"$ref": "{{SCHEMA_BASE_URL}}/common.json#/definitions/metadata"}
           ],
           "properties": {
             "lattice_type": {"type": "string", "enum": ["rectangular_prime_lattice"]},

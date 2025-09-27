@@ -8,7 +8,7 @@ theme: minima
 title: "Mathematical Notebooks"
 description: "Interactive browser-based mathematical playgrounds powered by Python and WebAssembly"
 url: "https://litlfred.github.io"
-baseurl: "/notebooks"
+baseurl: "/notebooks/branch-preview/feature-test"
 
 # Build settings
 markdown: kramdown
@@ -44,3 +44,18 @@ collections:
   notebooks:
     output: true
     permalink: /:name/
+
+# Deployment context (auto-generated)
+deployment_type: "preview"
+branch_name: "copilot/fix-2328d6bb-cf51-414e-855b-4e78f7435456"
+schema_base_url: "https://litlfred.github.io/notebooks/branch-preview/copilot/fix-2328d6bb-cf51-414e-855b-4e78f7435456/schema"
+
+# Deployment context (auto-generated)
+deployment_type: "preview"
+branch_name: "feature-test"
+schema_base_url: "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema"
+
+# Deployment context (auto-generated)
+deployment_type: "preview"
+branch_name: "feature-test"
+schema_base_url: "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema"

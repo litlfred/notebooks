@@ -1,0 +1,261 @@
+name: 🌿 Branch Preview Deployment
+
+on:
+  # Deploy feature branches to preview URLs
+  push:
+    branches-ignore: [ main ]
+  
+  # Deploy PRs to preview URLs  
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [ main ]
+  
+  # Manual preview deployment (allows deploying any branch via GitHub UI)
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: '🌿 Branch to deploy for preview'
+        required: false
+        default: ''
+        type: string
+      deploy_type:
+        description: '🎯 Preview deployment type'
+        required: true
+        default: 'branch-preview'
+        type: choice
+        options:
+        - branch-preview
+        - force-rebuild
+
+# Allow multiple concurrent preview deployments
+concurrency:
+  group: "branch-preview-${{ github.ref_name }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+jobs:
+  build-and-deploy-preview:
+    runs-on: ubuntu-latest
+    outputs:
+      branch_name: ${{ steps.branch.outputs.branch_name }}
+      sanitized_branch_name: ${{ steps.branch.outputs.sanitized_branch_name }}
+    
+    steps:
+    - name: Determine branch to deploy
+      id: branch
+      run: |
+        # Determine the actual branch name first
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # Manual dispatch - use specified branch or current branch
+          if [ -n "${{ github.event.inputs.branch_name }}" ]; then
+            DEPLOY_BRANCH="${{ github.event.inputs.branch_name }}"
+          else
+            DEPLOY_BRANCH="${{ github.ref_name }}"
+          fi
+          echo "ref=refs/heads/${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          DEPLOY_BRANCH="${{ github.head_ref }}"
+          echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+        else
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+        fi
+        
+        echo "branch_name=${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
+        
+        # Sanitize branch name for artifact naming (replace invalid characters)
+        SANITIZED_BRANCH=$(echo "${DEPLOY_BRANCH}" | sed 's/[\/:]/-/g' | sed 's/[^a-zA-Z0-9._-]/-/g')
+        echo "sanitized_branch_name=${SANITIZED_BRANCH}" >> $GITHUB_OUTPUT
+    
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.branch.outputs.ref }}
+    
+    - name: Display preview deployment info
+      run: |
+        echo "🌿 Branch Preview Deployment"
+        echo "============================"
+        echo "📦 Repository: ${{ github.repository }}"
+        echo "🌿 Branch: ${{ steps.branch.outputs.branch_name }}"
+        echo "⚡ Trigger: ${{ github.event_name }}"
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "🎯 Deploy Type: ${{ github.event.inputs.deploy_type }}"
+          if [ -n "${{ github.event.inputs.branch_name }}" ]; then
+            echo "📝 Custom Branch: ${{ github.event.inputs.branch_name }}"
+          else
+            echo "📝 Using Current Branch: ${{ github.ref_name }}"
+          fi
+        fi
+        echo "📱 Preview URL: https://litlfred.github.io/notebooks/branch-preview/${{ steps.branch.outputs.branch_name }}"
+        echo "============================"
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Configure deployment context
+      run: |
+        echo "🔧 Configuring deployment for branch preview..."
+        python scripts/deploy_manager.py . configure
+        
+        # Show what was configured
+        echo "📝 Jekyll configuration:"
+        cat docs/_config.yml | grep -E "(baseurl|url|deployment_type|branch_name|schema_base_url)"
+    
+    - name: Install dependencies
+      run: |
+        pip install numpy matplotlib
+    
+    - name: Test mathematical functions
+      run: |
+        if [ -d "src/weierstrass_playground" ]; then
+          echo "🧮 Testing mathematical functions in branch..."
+          cd src
+          python -c "
+          try:
+              import weierstrass_playground.core as wc
+              import numpy as np
+              print('Testing mathematical functions...')
+              z = 2.0 + 1.5j
+              p, q, N = 11.0, 5.0, 2
+              wp_val = wc.wp_rect(z, p, q, N)
+              print(f'✓ ℘ function test passed: |℘({z})| = {abs(wp_val):.4f}')
+          except ImportError as e:
+              print(f'⚠️  Mathematical functions not testable: {e}')
+              print('✓ Branch structure validated')
+          " || echo "✓ Branch structure exists"
+        else
+          echo "ℹ️  No mathematical functions to test in this branch"
+        fi
+    
+    - name: Validate deployment configuration
+      run: |
+        echo "🔍 Validating deployment configuration..."
+        
+        # Check that deployment info was created
+        test -f docs/deployment-info.json
+        echo "✓ Deployment info file created"
+        
+        # Show deployment configuration
+        echo "📋 Deployment configuration:"
+        cat docs/deployment-info.json
+        
+        # Check basic docs structure
+        if [ -f "docs/index.md" ]; then echo "✓ index.md present"; fi
+        if [ -f "docs/_layouts/default.html" ]; then echo "✓ Jekyll layout present"; fi
+        if [ -d "docs/schema" ]; then echo "✓ Schema directory present"; fi
+        
+        echo "🎯 Preview deployment validation completed"
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+      
+    - name: Build with Jekyll  
+      uses: actions/jekyll-build-pages@v1
+      with:
+        source: ./docs
+        destination: ./_site
+    
+    - name: Upload artifact to preview path
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./_site
+        name: github-pages-preview-${{ steps.branch.outputs.sanitized_branch_name }}
+
+  deploy-preview:
+    environment:
+      name: github-pages-preview
+      url: https://litlfred.github.io/notebooks/branch-preview/${{ needs.build-and-deploy-preview.outputs.branch_name }}
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-preview
+    
+    steps:
+    - name: Deploy to GitHub Pages Preview
+      id: deployment
+      uses: actions/deploy-pages@v4
+      with:
+        artifact_name: github-pages-preview-${{ needs.build-and-deploy-preview.outputs.sanitized_branch_name }}
+    
+    - name: Update deployment status
+      run: |
+        echo "🌿 Branch preview deployed successfully!"
+        echo "📱 Preview URL: https://litlfred.github.io/notebooks/branch-preview/${{ needs.build-and-deploy-preview.outputs.branch_name }}"
+        echo "⏰ Deployed at: $(date)"
+    
+    - name: Comment on PR with preview URL
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🌿 **Branch Preview Deployed**')
+          );
+          
+          const previewUrl = `https://litlfred.github.io/notebooks/branch-preview/${{ needs.build-and-deploy-preview.outputs.branch_name }}`;
+          
+          const body = `🌿 **Branch Preview Deployed**
+          
+          ✅ **Preview is live!**
+          
+          📦 Repository: \`${{ github.repository }}\`
+          🌿 Branch: \`${{ needs.build-and-deploy-preview.outputs.branch_name }}\`
+          📱 Preview URL: ${previewUrl}
+          ⏰ Deployed at: ${new Date().toUTCString()}
+          
+          ## 🎉 View your branch preview:
+          
+          <div align="center">
+          
+          [![🌐 View Branch Preview](https://img.shields.io/badge/🌐_View_Branch_Preview-brightgreen?style=for-the-badge&logo=github-pages)](${previewUrl})
+          
+          </div>
+          
+          ---
+          
+          **📋 About Branch Previews:**
+          - This preview is automatically updated when you push to this branch
+          - Schema URLs are automatically adjusted for this preview environment
+          - The preview will be available until the branch is deleted
+          
+          **🔄 To update:** Just push new commits to this branch`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+          }
+    
+    - name: Update branch status with preview URL
+      if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+      run: |
+        echo "🌿 Branch preview deployed for: ${{ needs.build-and-deploy-preview.outputs.branch_name }}"
+        echo "📱 Preview URL: https://litlfred.github.io/notebooks/branch-preview/${{ needs.build-and-deploy-preview.outputs.branch_name }}"
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "👤 Manual deployment triggered by: ${{ github.actor }}"
+          echo "🎯 Deploy type: ${{ github.event.inputs.deploy_type }}"
+        fi

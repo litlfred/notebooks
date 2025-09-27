@@ -1,11 +1,11 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+    "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/ontology/context.jsonld"
   ],
   "@type": ["prov:Entity", "pqt:widget"],
   "dct:conformsTo": "./widget.schema.json",
-  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.jsonld",
+  "@id": "https://litlfred.github.io/notebooks/branch-preview/feature-test/schema/pq-torus/widget.jsonld",
   "dct:title": "PQ-Torus Widget",
   "dct:description": "JSON-LD context for PQ-Torus widget instances"
 }
