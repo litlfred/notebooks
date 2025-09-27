@@ -933,13 +933,20 @@ def stop_widget(widget_id):
             return '';
         }
         
-        const inputsHtml = inputs.map(([key, sourceWidget]) => 
-            `<div class="connection-input">← ${key} from ${sourceWidget}</div>`
-        ).join('');
+        const inputsHtml = inputs.map(([key, connectionData]) => {
+            const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
+            const hasETL = typeof connectionData === 'object' && connectionData.etlScript;
+            const etlIndicator = hasETL ? ' 🔄' : '';
+            return `<div class="connection-input">← ${key} from ${sourceId}${etlIndicator}</div>`;
+        }).join('');
         
-        const outputsHtml = outputs.map(([key, targetWidgets]) =>
-            `<div class="connection-output">${key} → ${targetWidgets.join(', ')}</div>`
-        ).join('');
+        const outputsHtml = outputs.map(([key, targetWidgets]) => {
+            const targetList = targetWidgets.map(target => {
+                const etlIndicator = target.hasETL ? ' 🔄' : '';
+                return `${target.targetId}${etlIndicator}`;
+            }).join(', ');
+            return `<div class="connection-output">${key} → ${targetList}</div>`;
+        }).join('');
         
         return `<div class="connections">${inputsHtml}${outputsHtml}</div>`;
     }
@@ -1229,7 +1236,7 @@ def stop_widget(widget_id):
     }
 
     /**
-     * Get connections for a widget
+     * Get connections for a widget with ETL transformation support
      */
     getWidgetConnections(widgetId) {
         const widget = this.widgets.get(widgetId);
@@ -1237,13 +1244,42 @@ def stop_widget(widget_id):
         
         const connections = {};
         
-        // Input connections
+        // Input connections with ETL transformation
         if (widget.connections.inputs && widget.connections.inputs.size > 0) {
             connections.inputs = {};
-            for (const [inputPath, sourceId] of widget.connections.inputs) {
+            for (const [inputPath, connectionData] of widget.connections.inputs) {
+                const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
                 const sourceWidget = this.widgets.get(sourceId);
+                
                 if (sourceWidget && sourceWidget.lastOutput && sourceWidget.lastOutput.success) {
-                    connections.inputs[inputPath] = sourceWidget.lastOutput;
+                    let sourceData = sourceWidget.lastOutput;
+                    
+                    // Apply ETL transformation if present
+                    if (typeof connectionData === 'object' && connectionData.etlScript) {
+                        try {
+                            // Execute ETL script with Pyodide
+                            const etlCode = `
+# ETL Transformation Script
+source_data = ${JSON.stringify(sourceData)}
+output_path = '${connectionData.outputPath || 'result'}'
+
+# User's ETL script
+${connectionData.etlScript}
+`;
+                            
+                            if (this.pyodide) {
+                                const transformedData = this.pyodide.runPython(etlCode);
+                                sourceData = typeof transformedData === 'string' ? JSON.parse(transformedData) : transformedData;
+                            } else {
+                                console.warn(`ETL script skipped - Python not available for connection ${sourceId} → ${widgetId}`);
+                            }
+                        } catch (error) {
+                            console.error(`ETL transformation failed for ${sourceId} → ${widgetId}:`, error);
+                            // Use original data if ETL fails
+                        }
+                    }
+                    
+                    connections.inputs[inputPath] = sourceData;
                 }
             }
         }
@@ -1343,7 +1379,7 @@ def stop_widget(widget_id):
     }
 
     /**
-     * DFS helper for cycle detection
+     * DFS helper for cycle detection (updated for new connection structure)
      */
     hasCycleDFS(widgetId, visited, recursionStack) {
         if (recursionStack.has(widgetId)) {
@@ -1360,7 +1396,8 @@ def stop_widget(widget_id):
         // Check all widgets that depend on this widget's output
         for (const [targetId, targetWidget] of this.widgets) {
             if (targetWidget.connections && targetWidget.connections.inputs) {
-                for (const [inputPath, sourceId] of targetWidget.connections.inputs) {
+                for (const [inputPath, connectionData] of targetWidget.connections.inputs) {
+                    const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
                     if (sourceId === widgetId) {
                         if (this.hasCycleDFS(targetId, visited, recursionStack)) {
                             return true;
@@ -1375,9 +1412,9 @@ def stop_widget(widget_id):
     }
 
     /**
-     * Connect widgets with cycle detection
+     * Connect widgets with cycle detection and ETL script support
      */
-    connectWidgetsWithValidation(sourceId, targetId, outputPath, inputPath) {
+    connectWidgetsWithValidation(sourceId, targetId, outputPath, inputPath, etlScript = '') {
         // First, add the connection temporarily
         const targetWidget = this.widgets.get(targetId);
         if (!targetWidget.connections) {
@@ -1385,7 +1422,14 @@ def stop_widget(widget_id):
         }
         
         const oldInput = targetWidget.connections.inputs.get(inputPath);
-        targetWidget.connections.inputs.set(inputPath, sourceId);
+        const connectionData = {
+            sourceId,
+            outputPath,
+            etlScript: etlScript.trim(),
+            created: new Date().toISOString()
+        };
+        
+        targetWidget.connections.inputs.set(inputPath, connectionData);
         
         // Check for cycles
         if (this.detectCycles()) {
@@ -1410,10 +1454,11 @@ def stop_widget(widget_id):
         }
         sourceWidget.connections.outputs.get(outputPath).push({
             targetId,
-            inputPath
+            inputPath,
+            hasETL: !!etlScript
         });
         
-        console.log(`Connected ${sourceId}[${outputPath}] → ${targetId}[${inputPath}]`);
+        console.log(`Connected ${sourceId}[${outputPath}] → ${targetId}[${inputPath}]${etlScript ? ' (with ETL)' : ''}`);
         return true;
     }
 
@@ -1771,12 +1816,13 @@ def stop_widget(widget_id):
             return;
         }
         
-        // Find widgets that have this widget as input
+        // Find widgets that have this widget as input (updated for new connection structure)
         for (const [widgetId, widget] of this.widgets) {
-            if (widget.connections.inputs.size > 0) {
-                for (const [inputPath, connectedSourceId] of widget.connections.inputs) {
+            if (widget.connections && widget.connections.inputs && widget.connections.inputs.size > 0) {
+                for (const [inputPath, connectionData] of widget.connections.inputs) {
+                    const connectedSourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
                     if (connectedSourceId === sourceId) {
-                        // Update the target widget's config with output data
+                        // Update the target widget's config with output data (ETL will be applied in getWidgetConnections)
                         this.updateWidgetInputFromConnection(widget, inputPath, sourceWidget.lastOutput);
                         
                         // Execute the dependent widget
@@ -2303,19 +2349,52 @@ function toggleWidgetMenu(widgetId) {
 }
 
 function connectWidget(widgetId) {
-    // Enhanced connection interface with cycle detection
+    // Enhanced connection interface with ETL script support
     const sourceId = prompt('Connect FROM widget ID:');
+    if (!sourceId || sourceId === widgetId) return;
+    
     const outputPath = prompt('Output path (e.g., data.x):') || 'result';
     const inputPath = prompt('Input path (e.g., data):') || 'data';
     
-    if (sourceId && sourceId !== widgetId) {
-        try {
-            boardApp.connectWidgetsWithValidation(sourceId, widgetId, outputPath, inputPath);
-            boardApp.updateStatus(`Connected ${sourceId} → ${widgetId}`, 'success');
-        } catch (error) {
-            boardApp.updateStatus(`Connection failed: ${error.message}`, 'error');
-            console.error('Connection error:', error);
-        }
+    // Ask if user wants to add ETL transformation script
+    const useETL = confirm('Add ETL transformation script? (transforms source output to target input)');
+    let etlScript = '';
+    
+    if (useETL) {
+        etlScript = prompt(`Enter Python ETL script to transform data from ${sourceId}[${outputPath}] to ${widgetId}[${inputPath}]:
+        
+Example:
+# source_data contains the output from source widget
+# Return the transformed data for target widget input
+result = source_data.get('${outputPath}', {})
+if isinstance(result, dict):
+    # Transform the data structure
+    transformed = {'processed_' + k: v for k, v in result.items()}
+    return transformed
+return result
+
+Enter your ETL script:`) || '';
+    }
+    
+    try {
+        // Enhanced connection with ETL support
+        boardApp.connectWidgetsWithValidation(sourceId, widgetId, outputPath, inputPath, etlScript);
+        
+        const etlInfo = etlScript ? ' (with ETL transformation)' : '';
+        boardApp.updateStatus(`Connected ${sourceId} → ${widgetId}${etlInfo}`, 'success');
+        
+        // Fire connection event
+        boardApp.fireWidgetEvent(widgetId, 'connection_added', {
+            sourceId,
+            targetId: widgetId,
+            outputPath,
+            inputPath,
+            hasETL: !!etlScript
+        });
+        
+    } catch (error) {
+        boardApp.updateStatus(`Connection failed: ${error.message}`, 'error');
+        console.error('Connection error:', error);
     }
 }
 
@@ -2360,8 +2439,74 @@ function toggleLibrary() {
 }
 
 function fitToScreen() {
-    // TODO: Implement fit to screen functionality
-    boardApp.updateStatus('Fit to screen', 'success');
+    // Implement fit to screen functionality
+    const boardContent = document.getElementById('board-content');
+    const widgets = Array.from(boardApp.widgets.values());
+    
+    if (widgets.length === 0) {
+        boardApp.updateStatus('No widgets to fit', 'info');
+        return;
+    }
+    
+    // Calculate bounding box of all widgets
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    widgets.forEach(widget => {
+        const x = widget.x || 0;
+        const y = widget.y || 0;
+        const width = widget.width || 300;
+        const height = widget.height || 200;
+        
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + width);
+        maxY = Math.max(maxY, y + height);
+    });
+    
+    // Get board content dimensions
+    const boardRect = boardContent.getBoundingClientRect();
+    const padding = 50; // Add some padding around widgets
+    
+    // Calculate scaling factor
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    const availableWidth = boardRect.width - (padding * 2);
+    const availableHeight = boardRect.height - (padding * 2);
+    
+    const scaleX = availableWidth / contentWidth;
+    const scaleY = availableHeight / contentHeight;
+    const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+    
+    // Calculate center offset
+    const centerX = (boardRect.width / 2) - ((contentWidth * scale) / 2);
+    const centerY = (boardRect.height / 2) - ((contentHeight * scale) / 2);
+    
+    // Apply transformation to all widgets
+    widgets.forEach(widget => {
+        const element = document.querySelector(`[data-widget-id="${widget.id}"]`);
+        if (element) {
+            const newX = ((widget.x - minX) * scale) + centerX;
+            const newY = ((widget.y - minY) * scale) + centerY;
+            const newWidth = (widget.width || 300) * scale;
+            const newHeight = (widget.height || 200) * scale;
+            
+            // Update widget properties
+            widget.x = newX;
+            widget.y = newY;
+            widget.width = newWidth;
+            widget.height = newHeight;
+            
+            // Update DOM element
+            element.style.left = `${newX}px`;
+            element.style.top = `${newY}px`;
+            element.style.width = `${newWidth}px`;
+            element.style.height = `${newHeight}px`;
+        }
+    });
+    
+    // Save the updated positions
+    boardApp.saveBoardToStorage();
+    boardApp.updateStatus(`Fitted ${widgets.length} widgets to screen (scale: ${(scale * 100).toFixed(1)}%)`, 'success');
 }
 
 function toggleGrid() {
@@ -2425,8 +2570,37 @@ function playAllWidgets() {
 }
 
 function pauseAllWidgets() {
-    boardApp.updateStatus('Paused all widgets', 'paused');
-    // TODO: Pause all running widgets
+    // Implement pause all running widgets functionality
+    const runningWidgets = Array.from(boardApp.runningWidgets);
+    
+    if (runningWidgets.length === 0) {
+        boardApp.updateStatus('No widgets currently running', 'info');
+        return;
+    }
+    
+    let pausedCount = 0;
+    const promises = runningWidgets.map(async (widgetId) => {
+        try {
+            await boardApp.stopWidget(widgetId);
+            pausedCount++;
+        } catch (error) {
+            console.error(`Failed to pause widget ${widgetId}:`, error);
+        }
+    });
+    
+    // Wait for all widgets to be paused
+    Promise.all(promises).then(() => {
+        boardApp.updateStatus(`Paused ${pausedCount} running widgets`, 'success');
+        
+        // Fire global event for paused widgets
+        boardApp.fireWidgetEvent('*', 'all_widgets_paused', { 
+            pausedCount, 
+            totalRequested: runningWidgets.length 
+        });
+    }).catch((error) => {
+        console.error('Error pausing widgets:', error);
+        boardApp.updateStatus('Error pausing some widgets', 'error');
+    });
 }
 
 function clearBoard() {
