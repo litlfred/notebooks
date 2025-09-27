@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/weierstrass.json",
+  "title": "Weierstrass Function Widget Schemas",
+  "description": "Input and output schemas for Weierstrass ℘ function widgets",
+  "definitions": {
+    "weierstrass_input": {
+      "$id": "#/definitions/weierstrass_input",
+      "type": "object",
+      "title": "Weierstrass Function Input Schema",
+      "description": "Common input parameters for Weierstrass ℘ function widgets",
+      "properties": {
+        "p": {
+          "type": "number",
+          "description": "Lattice parameter p",
+          "minimum": 0.1,
+          "maximum": 20,
+          "default": 11.0
+        },
+        "q": {
+          "type": "number", 
+          "description": "Lattice parameter q",
+          "minimum": 0.1,
+          "maximum": 20,
+          "default": 5.0
+        },
+        "N": {
+          "type": "integer",
+          "description": "Truncation level",
+          "minimum": 0,
+          "maximum": 6,
+          "default": 3
+        },
+        "grid_size": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100},
+            "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
+          }
+        }
+      },
+      "required": ["p", "q", "N"]
+    },
+    "weierstrass_output": {
+      "$id": "#/definitions/weierstrass_output",
+      "type": "object",
+      "title": "Weierstrass Function Output Schema",
+      "description": "Output data from Weierstrass ℘ function widgets",
+      "allOf": [
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+      ],
+      "properties": {
+        "plot_data": {
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/visualization_output"
+        },
+        "field_data": {
+          "type": "object",
+          "description": "℘(z) field data and analysis"
+        }
+      }
+    }
+  }
+}

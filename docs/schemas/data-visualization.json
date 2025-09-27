@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/data-visualization.json",
+  "title": "Data Visualization Widget Schemas",
+  "description": "Input and output schemas for data visualization widgets",
+  "definitions": {
+    "plot_input": {
+      "$id": "#/definitions/plot_input",
+      "type": "object",
+      "title": "Data Plot Input Schema",
+      "description": "Input parameters for data plotting widgets",
+      "properties": {
+        "data": {
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/data_series"
+        },
+        "plot_type": {
+          "enum": ["line", "scatter", "bar", "histogram"],
+          "default": "line"
+        },
+        "title": {"type": "string", "default": "Data Plot"},
+        "xlabel": {"type": "string", "default": "X"},
+        "ylabel": {"type": "string", "default": "Y"},
+        "style": {
+          "type": "object",
+          "properties": {
+            "color": {"type": "string", "default": "blue"},
+            "linewidth": {"type": "number", "default": 1.0},
+            "marker": {"type": "string", "default": "o"}
+          }
+        }
+      },
+      "required": ["data"]
+    },
+    "plot_output": {
+      "$id": "#/definitions/plot_output",
+      "type": "object",
+      "title": "Data Plot Output Schema",
+      "description": "Output from data plotting widgets",
+      "allOf": [
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+      ],
+      "properties": {
+        "plot_image": {
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/visualization_output"
+        },
+        "statistics": {
+          "type": "object",
+          "properties": {
+            "mean_x": {"type": "number"},
+            "mean_y": {"type": "number"},
+            "std_x": {"type": "number"},
+            "std_y": {"type": "number"}
+          }
+        }
+      }
+    },
+    "data_generator_input": {
+      "$id": "#/definitions/data_generator_input",
+      "type": "object",
+      "title": "Data Generator Input Schema",
+      "description": "Input parameters for data generation widgets",
+      "properties": {
+        "type": {
+          "enum": ["linear", "sine", "cosine", "polynomial", "random", "normal"],
+          "default": "sine"
+        },
+        "n_points": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 10000,
+          "default": 100
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "amplitude": {"type": "number", "default": 1.0},
+            "frequency": {"type": "number", "default": 1.0},
+            "phase": {"type": "number", "default": 0.0},
+            "noise": {"type": "number", "minimum": 0, "default": 0.1}
+          }
+        },
+        "x_range": {
+          "type": "object",
+          "properties": {
+            "min": {"type": "number", "default": 0},
+            "max": {"type": "number", "default": 10}
+          }
+        }
+      },
+      "required": ["type", "n_points"]
+    },
+    "data_generator_output": {
+      "$id": "#/definitions/data_generator_output",
+      "type": "object",
+      "title": "Data Generator Output Schema",
+      "description": "Output from data generation widgets",
+      "allOf": [
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
+      ],
+      "properties": {
+        "data": {
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/data_series"
+        },
+        "metadata": {
+          "allOf": [
+            {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/metadata"}
+          ],
+          "properties": {
+            "generator_type": {"type": "string"},
+            "parameters_used": {"type": "object"},
+            "generated_at": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

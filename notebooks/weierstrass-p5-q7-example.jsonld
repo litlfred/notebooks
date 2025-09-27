@@ -1,0 +1,161 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@graph": [
+    {
+      "@id": "urn:notebook:weierstrass-p5-q7-example",
+      "@type": ["prov:Entity", "notebook:notebook"],
+      "dct:title": "Weierstrass Analysis for Prime Lattice p=5, q=7",
+      "dct:description": "Complete mathematical analysis of Weierstrass ℘-function over rectangular prime lattice with p=5 and q=7",
+      "dct:created": "2024-12-19T10:00:00Z",
+      "notebook:widgets": [
+        "urn:widget:pq-torus-1",
+        "urn:widget:weierstrass-two-panel-1", 
+        "urn:widget:weierstrass-five-panel-1",
+        "urn:widget:sticky-note-1"
+      ]
+    },
+    {
+      "@id": "urn:widget:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/widget.schema.json",
+      "widget:type": "pq-torus",
+      "widget:instance_id": "pq-torus-1",
+      "widget:position": {"x": 100, "y": 100},
+      "widget:size": {"width": 350, "height": 280},
+      "prov:value": {
+        "p": 5,
+        "q": 7,
+        "metadata": {
+          "created_at": "2024-12-19T10:00:00Z",
+          "widget_type": "pq-torus",
+          "instance_id": "pq-torus-1"
+        }
+      },
+      "prov:wasGeneratedBy": "urn:activity:pq-torus-computation-1"
+    },
+    {
+      "@id": "urn:activity:pq-torus-computation-1",
+      "@type": ["prov:Activity", "pqt:computation"],
+      "prov:startedAtTime": "2024-12-19T10:00:00Z",
+      "prov:endedAtTime": "2024-12-19T10:00:05Z",
+      "prov:used": {
+        "p": 5,
+        "q": 7
+      }
+    },
+    {
+      "@id": "urn:output:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:output"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/output.schema.json",
+      "prov:wasGeneratedBy": "urn:activity:pq-torus-computation-1",
+      "prov:value": {
+        "lattice_parameters": {
+          "p": 5,
+          "q": 7,
+          "fundamental_domain": {
+            "width": 5,
+            "height": 7,
+            "area": 35
+          },
+          "lattice_type": "rectangular_prime",
+          "torus_definition": "T = ℂ / (ℤ5 + ℤ7i)"
+        },
+        "prime_validation": {
+          "p_is_prime": true,
+          "q_is_prime": true,
+          "validation_status": "valid"
+        },
+        "mathematical_properties": {
+          "lattice_invariants": {
+            "g2": "computed",
+            "g3": "computed"
+          },
+          "discriminant": "non_zero"
+        }
+      }
+    },
+    {
+      "@id": "urn:widget:weierstrass-two-panel-1",
+      "@type": ["prov:Entity", "weier:two-panel-widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/widget.schema.json",
+      "widget:type": "pq-torus.weierstrass.two-panel",
+      "widget:instance_id": "weierstrass-two-panel-1",
+      "widget:position": {"x": 500, "y": 100},
+      "widget:size": {"width": 400, "height": 300},
+      "widget:parent": "urn:widget:pq-torus-1",
+      "prov:wasDerivedFrom": "urn:output:pq-torus-1",
+      "prov:value": {
+        "lattice_params": {
+          "p": 5,
+          "q": 7
+        },
+        "visualization_config": {
+          "plot_resolution": 100,
+          "color_scheme": "viridis",
+          "show_grid": true
+        }
+      }
+    },
+    {
+      "@id": "urn:widget:weierstrass-five-panel-1", 
+      "@type": ["prov:Entity", "weier:five-panel-widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/widget.schema.json",
+      "widget:type": "pq-torus.weierstrass.five-panel",
+      "widget:instance_id": "weierstrass-five-panel-1", 
+      "widget:position": {"x": 950, "y": 100},
+      "widget:size": {"width": 500, "height": 400},
+      "widget:parent": "urn:widget:pq-torus-1",
+      "prov:wasDerivedFrom": "urn:output:pq-torus-1",
+      "prov:value": {
+        "lattice_params": {
+          "p": 5,
+          "q": 7
+        },
+        "analysis_config": {
+          "show_derivatives": true,
+          "show_contours": true,
+          "resolution": 150
+        }
+      }
+    },
+    {
+      "@id": "urn:widget:sticky-note-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "widget:type": "sticky-note",
+      "widget:instance_id": "sticky-note-1",
+      "widget:position": {"x": 100, "y": 420},
+      "widget:size": {"width": 350, "height": 200},
+      "prov:value": {
+        "content": "# Weierstrass Analysis Example\n\nThis notebook demonstrates the complete analysis of the Weierstrass ℘-function over a rectangular prime lattice.\n\n**Lattice Parameters:**\n- p = {{pq-torus-1.output.lattice_parameters.p}} (prime)\n- q = {{pq-torus-1.output.lattice_parameters.q}} (prime)\n- Fundamental domain area: {{pq-torus-1.output.lattice_parameters.fundamental_domain.area}}\n\n**Mathematical Definition:**\nT = ℂ / (ℤ{{pq-torus-1.output.lattice_parameters.p}} + ℤ{{pq-torus-1.output.lattice_parameters.q}}i)\n\nThe two-panel visualization shows ℘(z) and ℘′(z), while the five-panel provides complete field analysis including derivatives and properties.\n\n*Last updated: {{timestamp}}*",
+        "show_note": true,
+        "style_theme": "desert"
+      }
+    },
+    {
+      "@id": "urn:connection:pq-torus-to-two-panel",
+      "@type": ["prov:Entity", "notebook:connection"],
+      "prov:wasInfluencedBy": "urn:widget:pq-torus-1",
+      "notebook:source": "urn:output:pq-torus-1",
+      "notebook:target": "urn:widget:weierstrass-two-panel-1",
+      "notebook:data_flow": {
+        "source_path": "lattice_parameters",
+        "target_path": "lattice_params"
+      }
+    },
+    {
+      "@id": "urn:connection:pq-torus-to-five-panel", 
+      "@type": ["prov:Entity", "notebook:connection"],
+      "prov:wasInfluencedBy": "urn:widget:pq-torus-1",
+      "notebook:source": "urn:output:pq-torus-1",
+      "notebook:target": "urn:widget:weierstrass-five-panel-1",
+      "notebook:data_flow": {
+        "source_path": "lattice_parameters",
+        "target_path": "lattice_params"
+      }
+    }
+  ]
+}

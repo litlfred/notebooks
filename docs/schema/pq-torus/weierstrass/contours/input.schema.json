@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/contours/input.schema.json",
+  "title": "Weierstrass Contours Input Schema",
+  "description": "Input parameters for topographic contour mapping of Weierstrass ℘ field",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "integer",
+      "description": "First prime integer p for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11
+    },
+    "q": {
+      "type": "integer",
+      "description": "Second prime integer q for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5
+    },
+    "contour_levels": {
+      "type": "integer",
+      "description": "Number of contour levels to generate",
+      "default": 20,
+      "minimum": 5,
+      "maximum": 50
+    },
+    "field_type": {
+      "type": "string",
+      "description": "Type of field to map contours for",
+      "default": "magnitude",
+      "enum": ["magnitude", "real", "imaginary", "phase"]
+    },
+    "adaptive_levels": {
+      "type": "boolean",
+      "description": "Use adaptive contour level spacing",
+      "default": true
+    }
+  },
+  "required": ["p", "q"]
+}

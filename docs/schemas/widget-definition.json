@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/widget-definition.json",
+  "title": "Widget Definition Schema",
+  "description": "Schema for defining widget configurations in the framework",
+  "type": "object",
+  "definitions": {
+    "schema_reference": {
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "uri",
+          "description": "URL reference to external schema"
+        },
+        {
+          "type": "object",
+          "description": "Inline JSON schema definition"
+        }
+      ]
+    },
+    "widget": {
+      "$id": "#/definitions/widget",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]*[a-z0-9]$",
+          "description": "Unique widget identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Human-readable widget name"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500,
+          "description": "Widget description"
+        },
+        "category": {
+          "enum": ["content", "computation", "visualization", "data", "utility"],
+          "description": "Widget category"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Widget icon (emoji or identifier)"
+        },
+        "input_schemas": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/schema_reference"},
+          "minItems": 1,
+          "description": "Array of input schemas in precedence order"
+        },
+        "output_schemas": {
+          "type": "array",
+          "items": {"$ref": "#/definitions/schema_reference"},
+          "minItems": 1,
+          "description": "Array of output schemas in precedence order"
+        },
+        "python_script": {
+          "type": "string",
+          "pattern": "^widgets/[a-zA-Z0-9_/-]+\\.py$",
+          "description": "Path to Python execution script"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "default": "1.0.0"
+        },
+        "author": {
+          "type": "string",
+          "description": "Widget author"
+        },
+        "tags": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Searchable tags"
+        }
+      },
+      "required": ["id", "name", "description", "category", "icon", "input_schemas", "output_schemas", "python_script"]
+    }
+  },
+  "properties": {
+    "widget-schemas": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*[a-z0-9]$": {
+          "$ref": "#/definitions/widget"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["widget-schemas"]
+}
