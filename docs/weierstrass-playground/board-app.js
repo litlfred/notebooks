@@ -100,7 +100,8 @@ class MathematicalBoard {
             'content': '📝',
             'computation': '🐍', 
             'visualization': '∞',
-            'data': '📋'
+            'data': '📋',
+            'jupyter': '🧩'
         };
         return icons[category] || '🧩';
     }
@@ -110,7 +111,8 @@ class MathematicalBoard {
             'content': 'CONTENT',
             'computation': 'COMPUTATION',
             'visualization': 'VISUALIZATION', 
-            'data': 'DATA'
+            'data': 'DATA',
+            'jupyter': 'JUPYTER'
         };
         return names[category] || category.toUpperCase();
     }

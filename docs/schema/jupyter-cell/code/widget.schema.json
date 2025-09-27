@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:litlfred:notebooks:schema:jupyter-cell:code:widget",
+  "title": "Jupyter Code Cell Widget",
+  "description": "Widget schema for Jupyter notebook code cells with execution and output support",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/metadata.schema.json"
+    }
+  ],
+  "properties": {
+    "input": {
+      "type": "object", 
+      "description": "Input configuration for the code cell",
+      "properties": {
+        "source": {
+          "type": ["string", "array"],
+          "description": "Source code content (string or array of lines)",
+          "default": ""
+        },
+        "language": {
+          "type": "string",
+          "description": "Programming language for syntax highlighting",
+          "default": "python",
+          "enum": ["python", "javascript", "r", "julia", "scala", "sql", "bash", "markdown"]
+        },
+        "execution_timeout": {
+          "type": "number",
+          "description": "Maximum execution time in seconds",
+          "default": 30,
+          "minimum": 1,
+          "maximum": 300
+        }
+      },
+      "required": ["source"]
+    },
+    "output": {
+      "type": "object",
+      "description": "Output configuration and results",
+      "properties": {
+        "execution_count": {
+          "type": ["integer", "null"],
+          "description": "Execution count from last run"
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Cell outputs per nbformat specification",
+          "items": {
+            "type": "object",
+            "properties": {
+              "output_type": {
+                "type": "string",
+                "enum": ["stream", "display_data", "execute_result", "error"]
+              },
+              "name": {
+                "type": "string",
+                "description": "Stream name for stream outputs"
+              },
+              "text": {
+                "oneOf": [
+                  {"type": "string"},
+                  {"type": "array", "items": {"type": "string"}}
+                ],
+                "description": "Text content for stream/error outputs"
+              },
+              "data": {
+                "type": "object",
+                "description": "Rich display data with MIME types",
+                "patternProperties": {
+                  "^[a-zA-Z0-9._/-]+$": {
+                    "oneOf": [
+                      {"type": "string"},
+                      {"type": "array", "items": {"type": "string"}},
+                      {"type": "object"}
+                    ]
+                  }
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "description": "Output metadata",
+                "additionalProperties": true
+              },
+              "execution_count": {
+                "type": ["integer", "null"]
+              },
+              "ename": {
+                "type": "string",
+                "description": "Exception name for error outputs"
+              },
+              "evalue": {
+                "type": "string", 
+                "description": "Exception value for error outputs"
+              },
+              "traceback": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Exception traceback for error outputs"
+              }
+            },
+            "required": ["output_type"]
+          }
+        }
+      }
+    },
+    "jupyter": {
+      "type": "object",
+      "description": "Jupyter-specific metadata and properties",
+      "properties": {
+        "cell_type": {
+          "type": "string",
+          "const": "code",
+          "description": "Jupyter cell type identifier"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Original Jupyter cell metadata",
+          "additionalProperties": true
+        },
+        "id": {
+          "type": "string",
+          "description": "Original Jupyter cell ID if present"
+        }
+      },
+      "required": ["cell_type"]
+    }
+  },
+  "required": ["input", "jupyter"]
+}
