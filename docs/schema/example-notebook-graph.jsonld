@@ -5,19 +5,23 @@
   ],
   "@graph": [
     {
-      "@id": "urn:uuid:pq-torus-widget-1",
+      "@id": "urn:widget:pq-torus-1",
       "@type": ["prov:Entity", "pqt:widget"],
       "dct:conformsTo": "./pq-torus/widget.schema.json",
       "widget_id": "pq-torus-1",
       "widget_type": "pq-torus",
       "prov:generatedAtTime": "2024-09-27T09:00:00Z",
+      "layout": {
+        "position": {"x": 100, "y": 100},
+        "size": {"width": 350, "height": 250}
+      },
       "input": {
         "p": 11,
         "q": 5
       }
     },
     {
-      "@id": "urn:uuid:pq-torus-output-1",
+      "@id": "urn:output:pq-torus-1",
       "@type": ["prov:Entity", "pqt:output"],
       "dct:conformsTo": "./pq-torus/output.schema.json",
       "prov:value": {
@@ -31,15 +35,19 @@
           "validation_message": "Both 11 and 5 are prime numbers ✓"
         }
       },
-      "prov:wasGeneratedBy": "urn:uuid:pq-torus-activity-1"
+      "prov:wasGeneratedBy": "urn:activity:pq-torus-1"
     },
     {
-      "@id": "urn:uuid:weierstrass-widget-1", 
+      "@id": "urn:widget:weierstrass-1", 
       "@type": ["prov:Entity", "weier:widget"],
       "dct:conformsTo": "./weierstrass/widget.schema.json",
       "widget_id": "weier-1",
       "widget_type": "wp-two-panel",
       "prov:generatedAtTime": "2024-09-27T09:01:00Z",
+      "layout": {
+        "position": {"x": 500, "y": 100},
+        "size": {"width": 400, "height": 300}
+      },
       "input": {
         "p": 11,
         "q": 5,
@@ -47,19 +55,19 @@
       },
       "dependencies": [
         {
-          "source_widget": "urn:uuid:pq-torus-widget-1",
+          "source_widget": "urn:widget:pq-torus-1",
           "source_path": "p",
           "target_path": "p"
         },
         {
-          "source_widget": "urn:uuid:pq-torus-widget-1",
+          "source_widget": "urn:widget:pq-torus-1",
           "source_path": "q", 
           "target_path": "q"
         }
       ]
     },
     {
-      "@id": "urn:uuid:weierstrass-output-1",
+      "@id": "urn:output:weierstrass-1",
       "@type": ["prov:Entity", "weier:output"],
       "dct:conformsTo": "./weierstrass/output.schema.json",
       "prov:value": {
@@ -70,22 +78,22 @@
           "height": 600
         }
       },
-      "prov:wasGeneratedBy": "urn:uuid:weierstrass-activity-1"
+      "prov:wasGeneratedBy": "urn:activity:weierstrass-1"
     },
     {
-      "@id": "urn:uuid:pq-torus-activity-1",
+      "@id": "urn:activity:pq-torus-1",
       "@type": "prov:Activity",
       "prov:startedAtTime": "2024-09-27T09:00:00Z",
       "prov:endedAtTime": "2024-09-27T09:00:01Z",
-      "prov:used": "urn:uuid:pq-torus-widget-1"
+      "prov:used": "urn:widget:pq-torus-1"
     },
     {
-      "@id": "urn:uuid:weierstrass-activity-1",
+      "@id": "urn:activity:weierstrass-1",
       "@type": "prov:Activity", 
       "prov:startedAtTime": "2024-09-27T09:01:00Z",
       "prov:endedAtTime": "2024-09-27T09:01:02Z",
-      "prov:used": "urn:uuid:weierstrass-widget-1",
-      "prov:wasInformedBy": "urn:uuid:pq-torus-activity-1"
+      "prov:used": "urn:widget:weierstrass-1",
+      "prov:wasInformedBy": "urn:activity:pq-torus-1"
     }
   ]
 }

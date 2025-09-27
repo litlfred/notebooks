@@ -396,6 +396,98 @@ body {
     padding: 0.5rem;
 }
 
+/* Widget layout and positioning */
+.widget-pq-torus {
+    min-width: 300px;
+    min-height: 200px;
+}
+
+.widget-pq-torus .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(231, 76, 60, 0.1));
+}
+
+.widget-sticky-note {
+    min-width: 250px;
+    min-height: 180px;
+    background: var(--warning-color);
+    color: var(--text-primary);
+}
+
+.widget-sticky-note .widget-header {
+    background: rgba(241, 196, 15, 0.9);
+    color: var(--text-primary);
+}
+
+.widget-sticky-note .widget-content {
+    background: rgba(241, 196, 15, 0.7);
+}
+
+.widget-weierstrass {
+    min-width: 350px;
+    min-height: 280px;
+}
+
+.widget-weierstrass .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(52, 152, 219, 0.1));
+}
+
+/* Widget status indicators */
+.widget-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}
+
+.widget-status.idle {
+    background: var(--text-secondary);
+}
+
+.widget-status.running {
+    background: var(--warning-color);
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.widget-status.completed {
+    background: var(--success-color);
+}
+
+.widget-status.error {
+    background: var(--accent-color);
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Layout positioning helpers */
+.widget-locked {
+    cursor: default !important;
+}
+
+.widget-locked .widget-header {
+    cursor: default !important;
+}
+
+.widget-z-index-high {
+    z-index: 100;
+}
+
+/* Responsive widget sizing */
+@media (max-width: 768px) {
+    .board-widget {
+        min-width: 280px;
+        min-height: 200px;
+    }
+    
+    .widget-content {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
 /* ===== CONTROL PANEL ===== */
 .global-control-panel {
     grid-area: controls;

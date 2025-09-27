@@ -6,18 +6,20 @@
   "type": "object",
   "properties": {
     "p": {
-      "type": "number",
-      "description": "Lattice parameter p",
-      "minimum": 0.1,
-      "maximum": 20,
-      "default": 11.0
+      "type": "integer",
+      "description": "First prime integer p for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
     },
     "q": {
-      "type": "number", 
-      "description": "Lattice parameter q",
-      "minimum": 0.1,
-      "maximum": 20,
-      "default": 5.0
+      "type": "integer",
+      "description": "Second prime integer q for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
     },
     "N": {
       "type": "integer",

@@ -55,6 +55,39 @@
           "target_path": {"type": "string"}
         }
       }
+    },
+    "layout": {
+      "type": "object",
+      "description": "Optional notebook layout information for blackboard positioning",
+      "properties": {
+        "position": {
+          "type": "object",
+          "description": "Widget position on infinite blackboard canvas",
+          "properties": {
+            "x": {"type": "number", "description": "X coordinate relative to origin"},
+            "y": {"type": "number", "description": "Y coordinate relative to origin"}
+          }
+        },
+        "size": {
+          "type": "object",
+          "description": "Widget display dimensions",
+          "properties": {
+            "width": {"type": "number", "minimum": 200, "maximum": 1200, "default": 350},
+            "height": {"type": "number", "minimum": 150, "maximum": 800, "default": 250}
+          }
+        },
+        "z_index": {
+          "type": "integer",
+          "description": "Widget stacking order",
+          "minimum": 0,
+          "default": 0
+        },
+        "locked": {
+          "type": "boolean", 
+          "description": "Whether widget position/size is locked",
+          "default": false
+        }
+      }
     }
   },
   "required": ["widget_id", "widget_type"],
