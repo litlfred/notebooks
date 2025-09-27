@@ -102,8 +102,19 @@ class WeierstrassApp {
             
             this.updateProgress(65, 'Loading Matplotlib...');
             console.log('📦 Loading Matplotlib package...');
-            await this.pyodide.loadPackage(['matplotlib']);
-            console.log('✅ Matplotlib loaded successfully');
+            console.log('🔄 Starting pyodide.loadPackage([\'matplotlib\'])...');
+            
+            try {
+                await this.pyodide.loadPackage(['matplotlib']);
+                console.log('✅ pyodide.loadPackage([\'matplotlib\']) completed');
+                console.log('✅ Matplotlib loaded successfully');
+            } catch (matplotlibError) {
+                console.error('❌ Matplotlib loading failed:', matplotlibError);
+                console.error('❌ Matplotlib error type:', matplotlibError.constructor.name);
+                console.error('❌ Matplotlib error message:', matplotlibError.message);
+                if (matplotlibError.stack) console.error('❌ Matplotlib error stack:', matplotlibError.stack);
+                throw matplotlibError;
+            }
             
         } catch (error) {
             console.error('❌ Failed to load Pyodide:', error);
@@ -122,17 +133,28 @@ class WeierstrassApp {
         
         // Configure matplotlib for web display
         try {
+            console.log('🔄 Starting matplotlib configuration...');
             this.pyodide.runPython(`
+                print("🐍 Setting up matplotlib backend...")
                 import matplotlib
                 matplotlib.use('Agg')  # Use Anti-Grain Geometry backend for PNG output
+                print("✅ matplotlib backend set to Agg")
+                
                 import matplotlib.pyplot as plt
+                print("✅ matplotlib.pyplot imported")
+                
                 plt.rcParams['figure.dpi'] = 100
                 plt.rcParams['savefig.dpi'] = 150
                 plt.rcParams['font.size'] = 10
+                print("✅ matplotlib rcParams configured")
+                print("✅ matplotlib configuration complete")
             `);
             console.log('✅ Matplotlib configured successfully');
         } catch (error) {
             console.error('❌ Failed to configure matplotlib:', error);
+            console.error('❌ Matplotlib config error type:', error.constructor.name);
+            console.error('❌ Matplotlib config error message:', error.message);
+            if (error.stack) console.error('❌ Matplotlib config error stack:', error.stack);
             throw error;
         }
         
