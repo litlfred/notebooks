@@ -25,6 +25,7 @@ class GitHubAuthService {
                     this.isAuthenticated = true;
                     this.checkUserPermissions();
                     this.updateUI();
+                    this.integrateWithNotebookLoader();
                 } else {
                     this.clearAuth();
                 }
@@ -181,6 +182,7 @@ class GitHubAuthService {
                 this.isAuthenticated = true;
                 await this.checkUserPermissions();
                 this.updateUI();
+                this.integrateWithNotebookLoader();
                 this.closeLoginModal();
                 this.showSuccess('Successfully authenticated with GitHub!');
             } else {
@@ -323,7 +325,7 @@ class GitHubAuthService {
     }
 
     /**
-     * Save current notebook to GitHub
+     * Save current notebook to GitHub (updated for PR #15 integration)
      */
     async saveToGitHub() {
         if (!this.canWrite()) {
@@ -332,7 +334,7 @@ class GitHubAuthService {
         }
 
         try {
-            // Get current notebook state
+            // Get current notebook state using the enhanced format
             const notebookData = this.getCurrentNotebookData();
             const filename = this.generateNotebookFilename();
             
@@ -341,6 +343,11 @@ class GitHubAuthService {
             
             await this.saveFileToGitHub(`notebooks/${filename}`, notebookData, commitMessage);
             this.showSuccess('Notebook saved to GitHub successfully!');
+            
+            // Integrate with notebook loader if available
+            if (window.notebookLoader) {
+                window.notebookLoader.loadAvailableNotebooks();
+            }
             
         } catch (error) {
             console.error('Save error:', error);
@@ -428,7 +435,7 @@ class GitHubAuthService {
     }
 
     /**
-     * Get current notebook data as JSON-LD
+     * Get current notebook data as JSON-LD (compatible with PR #15 format)
      */
     getCurrentNotebookData() {
         const board = window.mathematicalBoard;
@@ -436,59 +443,102 @@ class GitHubAuthService {
             throw new Error('Board not initialized');
         }
 
+        const title = document.getElementById('board-title')?.textContent || "Mathematical Notebook";
+        const notebookId = this.generateNotebookId(title);
+        
         const notebookData = {
-            "@context": {
-                "@vocab": "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld",
-                "prov": "http://www.w3.org/ns/prov#",
-                "dct": "http://purl.org/dc/terms/"
+            "@context": [
+                "https://www.w3.org/ns/prov-o.jsonld",
+                "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+            ],
+            "@id": notebookId,
+            "@type": ["prov:Collection", "notebook:Notebook"],
+            "notebook:title": title,
+            "notebook:description": `Mathematical notebook created by ${this.username}`,
+            "notebook:created": new Date().toISOString(),
+            "notebook:version": "1.0.0",
+            "notebook:creator": this.username,
+            "notebook:layout": {
+                "canvas_size": {"width": 1200, "height": 800},
+                "zoom_level": 1.0,
+                "center_point": {"x": 600, "y": 400}
             },
-            "@type": "prov:Entity",
-            "dct:title": document.getElementById('board-title')?.textContent || "Mathematical Notebook",
-            "dct:created": new Date().toISOString(),
-            "dct:creator": this.username,
-            "prov:wasGeneratedBy": {
-                "@type": "prov:Activity",
-                "prov:wasAssociatedWith": this.username,
-                "prov:used": "Mathematical Board Interface"
-            },
-            "widgets": []
+            "prov:hadMember": []
         };
 
-        // Add current widgets
-        board.widgets.forEach((widget, id) => {
-            notebookData.widgets.push({
-                "@type": "prov:Entity",
-                "id": id,
-                "widgetType": widget.type,
-                "position": widget.position,
-                "configuration": widget.configuration,
-                "prov:generatedAtTime": new Date().toISOString()
+        // Add current widgets using PR #15 format
+        if (board.widgets && board.widgets.size > 0) {
+            let widgetIndex = 1;
+            board.widgets.forEach((widget, id) => {
+                const widgetId = `urn:widget:${widget.type}-${widgetIndex}`;
+                notebookData["prov:hadMember"].push({
+                    "@id": widgetId,
+                    "@type": ["prov:Entity", `${widget.type}:widget`],
+                    "dct:conformsTo": `https://litlfred.github.io/notebooks/schema/${widget.type}/widget.schema.json`,
+                    "notebook:position": widget.position || {"x": 100 + (widgetIndex * 50), "y": 100 + (widgetIndex * 50)},
+                    "notebook:size": widget.size || {"width": 300, "height": 250},
+                    "notebook:config": widget.configuration || {},
+                    "prov:generatedAtTime": new Date().toISOString()
+                });
+                widgetIndex++;
             });
-        });
+        }
 
         return JSON.stringify(notebookData, null, 2);
     }
 
     /**
-     * Create empty notebook structure
+     * Generate a URN-compliant notebook ID
+     */
+    generateNotebookId(title) {
+        const safeTitle = title.toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim();
+        return `urn:notebook:${safeTitle}`;
+    }
+
+    /**
+     * Create empty notebook structure (compatible with PR #15 format)
      */
     createEmptyNotebook() {
+        const title = "New Mathematical Notebook";
+        const notebookId = this.generateNotebookId(title);
+        
         const emptyNotebook = {
-            "@context": {
-                "@vocab": "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld",
-                "prov": "http://www.w3.org/ns/prov#",
-                "dct": "http://purl.org/dc/terms/"
+            "@context": [
+                "https://www.w3.org/ns/prov-o.jsonld",
+                "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+            ],
+            "@id": notebookId,
+            "@type": ["prov:Collection", "notebook:Notebook"],
+            "notebook:title": title,
+            "notebook:description": `Empty mathematical notebook template created by ${this.username}`,
+            "notebook:created": new Date().toISOString(),
+            "notebook:version": "1.0.0",
+            "notebook:creator": this.username,
+            "notebook:layout": {
+                "canvas_size": {"width": 1200, "height": 800},
+                "zoom_level": 1.0,
+                "center_point": {"x": 600, "y": 400}
             },
-            "@type": "prov:Entity",
-            "dct:title": "New Mathematical Notebook",
-            "dct:created": new Date().toISOString(),
-            "dct:creator": this.username,
-            "prov:wasGeneratedBy": {
-                "@type": "prov:Activity",
-                "prov:wasAssociatedWith": this.username,
-                "prov:used": "Mathematical Board Interface"
-            },
-            "widgets": []
+            "prov:hadMember": [
+                {
+                    "@id": "urn:widget:sticky-note-welcome",
+                    "@type": ["prov:Entity", "sticky:widget"],
+                    "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+                    "notebook:position": {"x": 100, "y": 100},
+                    "notebook:size": {"width": 300, "height": 200},
+                    "notebook:config": {
+                        "content": "# Welcome!\n\nThis is your new mathematical notebook. Start by:\n\n1. Adding widgets from the library\n2. Configuring mathematical parameters\n3. Creating visualizations\n4. Saving your work to GitHub",
+                        "theme": "desert",
+                        "show_note": true,
+                        "editable": true
+                    },
+                    "prov:generatedAtTime": new Date().toISOString()
+                }
+            ]
         };
 
         return JSON.stringify(emptyNotebook, null, 2);
@@ -589,6 +639,55 @@ class GitHubAuthService {
                 notification.remove();
             }
         }, 5000);
+    }
+
+    /**
+     * Integrate with NotebookLoader for GitHub operations
+     */
+    integrateWithNotebookLoader() {
+        if (window.notebookLoader) {
+            // Extend NotebookLoader with GitHub functionality
+            window.notebookLoader.saveToGitHub = this.saveToGitHub.bind(this);
+            window.notebookLoader.loadFromGitHub = this.loadFromGitHub.bind(this);
+            window.notebookLoader.createNewNotebook = this.createNewNotebook.bind(this);
+        }
+    }
+
+    /**
+     * Load notebook from GitHub repository
+     */
+    async loadFromGitHub(filename) {
+        if (!this.canWrite()) {
+            this.showError('You need write permissions to load from GitHub.');
+            return;
+        }
+
+        try {
+            const url = `https://api.github.com/repos/${this.repoOwner}/${this.repoName}/contents/notebooks/${filename}`;
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${this.token}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to load from GitHub: ${response.statusText}`);
+            }
+
+            const fileData = await response.json();
+            const content = atob(fileData.content);
+            const notebook = JSON.parse(content);
+            
+            // Load using the existing notebook loader
+            if (window.notebookLoader) {
+                await window.notebookLoader.loadNotebookData(notebook);
+                this.showSuccess(`Loaded notebook from GitHub: ${filename}`);
+            }
+        } catch (error) {
+            console.error('GitHub load error:', error);
+            this.showError(`Failed to load from GitHub: ${error.message}`);
+        }
     }
 }
 
