@@ -197,3 +197,182 @@ def validate_parameters(p, q, N):
         raise ValueError(f"N must be non-negative integer, got {N}")
     if N > 10:
         warnings.warn(f"Large truncation N={N} may be slow", UserWarning)
+
+
+def soft_background(F, M):
+    """
+    Generate soft background colors for visualization.
+    
+    Args:
+        F: complex field values (2D array)
+        M: mask array (2D boolean array)
+        
+    Returns:
+        RGB background array with shape (ny, nx, 3)
+    """
+    ny, nx = F.shape
+    bg = np.zeros((ny, nx, 3))
+    
+    # Create a soft gradient background based on the field magnitude
+    magnitude = np.abs(F)
+    magnitude = np.where(M, magnitude, 0)
+    
+    if np.max(magnitude) > 0:
+        normalized = magnitude / np.max(magnitude)
+        
+        # Generate RGB values based on magnitude and phase
+        phase = np.angle(F)
+        
+        # Soft color scheme: red/green based on phase, blue based on magnitude
+        bg[:, :, 0] = 0.2 + 0.3 * np.sin(phase) ** 2  # Red component
+        bg[:, :, 1] = 0.2 + 0.3 * np.cos(phase) ** 2  # Green component 
+        bg[:, :, 2] = 0.3 + 0.4 * normalized           # Blue component
+    else:
+        # Default soft blue background
+        bg[:, :, :] = [0.2, 0.2, 0.5]
+    
+    return bg
+
+
+def integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N):
+    """
+    Integrate particle trajectory with blow-up detection.
+    
+    Args:
+        z0: initial position (complex)
+        v0: initial velocity (complex)  
+        dt: time step
+        T: total time
+        p, q: lattice parameters
+        N: truncation parameter
+        
+    Returns:
+        trajectory: array of complex positions
+        blowup_point: index where blow-up occurred, or None
+    """
+    nsteps = int(T / dt)
+    trajectory = np.zeros(nsteps + 1, dtype=complex)
+    
+    z, v = z0, v0
+    trajectory[0] = z
+    blowup_point = None
+    
+    for i in range(nsteps):
+        # Check for blow-up (large values or NaN)
+        if abs(z) > 100 or not np.isfinite(z):
+            blowup_point = i
+            break
+            
+        # Simple Euler integration
+        wp_val = wp_rect(z, p, q, N)
+        if not np.isfinite(wp_val):
+            blowup_point = i
+            break
+            
+        # Second-order dynamics with damping
+        acceleration = -0.1 * wp_val - 0.05 * v
+        v += acceleration * dt
+        z += v * dt
+        trajectory[i + 1] = z
+        
+    return trajectory[:i+2], blowup_point
+
+
+def create_figure_with_plots(plot_type, p, q, N, nx, ny, x_range, y_range, pole_threshold, pole_mask_radius,
+                           bg_opacity, traj_opacity, traj_width, particles, dt, T, blowup_threshold, 
+                           max_steps, use_adaptive_step):
+    """
+    Create matplotlib figure with field and trajectory plots.
+    
+    Args:
+        plot_type: type of plot ('two_panel', 'three_panel', etc.)
+        p, q: lattice parameters
+        N: truncation parameter
+        nx, ny: grid dimensions
+        x_range, y_range: plot ranges
+        pole_threshold: threshold for pole detection
+        pole_mask_radius: radius for pole masking
+        bg_opacity: background opacity
+        traj_opacity: trajectory opacity
+        traj_width: trajectory line width
+        particles: list of (z0, v0) initial conditions
+        dt: time step
+        T: total integration time
+        blowup_threshold: threshold for blowup detection
+        max_steps: maximum integration steps
+        use_adaptive_step: whether to use adaptive step size
+        
+    Returns:
+        fig: matplotlib figure
+        axes: array of matplotlib axes
+    """
+    import matplotlib.pyplot as plt
+    
+    # Generate field data
+    X, Y, F_grid, M_grid = field_grid(p, q, 'wp', N, nx, ny, pole_threshold)
+    
+    # Generate trajectories
+    trajectories = []
+    for z0, v0 in particles:
+        traj, _ = integrate_second_order_with_blowup(z0, v0, dt, T, p, q, N)
+        trajectories.append(traj)
+    
+    # Create figure based on plot type
+    if plot_type == 'two_panel':
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    elif plot_type == 'three_panel':
+        fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+    else:
+        fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    
+    # Ensure axes is always an array
+    if not hasattr(axes, '__len__'):
+        axes = [axes]
+    
+    # Plot 1: Field magnitude
+    ax1 = axes[0]
+    valid_F = np.where(M_grid, F_grid, np.nan)
+    magnitude = np.abs(valid_F)
+    
+    if np.nanmax(magnitude) > 0:
+        im1 = ax1.imshow(magnitude, extent=[-x_range, x_range, -y_range, y_range], 
+                        cmap='viridis', origin='lower', interpolation='bilinear', alpha=bg_opacity)
+        plt.colorbar(im1, ax=ax1, label='|℘(z)|')
+    
+    ax1.set_title(f'Weierstrass ℘ Field (p={p}, q={q})')
+    ax1.set_xlabel('Re(z)')
+    ax1.set_ylabel('Im(z)')
+    ax1.grid(True, alpha=0.3)
+    
+    # Plot trajectories on field plot
+    for i, trajectory in enumerate(trajectories):
+        if len(trajectory) > 0:
+            real_parts = np.real(trajectory)
+            imag_parts = np.imag(trajectory)
+            ax1.plot(real_parts, imag_parts, 'o-', markersize=2, linewidth=traj_width, 
+                    alpha=traj_opacity, label=f'Particle {i+1}')
+    
+    # Plot 2: Trajectory detail (if there are multiple axes)
+    if len(axes) > 1:
+        ax2 = axes[1] 
+        for i, trajectory in enumerate(trajectories):
+            if len(trajectory) > 0:
+                real_parts = np.real(trajectory)
+                imag_parts = np.imag(trajectory)
+                ax2.plot(real_parts, imag_parts, 'o-', markersize=2, linewidth=traj_width, 
+                        label=f'Particle {i+1}')
+                
+                # Mark start and end points
+                if len(trajectory) > 1:
+                    ax2.plot(real_parts[0], imag_parts[0], 'go', markersize=8, label=f'Start {i+1}')
+                    ax2.plot(real_parts[-1], imag_parts[-1], 'ro', markersize=8, label=f'End {i+1}')
+        
+        ax2.set_title('Particle Trajectories')
+        ax2.set_xlabel('Re(z)')
+        ax2.set_ylabel('Im(z)')
+        ax2.grid(True, alpha=0.3)
+        ax2.legend()
+        ax2.set_aspect('equal', adjustable='box')
+    
+    plt.tight_layout()
+    return fig, axes
