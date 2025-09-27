@@ -3,12 +3,15 @@ SymPy hypersimilar Widget
 Returns True if ``f`` and ``g`` are hyper-similar. Explanation Similarity in hypergeometric sense means that a quotient of f(k) and g(k) is a rational function in ``k``. This procedure is useful in solving recurrence relations. For more information see hypersimp().
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.simplify.simplify import hypersimilar
 
 

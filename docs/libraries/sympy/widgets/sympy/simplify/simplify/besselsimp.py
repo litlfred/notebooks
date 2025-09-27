@@ -7,12 +7,15 @@ from sympy.simplify.simplify import besselsimp
 class SymPyBesselsimpWidget:
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.abc import z
 
 

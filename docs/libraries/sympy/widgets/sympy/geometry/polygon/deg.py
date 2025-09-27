@@ -3,12 +3,15 @@ SymPy deg Widget
 Return the degree value for the given radians (pi = 180 degrees).
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.geometry.polygon import deg
 
 

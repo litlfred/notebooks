@@ -3,12 +3,15 @@ SymPy arity Widget
 Return the arity of the function if it is known, else None. Explanation When default values are specified for some arguments, they are optional and the arity is reported as a tuple of possible values. Examples >>> from sympy import arity, log >>> arity(lambda x: x) 1 >>> arity(log) (1, 2) >>> arity(lambda *x: sum(x)) is None True
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.core.function import arity
 
 

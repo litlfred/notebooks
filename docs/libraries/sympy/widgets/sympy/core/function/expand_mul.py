@@ -3,12 +3,15 @@ SymPy expand_mul Widget
 Wrapper around expand that only uses the mul hint.  See the expand docstring for more information. Examples >>> from sympy import symbols, expand_mul, exp, log >>> x, y = symbols('x,y', positive=True) >>> expand_mul(exp(x+y)*(x+y)*log(x*y**2)) x*exp(x + y)*log(x*y**2) + y*exp(x + y)*log(x*y**2)
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.core.function import expand_mul
 
 

@@ -3,12 +3,15 @@ SymPy classof Widget
 Get the type of the result when combining matrices of different types. Currently the strategy is that immutability is contagious. Examples >>> from sympy import Matrix, ImmutableMatrix >>> from sympy.matrices.matrixbase import classof >>> M = Matrix([[1, 2], [3, 4]]) # a Mutable Matrix >>> IM = ImmutableMatrix([[1, 2], [3, 4]]) >>> classof(M, IM) <class 'sympy.matrices.immutable.ImmutableDenseMatrix'>
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.matrices.matrixbase import classof
 
 

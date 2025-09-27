@@ -3,12 +3,15 @@ SymPy dotprodsimp Widget
 Simplification for a sum of products targeted at the kind of blowup that occurs during summation of products. Intended to reduce expression blowup during matrix multiplication or other similar operations. Only works with algebraic expressions and does not recurse into non.
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.simplify.simplify import dotprodsimp
 
 

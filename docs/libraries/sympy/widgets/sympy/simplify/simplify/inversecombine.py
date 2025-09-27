@@ -3,12 +3,15 @@ SymPy inversecombine Widget
 Simplify the composition of a function and its inverse. Explanation No attention is paid to whether the inverse is a left inverse or a right inverse; thus, the result will in general not be equivalent to the original expression. Examples >>> from sympy.simplify.simplify import inversecombine >>> from sympy import asin, sin, log, exp >>> from sympy.abc import x >>> inversecombine(asin(sin(x))) x >>> inversecombine(2*log(exp(3*x))) 6*x
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../'))
 
 from typing import Dict, Any, Callable
-from base_sympy_widget import BaseSymPyWidget
+try:
+    from ...base_sympy_widget import BaseSymPyWidget
+except ImportError:
+    try:
+        from ..base_sympy_widget import BaseSymPyWidget
+    except ImportError:
+        from base_sympy_widget import BaseSymPyWidget
 from sympy.simplify.simplify import inversecombine
 
 
