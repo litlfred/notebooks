@@ -1143,3 +1143,133 @@ body {
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.85em;
 }
+
+/* Attached Notes Styling */
+.widget-attached-note {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.5rem;
+}
+
+.attached-note-display {
+    font-size: 0.85rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.attached-note-display:hover {
+    background: var(--bg-secondary);
+}
+
+.attached-note-editor {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+}
+
+.note-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.note-toolbar .editor-btn {
+    padding: 0.25rem 0.5rem;
+    margin-right: 0.5rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.note-toolbar .editor-btn:hover {
+    background: var(--secondary-color);
+}
+
+.note-toolbar .cancel-note-btn {
+    background: var(--warning-color);
+}
+
+.note-toolbar .note-help {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.attached-note-textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    font-size: 0.85rem;
+    resize: vertical;
+    outline: none;
+}
+
+.attached-note-textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.note-content {
+    line-height: 1.4;
+}
+
+.note-content h1, .note-content h2, .note-content h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.note-content p {
+    margin: 0.25rem 0;
+}
+
+.note-content code {
+    background: var(--bg-primary);
+    padding: 0.125rem 0.25rem;
+    border-radius: 3px;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.8rem;
+}
+
+.note-content pre {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.8rem;
+}
+
+.note-edit-hint {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+}
+
+/* Stop button styling */
+.stop-btn {
+    background: var(--warning-color) !important;
+    color: #2c3e50 !important;
+}
+
+.stop-btn:hover {
+    background: #d68910 !important;
+}

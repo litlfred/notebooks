@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import sys
 import os
 
-# Add the docs/python directory to path to import our module
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'docs', 'python'))
+# Add the docs/weierstrass-playground/python directory to path to import our module
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'docs', 'weierstrass-playground', 'python'))
 
 def test_weierstrass_core():
     """Test core Weierstrass functions work correctly"""
@@ -17,7 +17,7 @@ def test_weierstrass_core():
     
     try:
         # Import our Pyodide-compatible module
-        import weierstrass_core as wc
+        from weierstrass_playground import core as wc
         
         # Test basic function evaluation
         print("\n1. Testing wp_rect function...")

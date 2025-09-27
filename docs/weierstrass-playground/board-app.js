@@ -14,11 +14,258 @@ class MathematicalBoard {
         this.isLibraryOpen = true;
         this.gridEnabled = true;
         this.connections = new Map(); // widget connections for data flow
+        this.pyodide = null; // Python execution engine
+        this.pyodideLoading = false;
+        this.runningWidgets = new Set(); // Track running widgets for stop functionality
+        this.eventListeners = new Map(); // Event system for widget communication
+        this.slugCounters = new Map(); // Track instance counts by widget slug
         
         this.initializeBoard();
         this.setupEventListeners();
         this.initializeUserPreferences();
         this.loadWidgetSchemas();
+        this.initializePython();
+    }
+
+    /**
+     * Initialize Python execution environment
+     */
+    async initializePython() {
+        if (this.pyodideLoading || this.pyodide) return;
+        
+        this.pyodideLoading = true;
+        this.updateStatus('Loading Python environment...', 'info');
+        
+        try {
+            // Load Pyodide from CDN
+            const pyodideScript = document.createElement('script');
+            pyodideScript.src = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
+            pyodideScript.onload = async () => {
+                try {
+                    this.pyodide = await loadPyodide({
+                        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
+                    });
+                    
+                    // Install commonly used packages
+                    await this.pyodide.loadPackage(['numpy', 'matplotlib', 'scipy']);
+                    
+                    // Set up Python environment with our modules
+                    await this.setupPythonEnvironment();
+                    
+                    this.updateStatus('Python environment ready', 'success');
+                    console.log('Pyodide initialized successfully');
+                } catch (error) {
+                    console.error('Pyodide initialization failed:', error);
+                    this.updateStatus('Python environment failed to load', 'error');
+                }
+                this.pyodideLoading = false;
+            };
+            pyodideScript.onerror = () => {
+                console.error('Failed to load Pyodide script');
+                this.updateStatus('Failed to load Python environment', 'error');
+                this.pyodideLoading = false;
+            };
+            
+            document.head.appendChild(pyodideScript);
+            
+        } catch (error) {
+            console.error('Python initialization error:', error);
+            this.updateStatus('Python environment error', 'error');
+            this.pyodideLoading = false;
+        }
+    }
+
+    /**
+     * Setup Python environment with widget framework modules
+     */
+    async setupPythonEnvironment() {
+        if (!this.pyodide) return;
+
+        // Create widget execution framework in Python
+        const frameworkCode = `
+import sys
+import json
+import traceback
+import numpy as np
+import matplotlib.pyplot as plt
+from io import StringIO, BytesIO
+import base64
+
+class WidgetExecutor:
+    """Base class for widget execution with input validation and error handling"""
+    
+    def __init__(self, widget_id, widget_type, config, connections=None):
+        self.widget_id = widget_id
+        self.widget_type = widget_type  
+        self.config = config or {}
+        self.connections = connections or {}
+        self.stdout_buffer = StringIO()
+        self.stderr_buffer = StringIO()
+        self.variables = {}
+        self.result = None
+        self.status = 'idle'
+        
+    def execute(self):
+        """Execute widget with error handling and output capture"""
+        self.status = 'running'
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        
+        try:
+            # Redirect output
+            sys.stdout = self.stdout_buffer
+            sys.stderr = self.stderr_buffer
+            
+            # Clear previous output
+            self.stdout_buffer.seek(0)
+            self.stdout_buffer.truncate(0)
+            self.stderr_buffer.seek(0) 
+            self.stderr_buffer.truncate(0)
+            
+            # Execute widget-specific code
+            self.result = self._execute_impl()
+            self.status = 'completed'
+            
+            return {
+                'success': True,
+                'result': self.result,
+                'stdout': self.stdout_buffer.getvalue(),
+                'stderr': self.stderr_buffer.getvalue(),
+                'variables': self.variables,
+                'status': self.status
+            }
+            
+        except Exception as e:
+            self.status = 'error'
+            error_traceback = traceback.format_exc()
+            sys.stderr.write(error_traceback)
+            
+            return {
+                'success': False,
+                'error': str(e),
+                'traceback': error_traceback,
+                'stdout': self.stdout_buffer.getvalue(),
+                'stderr': self.stderr_buffer.getvalue(), 
+                'variables': self.variables,
+                'status': self.status
+            }
+            
+        finally:
+            # Restore output
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+    
+    def _execute_impl(self):
+        """Override this method in widget implementations"""
+        raise NotImplementedError("Subclasses must implement _execute_impl")
+    
+    def stop(self):
+        """Stop widget execution"""
+        self.status = 'stopped'
+        # In a real implementation, this would interrupt execution
+        print(f"Widget {self.widget_id} execution stopped")
+
+class PythonCodeWidget(WidgetExecutor):
+    """Execute arbitrary Python code"""
+    
+    def _execute_impl(self):
+        code = self.config.get('code', '')
+        if not code.strip():
+            return "No code to execute"
+            
+        # Execute the code in current namespace
+        exec(code, globals(), self.variables)
+        
+        # Return any variables that were created
+        return {
+            'code_executed': True,
+            'variables_created': list(self.variables.keys())
+        }
+
+class WeierstraussWidget(WidgetExecutor):
+    """Weierstrass function visualization widget"""
+    
+    def _execute_impl(self):
+        p = self.config.get('p', 5)
+        q = self.config.get('q', 7) 
+        N = self.config.get('N', 2)
+        
+        # Generate Weierstrass field visualization
+        return self._generate_weierstrass_plot(p, q, N)
+    
+    def _generate_weierstrass_plot(self, p, q, N):
+        # Simple Weierstrass function implementation
+        import numpy as np
+        import matplotlib.pyplot as plt
+        
+        x = np.linspace(0, p, 50)
+        y = np.linspace(0, q, 50)
+        X, Y = np.meshgrid(x, y)
+        Z = X + 1j * Y
+        
+        # Simplified Weierstrass function
+        W = np.zeros_like(Z, dtype=complex)
+        for m in range(-N, N+1):
+            for n in range(-N, N+1):
+                if m == 0 and n == 0:
+                    continue
+                omega = m * p + n * 1j * q
+                W += 1.0 / (Z - omega)**2
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(8, 6))
+        magnitude = np.abs(W)
+        magnitude = np.where(magnitude < 100, magnitude, np.nan)  # Mask poles
+        
+        im = ax.imshow(magnitude, extent=[0, p, 0, q], cmap='viridis', origin='lower')
+        ax.set_title(f'Weierstrass ℘ Function (p={p}, q={q})')
+        ax.set_xlabel('Re(z)')
+        ax.set_ylabel('Im(z)')
+        plt.colorbar(im, ax=ax, label='|℘(z)|')
+        
+        # Save plot to base64 string
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png', dpi=100, bbox_inches='tight')
+        buffer.seek(0)
+        image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        plt.close(fig)
+        
+        self.variables.update({
+            'p': p, 'q': q, 'N': N,
+            'field_data': W,
+            'plot_image': f'data:image/png;base64,{image_base64}'
+        })
+        
+        return {
+            'plot_generated': True,
+            'image_data': f'data:image/png;base64,{image_base64}',
+            'parameters': {'p': p, 'q': q, 'N': N}
+        }
+
+# Global widget registry
+_widget_executors = {
+    'python-code': PythonCodeWidget,
+    'weierstrass': WeierstraussWidget,
+    'wp-two-panel': WeierstraussWidget,
+    'wp-three-panel': WeierstraussWidget, 
+    'wp-five-panel': WeierstraussWidget
+}
+
+def execute_widget(widget_id, widget_type, config, connections=None):
+    """Execute a widget and return results"""
+    executor_class = _widget_executors.get(widget_type, PythonCodeWidget)
+    executor = executor_class(widget_id, widget_type, config, connections)
+    return executor.execute()
+
+def stop_widget(widget_id):
+    """Stop a running widget"""
+    # In a full implementation, we'd track running executors
+    print(f"Stopping widget {widget_id}")
+    return {'stopped': True}
+`;
+
+        await this.pyodide.runPython(frameworkCode);
+        console.log('Python widget framework initialized');
     }
 
     /**
@@ -222,7 +469,7 @@ class MathematicalBoard {
     }
 
     /**
-     * Create a new widget using JSON schema
+     * Create a new widget using enhanced ID management and event system
      */
     createWidget(type, x, y, customConfig = {}) {
         if (!this.widgetSchemas || !this.widgetSchemas['widget-schemas'][type]) {
@@ -231,31 +478,23 @@ class MathematicalBoard {
         }
 
         const schema = this.widgetSchemas['widget-schemas'][type];
-        const widgetId = `widget-${++this.widgetCounter}`;
         
-        // Get default configuration from schema
-        const defaultConfig = this.getDefaultConfigFromSchema(schema);
+        // Use enhanced widget creation with proper ID management
+        const widget = this.createWidgetWithId(type, { x, y }, schema);
         
-        const widget = {
-            id: widgetId,
-            type: type,
-            x: x,
-            y: y,
-            width: 350,
-            height: 250,
-            title: schema.name,
-            icon: schema.icon,
-            description: schema.description,
-            config: { ...defaultConfig, ...customConfig },
-            schema: schema,
-            actions: schema.actions || {},
-            connections: {
-                inputs: new Map(),
-                outputs: new Map()
-            },
-            lastOutput: null,
-            status: 'idle' // idle, running, completed, error
-        };
+        // Override config if provided
+        if (Object.keys(customConfig).length > 0) {
+            widget.config = { ...widget.config, ...customConfig };
+        }
+        
+        // Set widget dimensions and additional properties
+        widget.x = x;
+        widget.y = y;
+        widget.width = 350;
+        widget.height = 250;
+        widget.title = schema.name;
+        widget.icon = schema.icon;
+        widget.description = schema.description;
 
         // Create DOM element
         const element = this.createWidgetElement(widget);
@@ -263,14 +502,11 @@ class MathematicalBoard {
         // Add to board
         document.getElementById('board-content').appendChild(element);
         
-        // Store widget
-        this.widgets.set(widgetId, widget);
-        
         // Make draggable
         this.makeDraggable(element);
         
         // Auto-select new widget
-        this.selectWidget(widgetId);
+        this.selectWidget(widget.id);
         
         // Auto-save
         this.saveBoardToStorage();
@@ -336,8 +572,14 @@ class MathematicalBoard {
                     <button class="widget-btn" onclick="runWidget('${widget.id}')" title="Execute Default">
                         ▶️
                     </button>
+                    <button class="widget-btn stop-btn" onclick="stopWidget('${widget.id}')" title="Stop Execution" ${widget.status !== 'running' ? 'style="display:none"' : ''}>
+                        ⏹️
+                    </button>
                     <button class="widget-btn" onclick="connectWidget('${widget.id}')" title="Connect">
                         🔗
+                    </button>
+                    <button class="widget-btn" onclick="toggleAttachedNote('${widget.id}')" title="Toggle Note">
+                        📝
                     </button>
                     <button class="widget-btn" onclick="deleteWidget('${widget.id}')" title="Delete">
                         🗑️
@@ -346,6 +588,9 @@ class MathematicalBoard {
             </div>
             <div class="widget-content" id="content-${widget.id}">
                 ${this.renderWidgetContent(widget)}
+            </div>
+            <div class="widget-attached-note" id="note-${widget.id}" ${!widget.attachedNote.visible ? 'style="display:none"' : ''}>
+                ${this.renderAttachedNote(widget)}
             </div>
             <div class="widget-connections" id="connections-${widget.id}">
                 ${this.renderWidgetConnections(widget)}
@@ -688,19 +933,183 @@ class MathematicalBoard {
             return '';
         }
         
-        const inputsHtml = inputs.map(([key, sourceWidget]) => 
-            `<div class="connection-input">← ${key} from ${sourceWidget}</div>`
-        ).join('');
+        const inputsHtml = inputs.map(([key, connectionData]) => {
+            const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
+            const hasETL = typeof connectionData === 'object' && connectionData.etlScript;
+            const etlIndicator = hasETL ? ' 🔄' : '';
+            return `<div class="connection-input">← ${key} from ${sourceId}${etlIndicator}</div>`;
+        }).join('');
         
-        const outputsHtml = outputs.map(([key, targetWidgets]) =>
-            `<div class="connection-output">${key} → ${targetWidgets.join(', ')}</div>`
-        ).join('');
+        const outputsHtml = outputs.map(([key, targetWidgets]) => {
+            const targetList = targetWidgets.map(target => {
+                const etlIndicator = target.hasETL ? ' 🔄' : '';
+                return `${target.targetId}${etlIndicator}`;
+            }).join(', ');
+            return `<div class="connection-output">${key} → ${targetList}</div>`;
+        }).join('');
         
         return `<div class="connections">${inputsHtml}${outputsHtml}</div>`;
     }
 
     /**
-     * Execute widget with Python backend
+     * Render attached note for widget with dynamic variable substitution
+     */
+    renderAttachedNote(widget) {
+        if (!widget.attachedNote) return '';
+        
+        const note = widget.attachedNote;
+        const isEditMode = note.editMode || false;
+        
+        if (isEditMode) {
+            return `
+                <div class="attached-note-editor">
+                    <div class="note-toolbar">
+                        <button class="editor-btn save-note-btn" onclick="boardApp.saveAttachedNote('${widget.id}')">💾 Save</button>
+                        <button class="editor-btn cancel-note-btn" onclick="boardApp.cancelAttachedNoteEdit('${widget.id}')">❌ Cancel</button>
+                        <div class="note-help">
+                            <small>Use {{config}} for configuration, {{output}} for results, {{widget.id}} for instance ID</small>
+                        </div>
+                    </div>
+                    <textarea class="attached-note-textarea" id="note-editor-${widget.id}" 
+                        style="width: 100%; height: 150px; padding: 0.5rem; border: 1px solid var(--border-color); 
+                               border-radius: 4px; background: var(--bg-secondary); color: var(--text-primary);
+                               font-family: 'Monaco', 'Menlo', 'Courier New', monospace; font-size: 0.85rem;"
+                        placeholder="Enter markdown notes with dynamic variables...">${this.escapeHtml(note.content)}</textarea>
+                </div>
+            `;
+        } else {
+            // Display mode - show rendered markdown with variable substitution
+            const processedContent = this.processNoteVariables(note.content, widget);
+            return `
+                <div class="attached-note-display" onclick="boardApp.editAttachedNote('${widget.id}')" 
+                     style="cursor: pointer; padding: 0.5rem; border: 1px solid var(--border-color);
+                            border-radius: 4px; background: var(--bg-tertiary); margin-top: 0.5rem;">
+                    <div class="note-content" style="font-size: 0.85rem;">
+                        ${this.renderMarkdown(processedContent)}
+                    </div>
+                    <div class="note-edit-hint" style="font-size: 0.7rem; color: var(--text-secondary); 
+                         text-align: right; margin-top: 0.25rem;">
+                        📝 Click to edit note
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Process dynamic variables in attached note content  
+     */
+    processNoteVariables(content, widget) {
+        if (!content) return '';
+        
+        let processed = content;
+        
+        // Update attached note variables
+        this.updateAttachedNoteVariables(widget);
+        
+        // Replace dynamic variables
+        for (const [key, value] of widget.attachedNote.variables) {
+            const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+            processed = processed.replace(regex, value);
+        }
+        
+        // Replace common widget variables
+        processed = processed.replace(/\{\{widget\.id\}\}/g, widget.id);
+        processed = processed.replace(/\{\{widget\.type\}\}/g, widget.type);
+        processed = processed.replace(/\{\{widget\.status\}\}/g, widget.status);
+        
+        // Replace config object
+        try {
+            const configJson = JSON.stringify(widget.config, null, 2);
+            processed = processed.replace(/\{\{config\}\}/g, `\`\`\`json\n${configJson}\n\`\`\``);
+        } catch (e) {
+            processed = processed.replace(/\{\{config\}\}/g, '[Config Error]');
+        }
+        
+        // Replace output object
+        if (widget.lastOutput) {
+            try {
+                const outputJson = JSON.stringify(widget.lastOutput, null, 2);
+                processed = processed.replace(/\{\{output\}\}/g, `\`\`\`json\n${outputJson}\n\`\`\``);
+            } catch (e) {
+                processed = processed.replace(/\{\{output\}\}/g, '[Output Error]');
+            }
+        } else {
+            processed = processed.replace(/\{\{output\}\}/g, '*No output yet*');
+        }
+        
+        return processed;
+    }
+
+    /**
+     * Update dynamic variables in attached note based on widget state
+     */
+    updateAttachedNoteVariables(widget) {
+        if (!widget.attachedNote.variables) {
+            widget.attachedNote.variables = new Map();
+        }
+        
+        const vars = widget.attachedNote.variables;
+        
+        // Update execution info
+        vars.set('last_executed', widget.lastOutput ? new Date().toLocaleString() : 'Never');
+        vars.set('execution_status', widget.status);
+        
+        // Update from last output variables if available
+        if (widget.lastOutput && widget.lastOutput.variables) {
+            for (const [key, value] of Object.entries(widget.lastOutput.variables)) {
+                // Add error highlighting for failed widget references
+                const formattedValue = widget.lastOutput.success ? 
+                    JSON.stringify(value) : 
+                    `<span style="text-decoration: underline; color: red;">${JSON.stringify(value)}</span>`;
+                vars.set(`output.${key}`, formattedValue);
+            }
+        }
+        
+        // Update metadata variables
+        vars.set('created', widget.metadata?.created || 'Unknown');
+        vars.set('modified', widget.metadata?.modified || 'Unknown');
+        vars.set('instance_number', widget.metadata?.instanceNumber || 0);
+    }
+
+    /**
+     * Attached Note Management Methods
+     */
+    
+    editAttachedNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget || !widget.attachedNote) return;
+        
+        widget.attachedNote.editMode = true;
+        this.updateWidgetDisplay(widget);
+    }
+
+    saveAttachedNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        const editorEl = document.getElementById(`note-editor-${widgetId}`);
+        if (!widget || !editorEl) return;
+        
+        widget.attachedNote.content = editorEl.value;
+        widget.attachedNote.editMode = false;
+        widget.metadata.modified = new Date().toISOString();
+        
+        this.updateWidgetDisplay(widget);
+        this.saveBoardToStorage();
+        
+        // Fire event
+        this.fireWidgetEvent(widgetId, 'note_updated', { content: widget.attachedNote.content });
+    }
+
+    cancelAttachedNoteEdit(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.attachedNote.editMode = false;
+        this.updateWidgetDisplay(widget);
+    }
+
+    /**
+     * Execute widget with real Python backend
      */
     async executeWidget(widgetId) {
         const widget = this.widgets.get(widgetId);
@@ -709,19 +1118,31 @@ class MathematicalBoard {
             return;
         }
 
-        // Update widget status
+        // Check if Python is available
+        if (!this.pyodide) {
+            widget.status = 'error';
+            widget.lastOutput = { success: false, error: 'Python environment not available' };
+            this.updateWidgetDisplay(widget);
+            return;
+        }
+
+        // Update widget status and track running widget
         widget.status = 'running';
+        this.runningWidgets.add(widgetId);
         this.updateWidgetDisplay(widget);
         
         try {
-            // Simulate widget execution (in real implementation, this would call Python backend)
-            const result = await this.simulateWidgetExecution(widget);
+            // Execute widget with Python backend
+            const result = await this.executePythonWidget(widget);
             
             widget.lastOutput = result;
             widget.status = result.success ? 'completed' : 'error';
             
             // Update display
             this.updateWidgetDisplay(widget);
+            
+            // Fire event triggers
+            this.fireWidgetEvent(widgetId, 'output_generated', result);
             
             // Trigger dependent widgets
             this.triggerDependentWidgets(widgetId);
@@ -734,7 +1155,354 @@ class MathematicalBoard {
             widget.status = 'error';
             widget.lastOutput = { success: false, error: error.message };
             this.updateWidgetDisplay(widget);
+            
+            // Fire error event
+            this.fireWidgetEvent(widgetId, 'execution_error', { error: error.message });
+        } finally {
+            // Remove from running widgets
+            this.runningWidgets.delete(widgetId);
         }
+    }
+
+    /**
+     * Execute widget with Python backend
+     */
+    async executePythonWidget(widget) {
+        if (!this.pyodide) {
+            return { success: false, error: 'Python environment not available' };
+        }
+
+        try {
+            // Prepare widget configuration and connections
+            const config = widget.config || {};
+            const connections = this.getWidgetConnections(widget.id);
+            
+            // Call Python execution function
+            const pythonCall = `execute_widget('${widget.id}', '${widget.type}', ${JSON.stringify(config)}, ${JSON.stringify(connections)})`;
+            const result = this.pyodide.runPython(pythonCall);
+            
+            // Parse result if it's a JSON string
+            const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
+            
+            return {
+                success: parsedResult.success || true,
+                result: parsedResult.result,
+                stdout: parsedResult.stdout || '',
+                stderr: parsedResult.stderr || '',
+                variables: parsedResult.variables || {},
+                status: parsedResult.status || 'completed',
+                execution_time: Date.now() - widget.executionStartTime || 0
+            };
+            
+        } catch (error) {
+            console.error('Python execution error:', error);
+            return {
+                success: false,
+                error: error.message,
+                traceback: error.stack,
+                stdout: '',
+                stderr: error.message
+            };
+        }
+    }
+
+    /**
+     * Stop widget execution
+     */
+    async stopWidget(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+
+        if (this.runningWidgets.has(widgetId)) {
+            // Call Python stop function
+            if (this.pyodide) {
+                try {
+                    this.pyodide.runPython(`stop_widget('${widgetId}')`);
+                } catch (error) {
+                    console.error('Error stopping widget:', error);
+                }
+            }
+            
+            // Update widget status
+            widget.status = 'stopped';
+            this.runningWidgets.delete(widgetId);
+            this.updateWidgetDisplay(widget);
+            
+            // Fire stop event
+            this.fireWidgetEvent(widgetId, 'execution_stopped', {});
+            
+            console.log(`Widget ${widgetId} stopped`);
+        }
+    }
+
+    /**
+     * Get connections for a widget with ETL transformation support
+     */
+    getWidgetConnections(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget || !widget.connections) return {};
+        
+        const connections = {};
+        
+        // Input connections with ETL transformation
+        if (widget.connections.inputs && widget.connections.inputs.size > 0) {
+            connections.inputs = {};
+            for (const [inputPath, connectionData] of widget.connections.inputs) {
+                const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
+                const sourceWidget = this.widgets.get(sourceId);
+                
+                if (sourceWidget && sourceWidget.lastOutput && sourceWidget.lastOutput.success) {
+                    let sourceData = sourceWidget.lastOutput;
+                    
+                    // Apply ETL transformation if present
+                    if (typeof connectionData === 'object' && connectionData.etlScript) {
+                        try {
+                            // Execute ETL script with Pyodide
+                            const etlCode = `
+# ETL Transformation Script
+source_data = ${JSON.stringify(sourceData)}
+output_path = '${connectionData.outputPath || 'result'}'
+
+# User's ETL script
+${connectionData.etlScript}
+`;
+                            
+                            if (this.pyodide) {
+                                const transformedData = this.pyodide.runPython(etlCode);
+                                sourceData = typeof transformedData === 'string' ? JSON.parse(transformedData) : transformedData;
+                            } else {
+                                console.warn(`ETL script skipped - Python not available for connection ${sourceId} → ${widgetId}`);
+                            }
+                        } catch (error) {
+                            console.error(`ETL transformation failed for ${sourceId} → ${widgetId}:`, error);
+                            // Use original data if ETL fails
+                        }
+                    }
+                    
+                    connections.inputs[inputPath] = sourceData;
+                }
+            }
+        }
+        
+        return connections;
+    }
+
+    /**
+     * Event System for Widget Communication
+     */
+    
+    /**
+     * Add event listener for widget events
+     */
+    addEventListener(eventType, widgetId, callback) {
+        const key = `${eventType}:${widgetId || '*'}`;
+        if (!this.eventListeners.has(key)) {
+            this.eventListeners.set(key, []);
+        }
+        this.eventListeners.get(key).push(callback);
+    }
+
+    /**
+     * Remove event listener
+     */
+    removeEventListener(eventType, widgetId, callback) {
+        const key = `${eventType}:${widgetId || '*'}`;
+        if (this.eventListeners.has(key)) {
+            const listeners = this.eventListeners.get(key);
+            const index = listeners.indexOf(callback);
+            if (index > -1) {
+                listeners.splice(index, 1);
+            }
+        }
+    }
+
+    /**
+     * Fire widget event to all listeners
+     */
+    fireWidgetEvent(widgetId, eventType, data) {
+        // Fire for specific widget
+        const specificKey = `${eventType}:${widgetId}`;
+        if (this.eventListeners.has(specificKey)) {
+            this.eventListeners.get(specificKey).forEach(callback => {
+                try {
+                    callback(widgetId, eventType, data);
+                } catch (error) {
+                    console.error('Event listener error:', error);
+                }
+            });
+        }
+
+        // Fire for global listeners
+        const globalKey = `${eventType}:*`;
+        if (this.eventListeners.has(globalKey)) {
+            this.eventListeners.get(globalKey).forEach(callback => {
+                try {
+                    callback(widgetId, eventType, data);
+                } catch (error) {
+                    console.error('Global event listener error:', error);
+                }
+            });
+        }
+
+        console.log(`Event fired: ${eventType} for widget ${widgetId}`, data);
+    }
+
+    /**
+     * Generate incremental widget ID based on slug
+     */
+    generateWidgetId(widgetSchema) {
+        const slug = widgetSchema.id || 'widget';
+        
+        // Get current count for this slug
+        const currentCount = this.slugCounters.get(slug) || 0;
+        const newCount = currentCount + 1;
+        this.slugCounters.set(slug, newCount);
+        
+        // Generate incremental ID: slug-1, slug-2, etc.
+        return `${slug}-${newCount}`;
+    }
+
+    /**
+     * Cycle Detection for Widget Dependencies
+     */
+    detectCycles() {
+        const visited = new Set();
+        const recursionStack = new Set();
+        
+        // Check all widgets for cycles
+        for (const widgetId of this.widgets.keys()) {
+            if (this.hasCycleDFS(widgetId, visited, recursionStack)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * DFS helper for cycle detection (updated for new connection structure)
+     */
+    hasCycleDFS(widgetId, visited, recursionStack) {
+        if (recursionStack.has(widgetId)) {
+            return true; // Cycle detected
+        }
+        
+        if (visited.has(widgetId)) {
+            return false; // Already processed
+        }
+        
+        visited.add(widgetId);
+        recursionStack.add(widgetId);
+        
+        // Check all widgets that depend on this widget's output
+        for (const [targetId, targetWidget] of this.widgets) {
+            if (targetWidget.connections && targetWidget.connections.inputs) {
+                for (const [inputPath, connectionData] of targetWidget.connections.inputs) {
+                    const sourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
+                    if (sourceId === widgetId) {
+                        if (this.hasCycleDFS(targetId, visited, recursionStack)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        
+        recursionStack.delete(widgetId);
+        return false;
+    }
+
+    /**
+     * Connect widgets with cycle detection and ETL script support
+     */
+    connectWidgetsWithValidation(sourceId, targetId, outputPath, inputPath, etlScript = '') {
+        // First, add the connection temporarily
+        const targetWidget = this.widgets.get(targetId);
+        if (!targetWidget.connections) {
+            targetWidget.connections = { inputs: new Map(), outputs: new Map() };
+        }
+        
+        const oldInput = targetWidget.connections.inputs.get(inputPath);
+        const connectionData = {
+            sourceId,
+            outputPath,
+            etlScript: etlScript.trim(),
+            created: new Date().toISOString()
+        };
+        
+        targetWidget.connections.inputs.set(inputPath, connectionData);
+        
+        // Check for cycles
+        if (this.detectCycles()) {
+            // Revert the connection
+            if (oldInput) {
+                targetWidget.connections.inputs.set(inputPath, oldInput);
+            } else {
+                targetWidget.connections.inputs.delete(inputPath);
+            }
+            
+            throw new Error(`Connection would create a cycle: ${sourceId} → ${targetId}`);
+        }
+        
+        // Update source widget connections
+        const sourceWidget = this.widgets.get(sourceId);
+        if (!sourceWidget.connections) {
+            sourceWidget.connections = { inputs: new Map(), outputs: new Map() };
+        }
+        
+        if (!sourceWidget.connections.outputs.has(outputPath)) {
+            sourceWidget.connections.outputs.set(outputPath, []);
+        }
+        sourceWidget.connections.outputs.get(outputPath).push({
+            targetId,
+            inputPath,
+            hasETL: !!etlScript
+        });
+        
+        console.log(`Connected ${sourceId}[${outputPath}] → ${targetId}[${inputPath}]${etlScript ? ' (with ETL)' : ''}`);
+        return true;
+    }
+
+    /**
+     * Enhanced Widget Creation with Proper ID Management
+     */
+    createWidgetWithId(widgetType, position, widgetSchema) {
+        // Generate proper incremental ID
+        const widgetId = this.generateWidgetId(widgetSchema);
+        
+        const widget = {
+            id: widgetId,
+            type: widgetType,
+            schema: widgetSchema,
+            position: position,
+            config: this.getDefaultConfigFromSchema(widgetSchema),
+            status: 'idle',
+            lastOutput: null,
+            connections: {
+                inputs: new Map(),
+                outputs: new Map()
+            },
+            attachedNote: {
+                visible: true,
+                content: `# Notes for ${widgetSchema.name}\n\nThis widget instance: **${widgetId}**\n\nLast executed: *Never*\n\nConfiguration: {{config}}\n\nLast output: {{output}}`,
+                variables: new Map()
+            },
+            actions: widgetSchema.actions || {},
+            executionStartTime: null,
+            metadata: {
+                slug: widgetSchema.id,
+                instanceNumber: this.slugCounters.get(widgetSchema.id),
+                created: new Date().toISOString(),
+                modified: new Date().toISOString()
+            }
+        };
+
+        this.widgets.set(widgetId, widget);
+        
+        // Fire widget created event
+        this.fireWidgetEvent(widgetId, 'widget_created', { widget });
+        
+        console.log(`Created widget: ${widgetId} (${widgetType})`);
+        return widget;
     }
 
     /**
@@ -1048,12 +1816,13 @@ class MathematicalBoard {
             return;
         }
         
-        // Find widgets that have this widget as input
+        // Find widgets that have this widget as input (updated for new connection structure)
         for (const [widgetId, widget] of this.widgets) {
-            if (widget.connections.inputs.size > 0) {
-                for (const [inputPath, connectedSourceId] of widget.connections.inputs) {
+            if (widget.connections && widget.connections.inputs && widget.connections.inputs.size > 0) {
+                for (const [inputPath, connectionData] of widget.connections.inputs) {
+                    const connectedSourceId = typeof connectionData === 'string' ? connectionData : connectionData.sourceId;
                     if (connectedSourceId === sourceId) {
-                        // Update the target widget's config with output data
+                        // Update the target widget's config with output data (ETL will be applied in getWidgetConnections)
                         this.updateWidgetInputFromConnection(widget, inputPath, sourceWidget.lastOutput);
                         
                         // Execute the dependent widget
@@ -1110,6 +1879,19 @@ class MathematicalBoard {
         const contentElement = element.querySelector('.widget-content');
         if (contentElement) {
             contentElement.innerHTML = this.renderWidgetContent(widget);
+        }
+        
+        // Update attached note
+        const noteElement = element.querySelector('.widget-attached-note');
+        if (noteElement && widget.attachedNote) {
+            noteElement.innerHTML = this.renderAttachedNote(widget);
+            noteElement.style.display = widget.attachedNote.visible ? 'block' : 'none';
+        }
+        
+        // Update stop button visibility
+        const stopButton = element.querySelector('.stop-btn');
+        if (stopButton) {
+            stopButton.style.display = widget.status === 'running' ? 'inline-block' : 'none';
         }
     }
 
@@ -1526,6 +2308,23 @@ function runWidget(widgetId) {
     boardApp.executeWidget(widgetId);
 }
 
+function stopWidget(widgetId) {
+    boardApp.stopWidget(widgetId);
+}
+
+function toggleAttachedNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget || !widget.attachedNote) return;
+    
+    widget.attachedNote.visible = !widget.attachedNote.visible;
+    const noteEl = document.getElementById(`note-${widgetId}`);
+    if (noteEl) {
+        noteEl.style.display = widget.attachedNote.visible ? 'block' : 'none';
+    }
+    
+    boardApp.saveBoardToStorage();
+}
+
 function executeWidgetAction(widgetId, actionSlug) {
     boardApp.executeWidgetAction(widgetId, actionSlug);
     // Close the hamburger menu
@@ -1550,14 +2349,52 @@ function toggleWidgetMenu(widgetId) {
 }
 
 function connectWidget(widgetId) {
-    // Simple connection interface - in practice this would be more sophisticated
+    // Enhanced connection interface with ETL script support
     const sourceId = prompt('Connect FROM widget ID:');
+    if (!sourceId || sourceId === widgetId) return;
+    
     const outputPath = prompt('Output path (e.g., data.x):') || 'result';
     const inputPath = prompt('Input path (e.g., data):') || 'data';
     
-    if (sourceId && sourceId !== widgetId) {
-        boardApp.connectWidgets(sourceId, widgetId, outputPath, inputPath);
-        boardApp.updateStatus(`Connected ${sourceId} → ${widgetId}`, 'success');
+    // Ask if user wants to add ETL transformation script
+    const useETL = confirm('Add ETL transformation script? (transforms source output to target input)');
+    let etlScript = '';
+    
+    if (useETL) {
+        etlScript = prompt(`Enter Python ETL script to transform data from ${sourceId}[${outputPath}] to ${widgetId}[${inputPath}]:
+        
+Example:
+# source_data contains the output from source widget
+# Return the transformed data for target widget input
+result = source_data.get('${outputPath}', {})
+if isinstance(result, dict):
+    # Transform the data structure
+    transformed = {'processed_' + k: v for k, v in result.items()}
+    return transformed
+return result
+
+Enter your ETL script:`) || '';
+    }
+    
+    try {
+        // Enhanced connection with ETL support
+        boardApp.connectWidgetsWithValidation(sourceId, widgetId, outputPath, inputPath, etlScript);
+        
+        const etlInfo = etlScript ? ' (with ETL transformation)' : '';
+        boardApp.updateStatus(`Connected ${sourceId} → ${widgetId}${etlInfo}`, 'success');
+        
+        // Fire connection event
+        boardApp.fireWidgetEvent(widgetId, 'connection_added', {
+            sourceId,
+            targetId: widgetId,
+            outputPath,
+            inputPath,
+            hasETL: !!etlScript
+        });
+        
+    } catch (error) {
+        boardApp.updateStatus(`Connection failed: ${error.message}`, 'error');
+        console.error('Connection error:', error);
     }
 }
 
@@ -1602,8 +2439,74 @@ function toggleLibrary() {
 }
 
 function fitToScreen() {
-    // TODO: Implement fit to screen functionality
-    boardApp.updateStatus('Fit to screen', 'success');
+    // Implement fit to screen functionality
+    const boardContent = document.getElementById('board-content');
+    const widgets = Array.from(boardApp.widgets.values());
+    
+    if (widgets.length === 0) {
+        boardApp.updateStatus('No widgets to fit', 'info');
+        return;
+    }
+    
+    // Calculate bounding box of all widgets
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    
+    widgets.forEach(widget => {
+        const x = widget.x || 0;
+        const y = widget.y || 0;
+        const width = widget.width || 300;
+        const height = widget.height || 200;
+        
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x + width);
+        maxY = Math.max(maxY, y + height);
+    });
+    
+    // Get board content dimensions
+    const boardRect = boardContent.getBoundingClientRect();
+    const padding = 50; // Add some padding around widgets
+    
+    // Calculate scaling factor
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+    const availableWidth = boardRect.width - (padding * 2);
+    const availableHeight = boardRect.height - (padding * 2);
+    
+    const scaleX = availableWidth / contentWidth;
+    const scaleY = availableHeight / contentHeight;
+    const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+    
+    // Calculate center offset
+    const centerX = (boardRect.width / 2) - ((contentWidth * scale) / 2);
+    const centerY = (boardRect.height / 2) - ((contentHeight * scale) / 2);
+    
+    // Apply transformation to all widgets
+    widgets.forEach(widget => {
+        const element = document.querySelector(`[data-widget-id="${widget.id}"]`);
+        if (element) {
+            const newX = ((widget.x - minX) * scale) + centerX;
+            const newY = ((widget.y - minY) * scale) + centerY;
+            const newWidth = (widget.width || 300) * scale;
+            const newHeight = (widget.height || 200) * scale;
+            
+            // Update widget properties
+            widget.x = newX;
+            widget.y = newY;
+            widget.width = newWidth;
+            widget.height = newHeight;
+            
+            // Update DOM element
+            element.style.left = `${newX}px`;
+            element.style.top = `${newY}px`;
+            element.style.width = `${newWidth}px`;
+            element.style.height = `${newHeight}px`;
+        }
+    });
+    
+    // Save the updated positions
+    boardApp.saveBoardToStorage();
+    boardApp.updateStatus(`Fitted ${widgets.length} widgets to screen (scale: ${(scale * 100).toFixed(1)}%)`, 'success');
 }
 
 function toggleGrid() {
@@ -1667,8 +2570,37 @@ function playAllWidgets() {
 }
 
 function pauseAllWidgets() {
-    boardApp.updateStatus('Paused all widgets', 'paused');
-    // TODO: Pause all running widgets
+    // Implement pause all running widgets functionality
+    const runningWidgets = Array.from(boardApp.runningWidgets);
+    
+    if (runningWidgets.length === 0) {
+        boardApp.updateStatus('No widgets currently running', 'info');
+        return;
+    }
+    
+    let pausedCount = 0;
+    const promises = runningWidgets.map(async (widgetId) => {
+        try {
+            await boardApp.stopWidget(widgetId);
+            pausedCount++;
+        } catch (error) {
+            console.error(`Failed to pause widget ${widgetId}:`, error);
+        }
+    });
+    
+    // Wait for all widgets to be paused
+    Promise.all(promises).then(() => {
+        boardApp.updateStatus(`Paused ${pausedCount} running widgets`, 'success');
+        
+        // Fire global event for paused widgets
+        boardApp.fireWidgetEvent('*', 'all_widgets_paused', { 
+            pausedCount, 
+            totalRequested: runningWidgets.length 
+        });
+    }).catch((error) => {
+        console.error('Error pausing widgets:', error);
+        boardApp.updateStatus('Error pausing some widgets', 'error');
+    });
 }
 
 function clearBoard() {
