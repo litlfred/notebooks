@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/weierstrass/output.schema.json",
-  "title": "Weierstrass Function Output Schema",
-  "description": "Output data from Weierstrass ℘ function widgets",
+  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/output.schema.json",
+  "title": "Weierstrass Two-Panel Function Output Schema",
+  "description": "Output data from Weierstrass ℘(z) and ℘′(z) two-panel visualization",
   "type": "object",
   "properties": {
     "success": {

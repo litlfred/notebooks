@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schemas/data-visualization.json",
+  "$id": "https://litlfred.github.io/notebooks/schema/data-visualization.json",
   "title": "Data Visualization Widget Schemas",
   "description": "Input and output schemas for data visualization widgets",
   "definitions": {
@@ -11,7 +11,7 @@
       "description": "Input parameters for data plotting widgets",
       "properties": {
         "data": {
-          "$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/data_series"
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/data_series"
         },
         "plot_type": {
           "enum": ["line", "scatter", "bar", "histogram"],
@@ -37,11 +37,11 @@
       "title": "Data Plot Output Schema",
       "description": "Output from data plotting widgets",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/execution_result"}
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "plot_image": {
-          "$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/visualization_output"
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/visualization_output"
         },
         "statistics": {
           "type": "object",
@@ -95,15 +95,15 @@
       "title": "Data Generator Output Schema",
       "description": "Output from data generation widgets",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/execution_result"}
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "data": {
-          "$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/data_series"
+          "$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/data_series"
         },
         "metadata": {
           "allOf": [
-            {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata"}
+            {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/metadata"}
           ],
           "properties": {
             "generator_type": {"type": "string"},

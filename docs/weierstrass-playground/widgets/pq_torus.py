@@ -219,10 +219,10 @@ PQ_TORUS_SCHEMA = {
     "category": "computation",
     "icon": "🔴",
     "input_schemas": [
-        "https://litlfred.github.io/notebooks/schemas/pq-torus.json#/definitions/prime_pair_input"
+        "https://litlfred.github.io/notebooks/schema/pq-torus.json#/definitions/prime_pair_input"
     ],
     "output_schemas": [
-        "https://litlfred.github.io/notebooks/schemas/pq-torus.json#/definitions/prime_pair_output"  
+        "https://litlfred.github.io/notebooks/schema/pq-torus.json#/definitions/prime_pair_output"  
     ],
     "python_script": "widgets/pq_torus.py"
 }

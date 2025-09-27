@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schemas/sticky-note.json",
+  "$id": "https://litlfred.github.io/notebooks/schema/sticky-note.json",
   "title": "Sticky Note Widget Schemas",
   "description": "Input and output schemas for the sticky note widget",
   "definitions": {
@@ -10,8 +10,8 @@
       "title": "Sticky Note Input Schema",
       "description": "Input parameters for sticky note widget",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/markdown_content"},
-        {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/ui_configuration"}
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/markdown_content"},
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/ui_configuration"}
       ],
       "properties": {
         "show_note": {
@@ -27,7 +27,7 @@
       "title": "Sticky Note Output Schema",
       "description": "Output data from sticky note widget",
       "allOf": [
-        {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/execution_result"}
+        {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/execution_result"}
       ],
       "properties": {
         "rendered_html": {
@@ -36,7 +36,7 @@
         },
         "metadata": {
           "allOf": [
-            {"$ref": "https://litlfred.github.io/notebooks/schemas/common.json#/definitions/metadata"}
+            {"$ref": "https://litlfred.github.io/notebooks/schema/common.json#/definitions/metadata"}
           ],
           "properties": {
             "visible": {"type": "boolean"},

@@ -933,7 +933,19 @@ def create_widget(widget_type: str, schemas: Dict[str, Any]) -> WidgetExecutor:
         'data-plot': DataPlotWidget,
         'data-generator': DataGeneratorWidget,
         'pq-torus': PQTorusWidget,
+        'pq-torus.weierstrass.two-panel': WeierstrassTwoPanelWidget,
+        'pq-torus.weierstrass.five-panel': WeierstrassFivePanelWidget,
     }
     
-    widget_class = widget_classes.get(widget_type, WidgetExecutor)
+    # Handle hierarchical widget IDs
+    if '.' in widget_type:
+        # For hierarchical widgets, try the full ID first, then fall back to base class
+        widget_class = widget_classes.get(widget_type)
+        if not widget_class:
+            # Fall back to parent widget class with sub-widget behavior
+            parent_type = widget_type.split('.')[0]
+            widget_class = widget_classes.get(parent_type, WidgetExecutor)
+    else:
+        widget_class = widget_classes.get(widget_type, WidgetExecutor)
+    
     return widget_class(schema)

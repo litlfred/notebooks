@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schemas/common.json",
+  "$id": "https://litlfred.github.io/notebooks/schema/common.json",
   "title": "Common Widget Framework Schemas",
   "description": "Reusable schema definitions for the widget framework",
   "definitions": {

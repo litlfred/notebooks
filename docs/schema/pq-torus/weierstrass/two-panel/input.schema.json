@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/schema/weierstrass/input.schema.json",
-  "title": "Weierstrass Function Input Schema",
-  "description": "Input parameters for Weierstrass ℘ function widgets",
+  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/input.schema.json",
+  "title": "Weierstrass Two-Panel Function Input Schema",
+  "description": "Input parameters for Weierstrass ℘(z) and ℘′(z) two-panel visualization widget (inherits from PQ-Torus)",
   "type": "object",
   "properties": {
     "p": {
@@ -23,10 +23,23 @@
     },
     "N": {
       "type": "integer",
-      "description": "Truncation level",
+      "description": "Truncation level for two-panel Weierstrass computation",
       "minimum": 0,
       "maximum": 6,
       "default": 3
+    },
+    "plot_resolution": {
+      "type": "integer",
+      "description": "Resolution for two-panel plot rendering",
+      "default": 100,
+      "minimum": 50,
+      "maximum": 500
+    },
+    "color_scheme": {
+      "type": "string", 
+      "description": "Color scheme for two-panel visualization",
+      "default": "viridis",
+      "enum": ["viridis", "plasma", "inferno", "magma"]
     },
     "grid_size": {
       "type": "object",
