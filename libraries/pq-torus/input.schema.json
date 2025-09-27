@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json",
+  "title": "PQ-Torus Input Schema",
+  "description": "Input parameters for PQ-Torus widget - pair of prime integers",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "integer",
+      "description": "First prime integer p for lattice L = Zp + Zqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    },
+    "q": {
+      "type": "integer",
+      "description": "Second prime integer q for lattice L = Zp + Zqi",  
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    }
+  },
+  "required": ["p", "q"],
+  "additionalProperties": false
+}

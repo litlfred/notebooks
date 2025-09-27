@@ -1,0 +1,73 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/ontology/context.jsonld"
+  ],
+  "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+  "@type": ["prov:Collection", "library:WidgetLibrary"],
+  "dct:title": "PQ-Torus Widget Library",
+  "dct:description": "Mathematical widgets for PQ-Torus analysis and Weierstrass ℘-function visualization",
+  "dct:version": "1.0.0",
+  "widgets": {
+    "pq-torus": {
+      "@id": "pq-torus",
+      "@type": "library:WidgetDefinition",
+      "name": "PQ-Torus",
+      "description": "Defines torus T = ℂ / L where L = ℤp + ℤqi with prime lattice parameters",
+      "category": "computation",
+      "icon": "🔴",
+      "input_schema": "input.schema.json",
+      "output_schema": "output.schema.json",
+      "widget_schema": "widget.schema.json",
+      "python_script": "pq_torus.py"
+    },
+    "weierstrass-two-panel": {
+      "@id": "weierstrass-two-panel", 
+      "@type": "library:WidgetDefinition",
+      "name": "Weierstrass ℘ Two-Panel Plot",
+      "description": "℘(z) and ℘′(z) two-panel visualization using PQ-Torus lattice",
+      "category": "visualization",
+      "icon": "∞",
+      "input_schema": "weierstrass/two-panel/input.schema.json",
+      "output_schema": "weierstrass/two-panel/output.schema.json",
+      "widget_schema": "weierstrass/two-panel/widget.schema.json",
+      "python_script": "weierstrass_two_panel.py"
+    },
+    "weierstrass-three-panel": {
+      "@id": "weierstrass-three-panel",
+      "@type": "library:WidgetDefinition", 
+      "name": "Weierstrass ℘ Three-Panel Analysis",
+      "description": "Advanced Weierstrass ℘ function three-panel mathematical analysis",
+      "category": "visualization",
+      "icon": "🔍",
+      "input_schema": "weierstrass/three-panel/input.schema.json",
+      "output_schema": "weierstrass/three-panel/output.schema.json",
+      "widget_schema": "weierstrass/three-panel/widget.schema.json",
+      "python_script": "weierstrass_three_panel.py"
+    },
+    "weierstrass-five-panel": {
+      "@id": "weierstrass-five-panel",
+      "@type": "library:WidgetDefinition",
+      "name": "Weierstrass ℘ Five-Panel Analysis", 
+      "description": "Complete Weierstrass ℘ function analysis with derivatives and properties",
+      "category": "visualization",
+      "icon": "🔍",
+      "input_schema": "weierstrass/five-panel/input.schema.json",
+      "output_schema": "weierstrass/five-panel/output.schema.json", 
+      "widget_schema": "weierstrass/five-panel/widget.schema.json",
+      "python_script": "weierstrass_five_panel.py"
+    },
+    "weierstrass-trajectories": {
+      "@id": "weierstrass-trajectories",
+      "@type": "library:WidgetDefinition",
+      "name": "Weierstrass ℘ Trajectories",
+      "description": "Trajectory analysis for Weierstrass ℘ function dynamics",
+      "category": "visualization", 
+      "icon": "🌀",
+      "input_schema": "weierstrass/trajectories/input.schema.json",
+      "output_schema": "weierstrass/trajectories/output.schema.json",
+      "widget_schema": "weierstrass/trajectories/widget.schema.json", 
+      "python_script": "weierstrass_trajectories.py"
+    }
+  }
+}

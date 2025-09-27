@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus/weierstrass/five-panel/output.schema.json",
+  "title": "Weierstrass Five-Panel Function Output Schema",
+  "description": "Output data from complete Weierstrass ℘ function five-panel analysis",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "computation_time": {
+      "type": "number",
+      "description": "Time taken for computation in seconds"
+    },
+    "panel_data": {
+      "type": "object",
+      "description": "Data for all five analysis panels",
+      "properties": {
+        "weierstrass_p": {
+          "type": "object",
+          "description": "℘(z) function values",
+          "properties": {
+            "values": {"type": "array"},
+            "grid_x": {"type": "array"},
+            "grid_y": {"type": "array"}
+          }
+        },
+        "weierstrass_p_prime": {
+          "type": "object", 
+          "description": "℘′(z) derivative values",
+          "properties": {
+            "values": {"type": "array"},
+            "real_part": {"type": "array"},
+            "imag_part": {"type": "array"}
+          }
+        },
+        "field_magnitude": {
+          "type": "object",
+          "description": "Field magnitude analysis",
+          "properties": {
+            "magnitude": {"type": "array"},
+            "contours": {"type": "array"}
+          }
+        },
+        "critical_points": {
+          "type": "array",
+          "description": "Critical points and singularities"
+        },
+        "mathematical_properties": {
+          "type": "object",
+          "description": "Computed mathematical properties",
+          "properties": {
+            "periods": {"type": "array"},
+            "invariants": {"type": "object"},
+            "pole_locations": {"type": "array"}
+          }
+        }
+      },
+      "required": ["weierstrass_p", "weierstrass_p_prime"]
+    },
+    "visualization": {
+      "type": "object",
+      "properties": {
+        "plot_base64": {"type": "string"},
+        "width": {"type": "integer"},
+        "height": {"type": "integer"}
+      }
+    }
+  },
+  "required": ["success", "panel_data"]
+}
