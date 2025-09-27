@@ -43,32 +43,34 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       branch_name: ${{ steps.branch.outputs.branch_name }}
+      sanitized_branch_name: ${{ steps.branch.outputs.sanitized_branch_name }}
     
     steps:
     - name: Determine branch to deploy
       id: branch
       run: |
+        # Determine the actual branch name first
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           # Manual dispatch - use specified branch or current branch
           if [ -n "${{ github.event.inputs.branch_name }}" ]; then
             DEPLOY_BRANCH="${{ github.event.inputs.branch_name }}"
-            echo "branch_name=${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
-            echo "ref=refs/heads/${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
           else
-            # Use current branch if no branch specified
-            echo "branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
+            DEPLOY_BRANCH="${{ github.ref_name }}"
           fi
+          echo "ref=refs/heads/${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
+        elif [ "${{ github.event_name }}" = "pull_request" ]; then
+          DEPLOY_BRANCH="${{ github.head_ref }}"
+          echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
         else
-          # Automatic trigger - use event branch
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "branch_name=${{ github.head_ref }}" >> $GITHUB_OUTPUT
-            echo "ref=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "branch_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
-          fi
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
         fi
+        
+        echo "branch_name=${DEPLOY_BRANCH}" >> $GITHUB_OUTPUT
+        
+        # Sanitize branch name for artifact naming (replace invalid characters)
+        SANITIZED_BRANCH=$(echo "${DEPLOY_BRANCH}" | sed 's/[\/:]/-/g' | sed 's/[^a-zA-Z0-9._-]/-/g')
+        echo "sanitized_branch_name=${SANITIZED_BRANCH}" >> $GITHUB_OUTPUT
     
     - name: Checkout
       uses: actions/checkout@v4
@@ -166,7 +168,7 @@ jobs:
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./_site
-        name: github-pages-preview-${{ steps.branch.outputs.branch_name }}
+        name: github-pages-preview-${{ steps.branch.outputs.sanitized_branch_name }}
 
   deploy-preview:
     environment:
@@ -180,7 +182,7 @@ jobs:
       id: deployment
       uses: actions/deploy-pages@v4
       with:
-        artifact_name: github-pages-preview-${{ needs.build-and-deploy-preview.outputs.branch_name }}
+        artifact_name: github-pages-preview-${{ needs.build-and-deploy-preview.outputs.sanitized_branch_name }}
     
     - name: Update deployment status
       run: |
