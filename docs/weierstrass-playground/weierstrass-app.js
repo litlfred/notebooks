@@ -250,24 +250,38 @@ class WeierstrassApp {
             
             for (const fileName of pythonFiles) {
                 console.log(`📥 Loading ${fileName}...`);
+                const fullUrl = `python/weierstrass_playground/${fileName}`;
                 try {
-                    console.log(`🌐 Fetching python/weierstrass_playground/${fileName}`);
-                    const response = await fetch(`python/weierstrass_playground/${fileName}`);
-                    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+                    console.log(`🌐 Fetching from URL: ${fullUrl}`);
+                    console.log(`🔍 Full URL check - fileName: "${fileName}", length: ${fileName.length}`);
+                    console.log(`🔍 Character codes: ${[...fileName].map(c => c.charCodeAt(0)).join(',')}`);
+                    
+                    const response = await fetch(fullUrl);
+                    console.log(`📡 Response status: ${response.status} ${response.statusText} for ${fileName}`);
                     
                     if (!response.ok) {
-                        throw new Error(`Failed to load ${fileName}: ${response.status} ${response.statusText}`);
+                        console.error(`❌ HTTP ${response.status} error for ${fileName}`);
+                        console.error(`❌ Response URL was: ${response.url}`);
+                        console.error(`❌ Response headers:`, [...response.headers.entries()]);
+                        throw new Error(`HTTP ${response.status}: Failed to load "${fileName}" from "${fullUrl}"`);
                     }
                     
                     const content = await response.text();
                     packageCode[fileName] = content;
-                    console.log(`✅ Loaded ${fileName} (${content.length} chars)`);
+                    console.log(`✅ Loaded ${fileName} (${content.length} chars) successfully`);
                 } catch (fetchError) {
-                    console.error(`❌ Failed to fetch ${fileName}:`, fetchError);
+                    console.error(`❌ Failed to fetch "${fileName}" from "${fullUrl}":`, fetchError);
                     console.error(`❌ Fetch error type: ${fetchError.constructor.name}`);
                     console.error(`❌ Fetch error message: ${fetchError.message}`);
-                    if (fetchError.stack) console.error(`❌ Fetch error stack: ${fetchError.stack}`);
-                    throw new Error(`Could not load Python file ${fileName}: ${fetchError.message}`);
+                    console.error(`❌ FileName details: "${fileName}", length: ${fileName.length}`);
+                    if (fetchError.stack) console.error(`❌ Fetch error stack:`, fetchError.stack);
+                    
+                    // More specific error message
+                    if (fetchError.message.includes('404')) {
+                        throw new Error(`File not found: "${fileName}" at URL "${fullUrl}". Check if the file exists and the path is correct.`);
+                    } else {
+                        throw new Error(`Network error loading "${fileName}" from "${fullUrl}": ${fetchError.message}`);
+                    }
                 }
             }
             
