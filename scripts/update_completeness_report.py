@@ -11,9 +11,9 @@ import datetime
 def update_completeness_report():
     """Update the completeness report with current progress."""
     
-    # Count generated widgets
+    # Count generated widgets in hierarchical structure
     widgets_dir = Path("docs/sympy/widgets")
-    widget_files = list(widgets_dir.glob("*.py"))
+    widget_files = list(widgets_dir.rglob("*.py"))  # Use rglob to find files recursively
     implemented_widgets = len(widget_files)
     
     # Load schema to get total widgets

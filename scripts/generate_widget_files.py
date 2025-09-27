@@ -113,9 +113,23 @@ def generate_widget_files():
         if generated_count >= max_widgets:
             break
             
-        # Skip if file already exists
-        filename = f"{widget_id.replace('-', '_')}.py"
-        filepath = widgets_dir / filename
+        # Parse widget ID to create hierarchical structure
+        # Example: sympy-core-add -> sympy/core/add.py
+        parts = widget_id.split('-')
+        if len(parts) >= 3 and parts[0] == 'sympy':
+            module_path = '/'.join(parts[1:-1])  # e.g., 'core' 
+            class_name = parts[-1]  # e.g., 'add'
+            
+            # Create directory structure
+            module_dir = widgets_dir / 'sympy' / module_path
+            module_dir.mkdir(parents=True, exist_ok=True)
+            
+            filename = f"{class_name}.py"
+            filepath = module_dir / filename
+        else:
+            # Fallback to flat structure for unknown patterns
+            filename = f"{widget_id.replace('-', '_')}.py"
+            filepath = widgets_dir / filename
         
         if filepath.exists():
             print(f"Skipping existing widget: {filename}")

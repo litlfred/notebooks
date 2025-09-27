@@ -13,8 +13,17 @@ docs/sympy/
 ├── widget_schemas.json         # Generated widget schemas (361 widgets)
 ├── sympy_context.jsonld        # JSON-LD context for semantic web
 ├── sympy_widget_executor.py    # Widget execution engine (standalone)
-└── widgets/                    # Individual widget implementations
-    └── 23+ Python widget files organized by class hierarchy
+└── widgets/                    # Hierarchical widget implementations
+    └── sympy/                  # Organized by SymPy module structure
+        ├── core/               # Core algebraic operations
+        │   ├── add.py          # Addition operations
+        │   ├── algebraicnumber.py # Algebraic numbers
+        │   ├── atom.py         # Atomic expressions
+        │   └── ... (20+ files)
+        ├── functions/          # Mathematical functions
+        │   └── elementary.py   # Elementary functions
+        └── matrices/           # Matrix operations
+            └── dense.py        # Dense matrix operations
 ```
 
 ### Schema Structure (Future-Compatible)
