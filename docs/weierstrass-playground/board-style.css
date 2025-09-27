@@ -30,6 +30,45 @@
     
     --board-bg: #1e2832;
     --widget-bg: #2c3e50;
+    
+    /* Sticky Note Color Themes as CSS Variables */
+    --sticky-desert-bg: #f4e4c1;
+    --sticky-desert-header: #e6d7b8;
+    --sticky-desert-content: #f9f2e5;
+    --sticky-desert-text: #6b5544;
+    --sticky-desert-border: #d4c5a6;
+    
+    --sticky-classic-bg: #fff740;
+    --sticky-classic-header: #f0e847;
+    --sticky-classic-content: #fffd70;
+    --sticky-classic-text: #333333;
+    --sticky-classic-border: #e6d633;
+    
+    --sticky-ocean-bg: #b3e5fc;
+    --sticky-ocean-header: #81d4fa;
+    --sticky-ocean-content: #e1f5fe;
+    --sticky-ocean-text: #0277bd;
+    --sticky-ocean-border: #4fc3f7;
+    
+    --sticky-forest-bg: #c8e6c9;
+    --sticky-forest-header: #a5d6a7;
+    --sticky-forest-content: #e8f5e8;
+    --sticky-forest-text: #2e7d32;
+    --sticky-forest-border: #81c784;
+    
+    /* Current theme defaults to desert */
+    --current-sticky-bg: var(--sticky-desert-bg);
+    --current-sticky-header: var(--sticky-desert-header);
+    --current-sticky-content: var(--sticky-desert-content);
+    --current-sticky-text: var(--sticky-desert-text);
+    --current-sticky-border: var(--sticky-desert-border);
+    --sticky-ocean-border: #4fc3f7;
+    
+    --sticky-forest-bg: #c8e6c9;
+    --sticky-forest-header: #a5d6a7;
+    --sticky-forest-content: #e8f5e8;
+    --sticky-forest-text: #2e7d32;
+    --sticky-forest-border: #81c784;
 }
 
 /* Light mode override */
@@ -396,6 +435,214 @@ body {
     padding: 0.5rem;
 }
 
+/* Widget layout and positioning */
+.widget-pq-torus {
+    min-width: 300px;
+    min-height: 200px;
+}
+
+.widget-pq-torus .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(231, 76, 60, 0.1));
+}
+
+/* Sticky Note Base Styles with CSS Variable Support */
+.widget-sticky-note {
+    min-width: 250px;
+    min-height: 180px;
+    background: var(--current-sticky-bg, var(--sticky-desert-bg));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    resize: both;
+    overflow: hidden;
+    position: relative;
+}
+
+.widget-sticky-note .widget-header {
+    background: var(--current-sticky-header, var(--sticky-desert-header));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    border-bottom: 1px solid var(--current-sticky-border, var(--sticky-desert-border));
+}
+
+.widget-sticky-note .widget-content {
+    background: var(--current-sticky-content, var(--sticky-desert-content));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    resize: none;
+    overflow: auto;
+}
+
+/* Sticky Note Theme Variants */
+.widget-sticky-note.theme-desert {
+    --current-sticky-bg: var(--sticky-desert-bg);
+    --current-sticky-header: var(--sticky-desert-header);
+    --current-sticky-content: var(--sticky-desert-content);
+    --current-sticky-text: var(--sticky-desert-text);
+    --current-sticky-border: var(--sticky-desert-border);
+}
+
+.widget-sticky-note.theme-classic {
+    --current-sticky-bg: var(--sticky-classic-bg);
+    --current-sticky-header: var(--sticky-classic-header);
+    --current-sticky-content: var(--sticky-classic-content);
+    --current-sticky-text: var(--sticky-classic-text);
+    --current-sticky-border: var(--sticky-classic-border);
+}
+
+.widget-sticky-note.theme-ocean {
+    --current-sticky-bg: var(--sticky-ocean-bg);
+    --current-sticky-header: var(--sticky-ocean-header);
+    --current-sticky-content: var(--sticky-ocean-content);
+    --current-sticky-text: var(--sticky-ocean-text);
+    --current-sticky-border: var(--sticky-ocean-border);
+}
+
+.widget-sticky-note.theme-forest {
+    --current-sticky-bg: var(--sticky-forest-bg);
+    --current-sticky-header: var(--sticky-forest-header);
+    --current-sticky-content: var(--sticky-forest-content);
+    --current-sticky-text: var(--sticky-forest-text);
+    --current-sticky-border: var(--sticky-forest-border);
+}
+
+/* Sticky Note Edit Mode */
+.widget-sticky-note .markdown-content {
+    padding: 1rem;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.widget-sticky-note .markdown-content h1,
+.widget-sticky-note .markdown-content h2,
+.widget-sticky-note .markdown-content h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.widget-sticky-note .markdown-content p {
+    margin-bottom: 0.5rem;
+}
+
+.widget-sticky-note .markdown-content code {
+    background: rgba(0,0,0,0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+/* Edit mode textarea */
+.widget-sticky-note .edit-textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding: 1rem;
+    resize: none;
+    outline: none;
+}
+
+/* Resizer handle */
+.widget-sticky-note .resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    background: linear-gradient(-45deg, transparent 0%, transparent 30%, var(--current-sticky-border, var(--sticky-desert-border)) 30%, var(--current-sticky-border, var(--sticky-desert-border)) 40%, transparent 40%, transparent 60%, var(--current-sticky-border, var(--sticky-desert-border)) 60%, var(--current-sticky-border, var(--sticky-desert-border)) 70%, transparent 70%);
+    cursor: nw-resize;
+}
+
+/* Theme selector dropdown in widget menu */
+.sticky-theme-selector {
+    margin: 0.5rem;
+    padding: 0.25rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+}
+
+/* Light mode adjustments */
+[data-theme="light"] .widget-sticky-note {
+    box-shadow: var(--shadow);
+}
+
+[data-theme="light"] .widget-sticky-note .edit-textarea {
+    background: rgba(255,255,255,0.5);
+}
+
+[data-theme="light"] .widget-sticky-note .markdown-content code {
+    background: rgba(0,0,0,0.05);
+}
+
+.widget-weierstrass {
+    min-width: 350px;
+    min-height: 280px;
+}
+
+.widget-weierstrass .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(52, 152, 219, 0.1));
+}
+
+/* Widget status indicators */
+.widget-status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+}
+
+.widget-status.idle {
+    background: var(--text-secondary);
+}
+
+.widget-status.running {
+    background: var(--warning-color);
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.widget-status.completed {
+    background: var(--success-color);
+}
+
+.widget-status.error {
+    background: var(--accent-color);
+}
+
+@keyframes pulse {
+    0% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Layout positioning helpers */
+.widget-locked {
+    cursor: default !important;
+}
+
+.widget-locked .widget-header {
+    cursor: default !important;
+}
+
+.widget-z-index-high {
+    z-index: 100;
+}
+
+/* Responsive widget sizing */
+@media (max-width: 768px) {
+    .board-widget {
+        min-width: 280px;
+        min-height: 200px;
+    }
+    
+    .widget-content {
+        padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+}
+
 /* ===== CONTROL PANEL ===== */
 .global-control-panel {
     grid-area: controls;
@@ -636,6 +883,116 @@ body {
     transform: translateY(-1px);
 }
 
+/* ===== SVG VISUALIZATION SUPPORT ===== */
+
+/* SVG Widget Styling */
+.svg-widget {
+    stroke: var(--border-color);
+    stroke-width: 1;
+    fill: var(--widget-bg);
+    transition: all 0.3s ease;
+}
+
+.svg-widget.widget-sticky-note {
+    fill: #f4e4c1; /* Soft desert sand */
+    stroke: #e6d7b8;
+}
+
+.svg-widget.widget-pq-torus {
+    fill: var(--bg-secondary);
+    stroke: rgba(231, 76, 60, 0.5);
+}
+
+.svg-widget.widget-weierstrass {
+    fill: var(--bg-secondary);
+    stroke: rgba(52, 152, 219, 0.5);
+}
+
+/* SVG Widget Status States */
+.svg-widget.running {
+    stroke: var(--warning-color);
+    stroke-width: 2;
+    animation: svg-pulse 1.5s ease-in-out infinite;
+}
+
+.svg-widget.completed {
+    stroke: var(--success-color);
+    stroke-width: 2;
+}
+
+.svg-widget.error {
+    stroke: var(--accent-color);
+    stroke-width: 2;
+}
+
+/* SVG Edge Styling */
+.svg-edge {
+    stroke: var(--text-secondary);
+    stroke-width: 2;
+    fill: none;
+    marker-end: url(#arrowhead);
+    transition: all 0.3s ease;
+}
+
+.svg-edge:hover {
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    cursor: pointer;
+}
+
+.svg-edge.dependency {
+    stroke-dasharray: 5,5;
+    stroke: var(--primary-color);
+}
+
+/* SVG Arrowhead Markers */
+.svg-arrowhead {
+    fill: var(--text-secondary);
+}
+
+.svg-edge:hover .svg-arrowhead {
+    fill: var(--primary-color);
+}
+
+/* SVG Animation Keyframes */
+@keyframes svg-pulse {
+    0% { stroke-opacity: 1; }
+    50% { stroke-opacity: 0.5; }
+    100% { stroke-opacity: 1; }
+}
+
+/* SVG Connection Ports */
+.svg-port {
+    fill: var(--primary-color);
+    stroke: var(--bg-primary);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.svg-widget:hover .svg-port {
+    opacity: 1;
+}
+
+.svg-port.active {
+    opacity: 1;
+    fill: var(--success-color);
+}
+
+/* Light mode overrides for SVG */
+[data-theme="light"] .svg-widget.widget-sticky-note {
+    fill: #f7ecd2; /* Lighter desert sand for light mode */
+    stroke: #ede0c7;
+}
+
+[data-theme="light"] .svg-edge {
+    stroke: var(--text-primary);
+}
+
+[data-theme="light"] .svg-arrowhead {
+    fill: var(--text-primary);
+}
+
 /* ===== DRAG AND DROP ===== */
 .board-content.drag-over {
     background-color: rgba(52, 152, 219, 0.1);
@@ -682,4 +1039,107 @@ body {
     .control-section h4 {
         margin-bottom: 0.25rem;
     }
+}
+
+/* Widget Action Menu Styles */
+.widget-hamburger-menu {
+    position: relative;
+}
+
+.hamburger-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    min-width: 180px;
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.menu-category {
+    padding: 4px 0;
+}
+
+.menu-category-header {
+    padding: 8px 12px 4px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 4px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-size: 0.9em;
+}
+
+.menu-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.menu-item-empty {
+    padding: 8px 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+    font-size: 0.85em;
+}
+
+.menu-icon {
+    margin-right: 8px;
+    font-size: 1.1em;
+    width: 16px;
+    text-align: center;
+}
+
+.menu-text {
+    flex: 1;
+}
+
+/* Action Result Styling */
+.action-result {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.action-result h3 {
+    margin: 0 0 8px 0;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.action-result p {
+    margin: 4px 0;
+    font-size: 0.9em;
+}
+
+/* Output Format Specific Styling */
+.output-svg {
+    text-align: center;
+    padding: 8px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+}
+
+.output-markdown {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 12px;
+    white-space: pre-wrap;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.85em;
 }

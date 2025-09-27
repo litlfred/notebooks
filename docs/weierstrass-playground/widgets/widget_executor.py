@@ -9,33 +9,196 @@ import time
 from typing import Dict, Any, List, Optional
 
 class WidgetExecutor:
-    """Base class for executing schema-based widgets"""
+    """Base class for executing schema-based widgets with multi-action support"""
     
     def __init__(self, widget_schema: Dict[str, Any]):
         self.schema = widget_schema
         self.id = widget_schema['id']
         self.name = widget_schema['name']
-        self.input_schema = widget_schema['input_schema']
-        self.output_schema = widget_schema['output_schema']
+        self.actions = widget_schema.get('actions', {})
         
+        # Handle both old and new schema formats
+        if 'input_schemas' in widget_schema:
+            # New format with multiple schemas
+            self.input_schemas = widget_schema['input_schemas']
+            self.output_schemas = widget_schema['output_schemas']
+            # For backward compatibility, use first schema as primary
+            self.input_schema = self._resolve_schema_reference(self.input_schemas[0]) if self.input_schemas else {}
+            self.output_schema = self._resolve_schema_reference(self.output_schemas[0]) if self.output_schemas else {}
+        else:
+            # Old format with single schema
+            self.input_schema = widget_schema.get('input_schema', {})
+            self.output_schema = widget_schema.get('output_schema', {})
+            self.input_schemas = [self.input_schema] if self.input_schema else []
+            self.output_schemas = [self.output_schema] if self.output_schema else []
+    
+    def _resolve_schema_reference(self, schema_ref):
+        """Resolve schema reference to actual schema object"""
+        if isinstance(schema_ref, str):
+            # For now, return a basic schema structure for URL references
+            # In a full implementation, this would fetch and resolve the URL
+            if 'sticky-note' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "content": {
+                            "type": "string",
+                            "default": "# New Sticky Note\n\nClick edit to add your **markdown** content...\n\n- Use lists\n- Add `code`\n- Format *text*"
+                        },
+                        "show_note": {
+                            "type": "boolean",
+                            "default": True
+                        }
+                    },
+                    "required": ["content"]
+                }
+            elif 'common' in schema_ref and 'markdown_content' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "content": {"type": "string", "default": ""},
+                        "render_latex": {"type": "boolean", "default": True},
+                        "variables": {"type": "object", "default": {}}
+                    },
+                    "required": ["content"]
+                }
+            elif 'pq-torus' in schema_ref:
+                return {
+                    "type": "object",
+                    "properties": {
+                        "p": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 100,
+                            "default": 11
+                        },
+                        "q": {
+                            "type": "integer",
+                            "minimum": 2,
+                            "maximum": 100,
+                            "default": 5
+                        }
+                    },
+                    "required": ["p", "q"]
+                }
+            else:
+                # Default empty schema for unknown references
+                return {"type": "object", "properties": {}}
+        else:
+            # Inline schema object
+            return schema_ref
+        
+    def validate_input_for_action(self, input_data: Dict[str, Any], action_slug: str) -> Dict[str, Any]:
+        """Validate input data against schema for a specific action"""
+        # Get action configuration
+        action_config = self.actions.get(action_slug, {})
+        validation_required = action_config.get('validation_required', True)
+        
+        if not validation_required:
+            return input_data
+            
+        return self.validate_input(input_data)
+    
+    def execute_action(self, input_data: Dict[str, Any], action_slug: str) -> Dict[str, Any]:
+        """Execute specific widget action with validation"""
+        # Validate action exists
+        if action_slug not in self.actions:
+            raise ValueError(f"Action '{action_slug}' not found in widget '{self.id}'")
+        
+        action_config = self.actions[action_slug]
+        
+        # Validate input data if required
+        validated_input = self.validate_input_for_action(input_data, action_slug)
+        
+        # Record execution time
+        start_time = time.time()
+        
+        try:
+            # Execute action-specific implementation
+            result = self._execute_action_impl(validated_input, action_slug, action_config)
+            result.update({
+                'execution_time': (time.time() - start_time) * 1000,
+                'widget_id': self.id,
+                'action_slug': action_slug,
+                'output_format': action_config.get('output_format', 'json'),
+                'success': True
+            })
+            return result
+            
+        except Exception as e:
+            return {
+                'widget_id': self.id,
+                'action_slug': action_slug,
+                'success': False,
+                'error': str(e),
+                'execution_time': (time.time() - start_time) * 1000
+            }
+    
+    def get_action_menu(self, locale: str = 'en') -> Dict[str, Any]:
+        """Get hierarchical action menu for widget interface"""
+        menu = {}
+        
+        for action_slug, action_config in self.actions.items():
+            category = action_config.get('menu_category', 'actions')
+            action_name = action_config.get('names', {}).get(locale, action_config.get('names', {}).get('en', action_slug))
+            
+            if category not in menu:
+                menu[category] = []
+            
+            menu[category].append({
+                'slug': action_slug,
+                'name': action_name,
+                'icon': action_config.get('icon', '⚙️'),
+                'description': action_config.get('description', {}).get(locale, action_config.get('description', {}).get('en', ''))
+            })
+        
+        return menu
+    
     def validate_input(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate input data against schema"""
+        """Validate input data against schema with comprehensive checking"""
         validated = {}
         
         # Apply defaults for missing values
         if 'properties' in self.input_schema:
             for prop, prop_schema in self.input_schema['properties'].items():
                 if prop in input_data:
-                    validated[prop] = input_data[prop]
+                    # Basic type validation
+                    expected_type = prop_schema.get('type')
+                    if expected_type == 'integer' and not isinstance(input_data[prop], int):
+                        try:
+                            validated[prop] = int(input_data[prop])
+                        except (ValueError, TypeError):
+                            raise ValueError(f"Property '{prop}' must be an integer")
+                    elif expected_type == 'number' and not isinstance(input_data[prop], (int, float)):
+                        try:
+                            validated[prop] = float(input_data[prop])
+                        except (ValueError, TypeError):
+                            raise ValueError(f"Property '{prop}' must be a number")
+                    elif expected_type == 'boolean' and not isinstance(input_data[prop], bool):
+                        # Convert string boolean values
+                        if isinstance(input_data[prop], str):
+                            validated[prop] = input_data[prop].lower() in ('true', '1', 'yes', 'on')
+                        else:
+                            validated[prop] = bool(input_data[prop])
+                    else:
+                        validated[prop] = input_data[prop]
+                        
+                    # Range validation for numbers
+                    if expected_type in ('integer', 'number'):
+                        if 'minimum' in prop_schema and validated[prop] < prop_schema['minimum']:
+                            raise ValueError(f"Property '{prop}' must be >= {prop_schema['minimum']}")
+                        if 'maximum' in prop_schema and validated[prop] > prop_schema['maximum']:
+                            raise ValueError(f"Property '{prop}' must be <= {prop_schema['maximum']}")
+                            
                 elif 'default' in prop_schema:
                     validated[prop] = prop_schema['default']
                 elif prop in self.input_schema.get('required', []):
                     raise ValueError(f"Required property '{prop}' missing")
         
         return validated
-    
+
     def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute widget with validated input"""
+        """Execute widget with validated input (default action)"""
         validated_input = self.validate_input(input_data)
         
         # Record execution time
@@ -57,8 +220,13 @@ class WidgetExecutor:
             }
     
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
-        """Override this method in subclasses"""
+        """Override this method in subclasses for default action"""
         raise NotImplementedError
+    
+    def _execute_action_impl(self, validated_input: Dict[str, Any], action_slug: str, action_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Override this method in subclasses for action-specific implementations"""
+        # Default implementation delegates to the main execute implementation
+        return self._execute_impl(validated_input)
 
 class MarkdownWidget(WidgetExecutor):
     """Markdown widget with LaTeX and variable substitution"""
@@ -540,3 +708,244 @@ class WidgetGraph:
                 current[key] = {}
             current = current[key]
         current[keys[-1]] = value
+
+
+class StickyNoteWidget(WidgetExecutor):
+    """Simple sticky note widget - the most basic widget example"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        content = validated_input.get('content', '')
+        show_note = validated_input.get('show_note', True)
+        
+        if not show_note:
+            return {
+                'success': True,
+                'rendered_html': '<div class="sticky-note hidden">Note hidden</div>',
+                'metadata': {
+                    'visible': False,
+                    'content_length': len(content)
+                }
+            }
+        
+        # Simple markdown-like rendering
+        html_content = self.render_simple_markdown(content)
+        
+        return {
+            'success': True,
+            'rendered_html': f'<div class="sticky-note">{html_content}</div>',
+            'metadata': {
+                'visible': True,
+                'content_length': len(content),
+                'rendered_length': len(html_content)
+            }
+        }
+    
+    def render_simple_markdown(self, content: str) -> str:
+        """Simple markdown rendering for basic formatting"""
+        html = content
+        
+        # Headers
+        html = re.sub(r'^# (.*$)', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+        html = re.sub(r'^## (.*$)', r'<h2>\1</h2>', html, flags=re.MULTILINE)
+        html = re.sub(r'^### (.*$)', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+        
+        # Bold and italic
+        html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+        html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+        
+        # Code blocks and inline code
+        html = re.sub(r'```(.*?)```', r'<pre><code>\1</code></pre>', html, flags=re.DOTALL)
+        html = re.sub(r'`(.*?)`', r'<code>\1</code>', html)
+        
+        # Simple lists
+        lines = html.split('\n')
+        processed_lines = []
+        in_list = False
+        
+        for line in lines:
+            if re.match(r'^\s*[-*+]\s+', line):
+                if not in_list:
+                    processed_lines.append('<ul>')
+                    in_list = True
+                list_item = re.sub(r'^\s*[-*+]\s+', '', line)
+                processed_lines.append(f'<li>{list_item}</li>')
+            else:
+                if in_list:
+                    processed_lines.append('</ul>')
+                    in_list = False
+                processed_lines.append(line)
+        
+        if in_list:
+            processed_lines.append('</ul>')
+        
+        html = '\n'.join(processed_lines)
+        
+        # Convert line breaks to HTML
+        html = html.replace('\n\n', '</p><p>').replace('\n', '<br>')
+        html = f'<p>{html}</p>'
+        
+        # Clean up empty paragraphs
+        html = re.sub(r'<p>\s*</p>', '', html)
+        
+        return html
+
+
+class PQTorusWidget(WidgetExecutor):
+    """PQ-Torus widget defining torus T = C / L where L = Zp + Zqi"""
+    
+    def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        p = validated_input.get('p', 11)
+        q = validated_input.get('q', 5)
+        
+        # Ensure they are integers
+        try:
+            p = int(p)
+            q = int(q)
+        except (ValueError, TypeError):
+            return {
+                'success': False,
+                'error': f"p and q must be integers, got p={p}, q={q}",
+                'p': p, 'q': q,
+                'torus_description': 'Error: invalid parameters',
+                'markdown_content': f'# Error\n\nInvalid parameters: p={p}, q={q}'
+            }
+        
+        # Check if p and q are prime
+        p_is_prime = self._is_prime(p)
+        q_is_prime = self._is_prime(q)
+        
+        # Generate descriptions
+        torus_description = f"T = ℂ / L where L = ℤ{p} + ℤ{q}i"
+        lattice_description = f"L = ℤ{p} + ℤ{q}i (rectangular prime lattice)"
+        
+        # Validation message
+        if p_is_prime and q_is_prime:
+            validation_msg = f"Both {p} and {q} are prime numbers ✓"
+        elif p_is_prime and not q_is_prime:
+            validation_msg = f"{p} is prime, but {q} is not prime ⚠️"
+        elif not p_is_prime and q_is_prime:
+            validation_msg = f"{q} is prime, but {p} is not prime ⚠️"
+        else:
+            validation_msg = f"Neither {p} nor {q} are prime numbers ⚠️"
+        
+        # Generate markdown content
+        markdown_content = self._generate_torus_markdown(p, q, p_is_prime, q_is_prime)
+        
+        return {
+            'success': True,
+            'p': p,
+            'q': q,
+            'torus_description': torus_description,
+            'lattice_description': lattice_description,
+            'prime_validation': {
+                'p_is_prime': p_is_prime,
+                'q_is_prime': q_is_prime,
+                'validation_message': validation_msg
+            },
+            'markdown_content': markdown_content,
+            'metadata': {
+                'lattice_type': 'rectangular_prime_lattice',
+                'torus_equation': f'T = ℂ / (ℤ{p} + ℤ{q}i)',
+                'fundamental_domain': {
+                    'width': p,
+                    'height': q,
+                    'area': p * q
+                },
+                'execution_time': 0.001,
+                'widget_id': 'pq-torus'
+            }
+        }
+    
+    def _is_prime(self, n: int) -> bool:
+        """Check if a number is prime"""
+        if n < 2:
+            return False
+        if n == 2:
+            return True
+        if n % 2 == 0:
+            return False
+        
+        for i in range(3, int(n**0.5) + 1, 2):
+            if n % i == 0:
+                return False
+        return True
+    
+    def _generate_torus_markdown(self, p: int, q: int, p_is_prime: bool, q_is_prime: bool) -> str:
+        """Generate markdown content displaying the torus information"""
+        
+        # Prime status indicators  
+        p_status = "✓ prime" if p_is_prime else "⚠️ not prime"
+        q_status = "✓ prime" if q_is_prime else "⚠️ not prime"
+        
+        markdown = f"""# PQ-Torus: T = ℂ / L
+
+## Lattice Definition
+**L = ℤ{p} + ℤ{q}i** (rectangular lattice)
+
+## Prime Parameters
+- **p = {p}** ({p_status})
+- **q = {q}** ({q_status})
+
+## Torus Structure
+The torus is defined as:
+```
+T = ℂ / L = ℂ / (ℤ{p} + ℤ{q}i)
+```
+
+### Fundamental Domain
+- **Width**: {p} units
+- **Height**: {q} units  
+- **Area**: {p * q} square units
+
+### Weierstrass Function Compatibility
+This torus defines a rectangular lattice suitable for ℘-function analysis with lattice parameters p={p}, q={q}.
+
+The Weierstrass ℘-function for this lattice can be used in visualization widgets:
+- **wp-two-panel**: Visualize ℘(z) and ℘′(z) 
+- **wp-three-panel**: Show ℘(z), Re(℘′(z)), Im(℘′(z))
+- **wp-five-panel**: Complete analysis including derivatives
+- **wp-trajectories**: Particle trajectories in the ℘-field
+- **wp-contours**: Contour plots of the field
+"""
+        
+        return markdown
+
+
+def create_widget(widget_type: str, schemas: Dict[str, Any]) -> WidgetExecutor:
+    """Factory function to create widget instances based on type"""
+    if widget_type not in schemas['widget-schemas']:
+        raise ValueError(f"Unknown widget type: {widget_type}")
+    
+    schema = schemas['widget-schemas'][widget_type]
+    
+    # Map widget types to their implementation classes
+    widget_classes = {
+        'sticky-note': StickyNoteWidget,
+        'markdown-note': MarkdownWidget,
+        'python-code': PythonWidget,
+        'wp-two-panel': WeierstrassTwoPanelWidget,
+        'wp-three-panel': WeierstrassThreePanelWidget,
+        'wp-five-panel': WeierstrassFivePanelWidget,
+        'wp-trajectories': WeierstrassTrajectoryWidget,
+        'wp-lattice': WeierstrassLatticeWidget,
+        'wp-poles': WeierstrassPoleWidget,
+        'wp-contours': WeierstrassContourWidget,
+        'data-plot': DataPlotWidget,
+        'data-generator': DataGeneratorWidget,
+        'pq-torus': PQTorusWidget,
+        'pq-torus.weierstrass.two-panel': WeierstrassTwoPanelWidget,
+        'pq-torus.weierstrass.five-panel': WeierstrassFivePanelWidget,
+    }
+    
+    # Handle hierarchical widget IDs
+    if '.' in widget_type:
+        # For hierarchical widgets, try the full ID first, then fall back to base class
+        widget_class = widget_classes.get(widget_type)
+        if not widget_class:
+            # Fall back to parent widget class with sub-widget behavior
+            parent_type = widget_type.split('.')[0]
+            widget_class = widget_classes.get(parent_type, WidgetExecutor)
+    else:
+        widget_class = widget_classes.get(widget_type, WidgetExecutor)
+    
+    return widget_class(schema)

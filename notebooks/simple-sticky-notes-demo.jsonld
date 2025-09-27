@@ -1,0 +1,95 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@id": "urn:notebook:simple-sticky-notes-demo",
+  "@type": ["prov:Collection", "notebook:Notebook"],
+  "notebook:title": "Simple Sticky Notes Demonstration",
+  "notebook:description": "Basic demonstration of sticky note widgets with different themes and markdown content.",
+  "notebook:created": "2024-12-19T10:00:00Z",
+  "notebook:version": "1.0.0",
+  "notebook:layout": {
+    "canvas_size": {"width": 1200, "height": 800},
+    "zoom_level": 1.0,
+    "center_point": {"x": 600, "y": 400}
+  },
+  "prov:hadMember": [
+    {
+      "@id": "urn:widget:sticky-note-desert-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "notebook:position": {"x": 100, "y": 100},
+      "notebook:size": {"width": 300, "height": 250},
+      "notebook:config": {
+        "content": "# Desert Theme Note\n\nThis sticky note uses the **desert theme** with soft sand colors:\n\n- Warm beige background\n- Desert brown text\n- Excellent readability\n\n*Perfect for mathematical notes and documentation.*",
+        "theme": "desert",
+        "show_note": true,
+        "editable": true
+      },
+      "prov:generatedAtTime": "2024-12-19T10:01:00Z"
+    },
+    {
+      "@id": "urn:widget:sticky-note-ocean-1",
+      "@type": ["prov:Entity", "sticky:widget"], 
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "notebook:position": {"x": 450, "y": 100},
+      "notebook:size": {"width": 300, "height": 250},
+      "notebook:config": {
+        "content": "# Ocean Theme Note\n\nThis note demonstrates the **ocean theme**:\n\n- Cool blue tones\n- Calming sea colors\n- Great for computational notes\n\n**LaTeX Support**: ℘(z), ℤ, ℂ, ℝ symbols work perfectly!",
+        "theme": "ocean",
+        "show_note": true,
+        "editable": true
+      },
+      "prov:generatedAtTime": "2024-12-19T10:02:00Z"
+    },
+    {
+      "@id": "urn:widget:sticky-note-forest-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json", 
+      "notebook:position": {"x": 800, "y": 100},
+      "notebook:size": {"width": 300, "height": 250},
+      "notebook:config": {
+        "content": "# Forest Theme Note\n\nThe **forest theme** provides:\n\n- Natural green colors\n- Earth-inspired palette\n- Excellent for research notes\n\n```python\n# Code blocks supported\ndef fibonacci(n):\n    return n if n <= 1 else fibonacci(n-1) + fibonacci(n-2)\n```",
+        "theme": "forest",
+        "show_note": true,
+        "editable": true
+      },
+      "prov:generatedAtTime": "2024-12-19T10:03:00Z"
+    },
+    {
+      "@id": "urn:widget:sticky-note-math-1",
+      "@type": ["prov:Entity", "sticky:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+      "notebook:position": {"x": 275, "y": 400},
+      "notebook:size": {"width": 350, "height": 300},
+      "notebook:config": {
+        "content": "# Mathematical Formulas\n\n## Weierstrass ℘-function\n\nThe Weierstrass elliptic function is defined as:\n\n℘(z) = 1/z² + Σ[(1/(z-ω)² - 1/ω²)]\n\nwhere the sum is over all non-zero lattice points ω ∈ L.\n\n**Key Properties**:\n- Doubly periodic: ℘(z + ω) = ℘(z) for all ω ∈ L\n- Even function: ℘(-z) = ℘(z)\n- Poles of order 2 at lattice points\n\n**Torus**: T = ℂ / L where L = ℤp + ℤqi",
+        "theme": "desert",
+        "show_note": true,
+        "editable": true
+      },
+      "prov:generatedAtTime": "2024-12-19T10:04:00Z"
+    }
+  ],
+  "notebook:execution_graph": {
+    "nodes": [
+      {"id": "urn:widget:sticky-note-desert-1", "type": "independent"},
+      {"id": "urn:widget:sticky-note-ocean-1", "type": "independent"},
+      {"id": "urn:widget:sticky-note-forest-1", "type": "independent"},
+      {"id": "urn:widget:sticky-note-math-1", "type": "independent"}
+    ],
+    "edges": []
+  },
+  "notebook:workflow_status": {
+    "total_widgets": 4,
+    "executed_widgets": 4,
+    "failed_widgets": 0,
+    "last_execution": "2024-12-19T10:04:30Z"
+  },
+  "prov:wasAttributedTo": {
+    "@id": "urn:agent:sticky-notes-demo",
+    "@type": "prov:SoftwareAgent",
+    "prov:label": "Sticky Notes Demo System"
+  }
+}

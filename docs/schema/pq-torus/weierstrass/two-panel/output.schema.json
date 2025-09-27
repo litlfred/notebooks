@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/output.schema.json",
+  "title": "Weierstrass Two-Panel Function Output Schema",
+  "description": "Output data from Weierstrass ℘(z) and ℘′(z) two-panel visualization",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Execution time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when computation completed"
+    },
+    "plot_data": {
+      "type": "object",
+      "properties": {
+        "image_base64": {"type": "string"},
+        "width": {"type": "integer"},
+        "height": {"type": "integer"},
+        "mime_type": {"type": "string", "default": "image/png"}
+      }
+    },
+    "field_data": {
+      "type": "object",
+      "description": "℘(z) field data and analysis",
+      "properties": {
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {"type": "number"},
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "values": {
+          "type": "array",
+          "items": {"type": "number"}
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "lattice_params": {
+          "type": "object",
+          "properties": {
+            "p": {"type": "number"},
+            "q": {"type": "number"},
+            "N": {"type": "integer"}
+          }
+        },
+        "computation_method": {"type": "string"},
+        "widget_instance": {"type": "string"}
+      }
+    }
+  },
+  "required": ["success", "timestamp"],
+  "additionalProperties": false
+}
