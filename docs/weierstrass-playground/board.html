@@ -166,11 +166,11 @@
 
         <div class="control-section">
             <h4>Notebooks:</h4>
-            <input type="file" id="notebook-file-input" accept=".jsonld,.json" style="display: none;">
-            <button class="control-btn" onclick="loadNotebookFromFile()">
+            <input type="file" id="notebook-file-input" accept=".jsonld,.json,.ipynb" style="display: none;">
+            <button class="control-btn" onclick="loadNotebookFile()">
                 <i class="fas fa-folder-open"></i> Load Notebook
             </button>
-            <button class="control-btn" onclick="saveNotebookToFile()">
+            <button class="control-btn" onclick="saveNotebookFile()">
                 <i class="fas fa-download"></i> Save Notebook
             </button>
             <div class="notebook-list" id="notebook-list">
