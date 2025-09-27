@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/libraries/sympy/output.schema.json",
+  "title": "SymPy Core Output Schema",
+  "description": "Output data from SymPy core mathematical operations",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "result": {
+      "type": "string",
+      "description": "String representation of the SymPy result"
+    },
+    "latex": {
+      "type": "string",
+      "description": "LaTeX representation of the result"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "operation_performed": {"type": "string"},
+        "input_expression": {"type": "string"},
+        "variables_used": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": false
+}
