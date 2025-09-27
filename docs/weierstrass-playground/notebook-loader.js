@@ -17,7 +17,7 @@ class NotebookLoader {
         // Create file input for loading
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = '.jsonld,.json';
+        fileInput.accept = '.jsonld,.json,.ipynb';
         fileInput.style.display = 'none';
         fileInput.addEventListener('change', this.handleFileLoad.bind(this));
         document.body.appendChild(fileInput);
@@ -85,8 +85,16 @@ class NotebookLoader {
 
         try {
             const content = await this.readFileAsText(file);
-            const notebook = JSON.parse(content);
-            await this.loadNotebookData(notebook);
+            
+            // Check if it's a Jupyter notebook
+            if (file.name.endsWith('.ipynb')) {
+                await this.loadJupyterNotebook(content, file.name);
+            } else {
+                // Standard JSON-LD notebook
+                const notebook = JSON.parse(content);
+                await this.loadNotebookData(notebook);
+            }
+            
             this.boardApp.updateStatus(`Loaded notebook: ${file.name}`, 'success');
         } catch (error) {
             console.error('Failed to load notebook file:', error);
@@ -108,18 +116,64 @@ class NotebookLoader {
     async handleDrop(event) {
         event.preventDefault();
         const files = Array.from(event.dataTransfer.files);
-        const jsonldFile = files.find(f => f.name.endsWith('.jsonld') || f.name.endsWith('.json'));
+        const notebookFile = files.find(f => 
+            f.name.endsWith('.jsonld') || 
+            f.name.endsWith('.json') || 
+            f.name.endsWith('.ipynb')
+        );
         
-        if (jsonldFile) {
+        if (notebookFile) {
             try {
-                const content = await this.readFileAsText(jsonldFile);
-                const notebook = JSON.parse(content);
-                await this.loadNotebookData(notebook);
-                this.boardApp.updateStatus(`Loaded notebook: ${jsonldFile.name}`, 'success');
+                const content = await this.readFileAsText(notebookFile);
+                
+                // Check if it's a Jupyter notebook
+                if (notebookFile.name.endsWith('.ipynb')) {
+                    await this.loadJupyterNotebook(content, notebookFile.name);
+                } else {
+                    // Standard JSON-LD notebook
+                    const notebook = JSON.parse(content);
+                    await this.loadNotebookData(notebook);
+                }
+                
+                this.boardApp.updateStatus(`Loaded notebook: ${notebookFile.name}`, 'success');
             } catch (error) {
                 console.error('Failed to load dropped notebook:', error);
                 this.boardApp.updateStatus(`Failed to load notebook: ${error.message}`, 'error');
             }
+        }
+    }
+
+    /**
+     * Load Jupyter notebook (.ipynb) file
+     */
+    async loadJupyterNotebook(content, filename) {
+        // Initialize Jupyter parser if not already done
+        if (!this.jupyterParser) {
+            this.jupyterParser = new JupyterParser(this.boardApp);
+        }
+        
+        try {
+            const notebookData = JSON.parse(content);
+            const result = await this.jupyterParser.loadJupyterNotebook({
+                name: filename,
+                text: () => content
+            });
+            
+            // Update title if available
+            if (result.metadata?.title) {
+                document.title = `Mathematical Workspace - ${result.metadata.title}`;
+            }
+            
+            this.boardApp.updateStatus(
+                `Imported Jupyter notebook: ${result.widgets} cells converted to widgets`, 
+                'success'
+            );
+            
+            return result;
+            
+        } catch (error) {
+            console.error('Failed to load Jupyter notebook:', error);
+            throw new Error(`Failed to import Jupyter notebook: ${error.message}`);
         }
     }
 

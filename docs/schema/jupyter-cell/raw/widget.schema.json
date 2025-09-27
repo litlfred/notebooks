@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:litlfred:notebooks:schema:jupyter-cell:raw:widget",
+  "title": "Jupyter Raw Cell Widget",
+  "description": "Widget schema for Jupyter notebook raw cells (unformatted text content)",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../common/metadata.schema.json"
+    }
+  ],
+  "properties": {
+    "input": {
+      "type": "object",
+      "description": "Input configuration for the raw cell",
+      "properties": {
+        "source": {
+          "type": ["string", "array"],
+          "description": "Raw text content (string or array of lines)",
+          "default": ""
+        },
+        "format": {
+          "type": "string",
+          "description": "Target format for raw content",
+          "default": "text",
+          "enum": ["text", "html", "latex", "restructuredtext", "asciidoc"]
+        }
+      },
+      "required": ["source"]
+    },
+    "output": {
+      "type": "object",
+      "description": "Output display for raw content",
+      "properties": {
+        "rendered_content": {
+          "type": "string",
+          "description": "Rendered content for display"
+        },
+        "format_applied": {
+          "type": "string",
+          "description": "Applied formatting type"
+        }
+      }
+    },
+    "jupyter": {
+      "type": "object",
+      "description": "Jupyter-specific metadata and properties",
+      "properties": {
+        "cell_type": {
+          "type": "string",
+          "const": "raw",
+          "description": "Jupyter cell type identifier"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Original Jupyter cell metadata",
+          "properties": {
+            "format": {
+              "type": "string",
+              "description": "Raw cell format from metadata"
+            }
+          },
+          "additionalProperties": true
+        },
+        "id": {
+          "type": "string",
+          "description": "Original Jupyter cell ID if present"
+        }
+      },
+      "required": ["cell_type"]
+    }
+  },
+  "required": ["input", "jupyter"]
+}

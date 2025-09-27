@@ -1143,3 +1143,284 @@ body {
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.85em;
 }
+
+/* ===== JUPYTER NOTEBOOK CELL STYLES ===== */
+
+/* Jupyter cell base styling */
+.widget-jupyter-markdown-cell,
+.widget-jupyter-code-cell,
+.widget-jupyter-raw-cell {
+    border-left: 4px solid var(--primary-color);
+    position: relative;
+}
+
+.widget-jupyter-markdown-cell .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(52, 152, 219, 0.1));
+}
+
+.widget-jupyter-code-cell .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(46, 204, 113, 0.1));
+}
+
+.widget-jupyter-raw-cell .widget-header {
+    background: linear-gradient(90deg, var(--bg-secondary), rgba(155, 89, 182, 0.1));
+}
+
+/* Jupyter cell execution indicators */
+.jupyter-execution-count {
+    position: absolute;
+    top: 0.5rem;
+    right: 2.5rem;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-family: monospace;
+}
+
+/* Code cell syntax highlighting */
+.code-block {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    overflow-x: auto;
+    font-family: 'Courier New', Monaco, monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.code-block .keyword {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.code-block .string {
+    color: #4ecdc4;
+}
+
+.code-block .comment {
+    color: #95a5a6;
+    font-style: italic;
+}
+
+/* Jupyter output styling */
+.jupyter-output {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 0.5rem;
+}
+
+.jupyter-output-item {
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Stream output (stdout/stderr) */
+.stream-stdout {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    border-left: 3px solid var(--success-color);
+}
+
+.stream-stderr {
+    background: rgba(231, 76, 60, 0.1);
+    color: var(--accent-color);
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    border-left: 3px solid var(--accent-color);
+}
+
+/* Rich display data */
+.output-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.html-output {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.svg-output {
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.latex-output {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    text-align: center;
+}
+
+.json-output {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+}
+
+.text-output {
+    background: var(--bg-tertiary);
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    border-radius: 4px;
+}
+
+/* Error output styling */
+.error-output {
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.error-header {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.error-name {
+    color: var(--accent-color);
+}
+
+.error-value {
+    color: var(--text-primary);
+}
+
+.error-traceback {
+    font-family: monospace;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.5rem;
+    border-radius: 4px;
+    overflow-x: auto;
+}
+
+.traceback-line {
+    margin: 0.1rem 0;
+    color: var(--text-secondary);
+}
+
+/* Jupyter cell references and attachments */
+.cell-reference {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cell-reference:hover {
+    background: var(--secondary-color);
+}
+
+.attachment-ref {
+    background: var(--warning-color);
+    color: var(--bg-primary);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+}
+
+/* Raw cell formatting */
+.raw-html-content {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+}
+
+.raw-latex-content {
+    text-align: center;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 1rem;
+}
+
+.raw-rst-content,
+.raw-asciidoc-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    line-height: 1.6;
+}
+
+.raw-text-content {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+}
+
+/* Jupyter sequential connection styling */
+.jupyter-connection {
+    stroke: var(--primary-color);
+    stroke-width: 2;
+    stroke-dasharray: 10, 5;
+    marker-end: url(#jupyter-arrow);
+}
+
+.jupyter-connection-label {
+    fill: var(--text-secondary);
+    font-size: 0.8rem;
+    text-anchor: middle;
+}
+
+/* Light mode adjustments for Jupyter cells */
+[data-theme="light"] .code-block {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+[data-theme="light"] .stream-stdout {
+    background: #f8f9fa;
+}
+
+[data-theme="light"] .error-output {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+[data-theme="light"] .html-output,
+[data-theme="light"] .svg-output,
+[data-theme="light"] .latex-output {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+}

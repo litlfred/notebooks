@@ -8,6 +8,17 @@ import re
 import time
 from typing import Dict, Any, List, Optional
 
+# Import Jupyter widget classes
+try:
+    from .jupyter_markdown_cell import JupyterMarkdownWidget
+    from .jupyter_code_cell import JupyterCodeWidget
+    from .jupyter_raw_cell import JupyterRawWidget
+except ImportError:
+    # Fallback classes if Jupyter widgets aren't available
+    JupyterMarkdownWidget = None
+    JupyterCodeWidget = None
+    JupyterRawWidget = None
+
 class WidgetExecutor:
     """Base class for executing schema-based widgets with multi-action support"""
     
@@ -607,6 +618,13 @@ def create_widget(widget_id: str, schemas: Dict[str, Any]) -> WidgetExecutor:
         return DataGeneratorWidget(schema)
     elif widget_id == 'data-plot':
         return DataPlotWidget(schema)
+    # Jupyter widget types
+    elif widget_id == 'jupyter-markdown-cell':
+        return JupyterMarkdownWidget(schema) if JupyterMarkdownWidget else MarkdownWidget(schema)
+    elif widget_id == 'jupyter-code-cell':
+        return JupyterCodeWidget(schema) if JupyterCodeWidget else WidgetExecutor(schema)
+    elif widget_id == 'jupyter-raw-cell':
+        return JupyterRawWidget(schema) if JupyterRawWidget else WidgetExecutor(schema)
     else:
         return WidgetExecutor(schema)  # Basic implementation
 

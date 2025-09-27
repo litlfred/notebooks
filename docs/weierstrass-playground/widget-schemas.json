@@ -401,6 +401,159 @@
           "validation_required": true
         }
       }
+    },
+
+    "jupyter-markdown-cell": {
+      "id": "jupyter-markdown-cell",
+      "name": "Jupyter Markdown Cell",
+      "description": "Markdown cell imported from Jupyter notebook with enhanced rendering",
+      "category": "jupyter",
+      "icon": "📄",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Markdown content from Jupyter cell",
+            "default": "# Imported Markdown Cell\n\nContent from Jupyter notebook."
+          },
+          "render_latex": {
+            "type": "boolean",
+            "description": "Render LaTeX math expressions",
+            "default": true
+          },
+          "variables": {
+            "type": "object",
+            "description": "Variables for substitution",
+            "default": {}
+          }
+        },
+        "required": ["content"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "rendered_html": {
+            "type": "string",
+            "description": "Rendered HTML output"
+          },
+          "jupyter_metadata": {
+            "type": "object",
+            "description": "Original Jupyter cell metadata"
+          }
+        }
+      },
+      "python_script": "widgets/jupyter_markdown_cell.py"
+    },
+
+    "jupyter-code-cell": {
+      "id": "jupyter-code-cell", 
+      "name": "Jupyter Code Cell",
+      "description": "Code cell imported from Jupyter notebook with execution and output display",
+      "category": "jupyter",
+      "icon": "🐍",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Source code from Jupyter cell",
+            "default": "# Imported code cell\nprint('Hello from Jupyter!')"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language",
+            "default": "python",
+            "enum": ["python", "javascript", "r", "julia", "scala", "sql", "bash"]
+          },
+          "execution_timeout": {
+            "type": "number",
+            "description": "Execution timeout in seconds",
+            "default": 30,
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": ["source"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "execution_count": {
+            "type": ["integer", "null"],
+            "description": "Execution count from notebook"
+          },
+          "outputs": {
+            "type": "array",
+            "description": "Cell outputs with rich display data",
+            "items": {
+              "type": "object",
+              "properties": {
+                "output_type": {
+                  "type": "string",
+                  "enum": ["stream", "display_data", "execute_result", "error"]
+                },
+                "data": {
+                  "type": "object",
+                  "description": "Rich display data by MIME type"
+                },
+                "text": {
+                  "type": ["string", "array"],
+                  "description": "Text output content"
+                }
+              }
+            }
+          },
+          "jupyter_metadata": {
+            "type": "object", 
+            "description": "Original Jupyter cell metadata"
+          }
+        }
+      },
+      "python_script": "widgets/jupyter_code_cell.py"
+    },
+
+    "jupyter-raw-cell": {
+      "id": "jupyter-raw-cell",
+      "name": "Jupyter Raw Cell", 
+      "description": "Raw text cell imported from Jupyter notebook",
+      "category": "jupyter",
+      "icon": "📝",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Raw text content from Jupyter cell",
+            "default": "Raw text content"
+          },
+          "format": {
+            "type": "string", 
+            "description": "Target format for raw content",
+            "default": "text",
+            "enum": ["text", "html", "latex", "restructuredtext", "asciidoc"]
+          }
+        },
+        "required": ["source"]
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "rendered_content": {
+            "type": "string",
+            "description": "Rendered content for display"
+          },
+          "format_applied": {
+            "type": "string",
+            "description": "Applied formatting"
+          },
+          "jupyter_metadata": {
+            "type": "object",
+            "description": "Original Jupyter cell metadata"
+          }
+        }
+      },
+      "python_script": "widgets/jupyter_raw_cell.py"
     }
   }
 }
