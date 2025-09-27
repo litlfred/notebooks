@@ -578,6 +578,9 @@ def stop_widget(widget_id):
                     <button class="widget-btn" onclick="connectWidget('${widget.id}')" title="Connect">
                         🔗
                     </button>
+                    <button class="widget-btn" onclick="toggleAttachedNote('${widget.id}')" title="Toggle Note">
+                        📝
+                    </button>
                     <button class="widget-btn" onclick="deleteWidget('${widget.id}')" title="Delete">
                         🗑️
                     </button>
@@ -585,6 +588,9 @@ def stop_widget(widget_id):
             </div>
             <div class="widget-content" id="content-${widget.id}">
                 ${this.renderWidgetContent(widget)}
+            </div>
+            <div class="widget-attached-note" id="note-${widget.id}" ${!widget.attachedNote.visible ? 'style="display:none"' : ''}>
+                ${this.renderAttachedNote(widget)}
             </div>
             <div class="widget-connections" id="connections-${widget.id}">
                 ${this.renderWidgetConnections(widget)}
@@ -936,6 +942,163 @@ def stop_widget(widget_id):
         ).join('');
         
         return `<div class="connections">${inputsHtml}${outputsHtml}</div>`;
+    }
+
+    /**
+     * Render attached note for widget with dynamic variable substitution
+     */
+    renderAttachedNote(widget) {
+        if (!widget.attachedNote) return '';
+        
+        const note = widget.attachedNote;
+        const isEditMode = note.editMode || false;
+        
+        if (isEditMode) {
+            return `
+                <div class="attached-note-editor">
+                    <div class="note-toolbar">
+                        <button class="editor-btn save-note-btn" onclick="boardApp.saveAttachedNote('${widget.id}')">💾 Save</button>
+                        <button class="editor-btn cancel-note-btn" onclick="boardApp.cancelAttachedNoteEdit('${widget.id}')">❌ Cancel</button>
+                        <div class="note-help">
+                            <small>Use {{config}} for configuration, {{output}} for results, {{widget.id}} for instance ID</small>
+                        </div>
+                    </div>
+                    <textarea class="attached-note-textarea" id="note-editor-${widget.id}" 
+                        style="width: 100%; height: 150px; padding: 0.5rem; border: 1px solid var(--border-color); 
+                               border-radius: 4px; background: var(--bg-secondary); color: var(--text-primary);
+                               font-family: 'Monaco', 'Menlo', 'Courier New', monospace; font-size: 0.85rem;"
+                        placeholder="Enter markdown notes with dynamic variables...">${this.escapeHtml(note.content)}</textarea>
+                </div>
+            `;
+        } else {
+            // Display mode - show rendered markdown with variable substitution
+            const processedContent = this.processNoteVariables(note.content, widget);
+            return `
+                <div class="attached-note-display" onclick="boardApp.editAttachedNote('${widget.id}')" 
+                     style="cursor: pointer; padding: 0.5rem; border: 1px solid var(--border-color);
+                            border-radius: 4px; background: var(--bg-tertiary); margin-top: 0.5rem;">
+                    <div class="note-content" style="font-size: 0.85rem;">
+                        ${this.renderMarkdown(processedContent)}
+                    </div>
+                    <div class="note-edit-hint" style="font-size: 0.7rem; color: var(--text-secondary); 
+                         text-align: right; margin-top: 0.25rem;">
+                        📝 Click to edit note
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Process dynamic variables in attached note content  
+     */
+    processNoteVariables(content, widget) {
+        if (!content) return '';
+        
+        let processed = content;
+        
+        // Update attached note variables
+        this.updateAttachedNoteVariables(widget);
+        
+        // Replace dynamic variables
+        for (const [key, value] of widget.attachedNote.variables) {
+            const regex = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+            processed = processed.replace(regex, value);
+        }
+        
+        // Replace common widget variables
+        processed = processed.replace(/\{\{widget\.id\}\}/g, widget.id);
+        processed = processed.replace(/\{\{widget\.type\}\}/g, widget.type);
+        processed = processed.replace(/\{\{widget\.status\}\}/g, widget.status);
+        
+        // Replace config object
+        try {
+            const configJson = JSON.stringify(widget.config, null, 2);
+            processed = processed.replace(/\{\{config\}\}/g, `\`\`\`json\n${configJson}\n\`\`\``);
+        } catch (e) {
+            processed = processed.replace(/\{\{config\}\}/g, '[Config Error]');
+        }
+        
+        // Replace output object
+        if (widget.lastOutput) {
+            try {
+                const outputJson = JSON.stringify(widget.lastOutput, null, 2);
+                processed = processed.replace(/\{\{output\}\}/g, `\`\`\`json\n${outputJson}\n\`\`\``);
+            } catch (e) {
+                processed = processed.replace(/\{\{output\}\}/g, '[Output Error]');
+            }
+        } else {
+            processed = processed.replace(/\{\{output\}\}/g, '*No output yet*');
+        }
+        
+        return processed;
+    }
+
+    /**
+     * Update dynamic variables in attached note based on widget state
+     */
+    updateAttachedNoteVariables(widget) {
+        if (!widget.attachedNote.variables) {
+            widget.attachedNote.variables = new Map();
+        }
+        
+        const vars = widget.attachedNote.variables;
+        
+        // Update execution info
+        vars.set('last_executed', widget.lastOutput ? new Date().toLocaleString() : 'Never');
+        vars.set('execution_status', widget.status);
+        
+        // Update from last output variables if available
+        if (widget.lastOutput && widget.lastOutput.variables) {
+            for (const [key, value] of Object.entries(widget.lastOutput.variables)) {
+                // Add error highlighting for failed widget references
+                const formattedValue = widget.lastOutput.success ? 
+                    JSON.stringify(value) : 
+                    `<span style="text-decoration: underline; color: red;">${JSON.stringify(value)}</span>`;
+                vars.set(`output.${key}`, formattedValue);
+            }
+        }
+        
+        // Update metadata variables
+        vars.set('created', widget.metadata?.created || 'Unknown');
+        vars.set('modified', widget.metadata?.modified || 'Unknown');
+        vars.set('instance_number', widget.metadata?.instanceNumber || 0);
+    }
+
+    /**
+     * Attached Note Management Methods
+     */
+    
+    editAttachedNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget || !widget.attachedNote) return;
+        
+        widget.attachedNote.editMode = true;
+        this.updateWidgetDisplay(widget);
+    }
+
+    saveAttachedNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        const editorEl = document.getElementById(`note-editor-${widgetId}`);
+        if (!widget || !editorEl) return;
+        
+        widget.attachedNote.content = editorEl.value;
+        widget.attachedNote.editMode = false;
+        widget.metadata.modified = new Date().toISOString();
+        
+        this.updateWidgetDisplay(widget);
+        this.saveBoardToStorage();
+        
+        // Fire event
+        this.fireWidgetEvent(widgetId, 'note_updated', { content: widget.attachedNote.content });
+    }
+
+    cancelAttachedNoteEdit(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.attachedNote.editMode = false;
+        this.updateWidgetDisplay(widget);
     }
 
     /**
@@ -1671,6 +1834,19 @@ def stop_widget(widget_id):
         if (contentElement) {
             contentElement.innerHTML = this.renderWidgetContent(widget);
         }
+        
+        // Update attached note
+        const noteElement = element.querySelector('.widget-attached-note');
+        if (noteElement && widget.attachedNote) {
+            noteElement.innerHTML = this.renderAttachedNote(widget);
+            noteElement.style.display = widget.attachedNote.visible ? 'block' : 'none';
+        }
+        
+        // Update stop button visibility
+        const stopButton = element.querySelector('.stop-btn');
+        if (stopButton) {
+            stopButton.style.display = widget.status === 'running' ? 'inline-block' : 'none';
+        }
     }
 
     /**
@@ -2088,6 +2264,19 @@ function runWidget(widgetId) {
 
 function stopWidget(widgetId) {
     boardApp.stopWidget(widgetId);
+}
+
+function toggleAttachedNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget || !widget.attachedNote) return;
+    
+    widget.attachedNote.visible = !widget.attachedNote.visible;
+    const noteEl = document.getElementById(`note-${widgetId}`);
+    if (noteEl) {
+        noteEl.style.display = widget.attachedNote.visible ? 'block' : 'none';
+    }
+    
+    boardApp.saveBoardToStorage();
 }
 
 function executeWidgetAction(widgetId, actionSlug) {
