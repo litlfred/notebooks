@@ -208,80 +208,168 @@ class WeierstrassApp {
      */
     async performPythonSetup() {
         console.log('📂 Loading Weierstrass playground library...');
-        console.log('🔧 Step 1: Setting up Python sys.path...');
-        this.pyodide.runPython(`
-            print("🔧 Setting up Python sys.path...")
-            import sys
-            sys.path.append('./python')
-            print(f"✅ Python sys.path: {sys.path}")
-        `);
-        console.log('✅ Step 1 completed: sys.path configured');
         
-        console.log('📦 Step 2: Checking if weierstrass_playground directory exists...');
-        this.pyodide.runPython(`
-            import os
-            wp_path = './python/weierstrass_playground'
-            if os.path.exists(wp_path):
-                print(f"✅ Found weierstrass_playground directory: {wp_path}")
-                files = os.listdir(wp_path)
-                print(f"📁 Directory contents: {files}")
-            else:
-                print(f"❌ weierstrass_playground directory not found: {wp_path}")
-                print(f"📁 Current directory contents: {os.listdir('.')}")
-                raise FileNotFoundError(f"weierstrass_playground directory not found at {wp_path}")
-        `);
-        console.log('✅ Step 2 completed: directory check');
-        
-        console.log('📦 Step 3: Attempting to import weierstrass_playground package...');
-        this.pyodide.runPython(`
-            print("📦 Importing weierstrass_playground package...")
-            try:
+        try {
+            console.log('🔧 Step 1: Loading Python package files from server...');
+            
+            // Load Python package files directly from server
+            const pythonFiles = [
+                '__init__.py',
+                'core.py',
+                'visualization.py',
+                'integration.py',
+                'browser.py'
+            ];
+            
+            const packageCode = {};
+            
+            for (const fileName of pythonFiles) {
+                console.log(`📥 Loading ${fileName}...`);
+                try {
+                    const response = await fetch(`python/weierstrass_playground/${fileName}`);
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${fileName}: ${response.status} ${response.statusText}`);
+                    }
+                    packageCode[fileName] = await response.text();
+                    console.log(`✅ Loaded ${fileName} (${packageCode[fileName].length} chars)`);
+                } catch (fetchError) {
+                    console.error(`❌ Failed to fetch ${fileName}:`, fetchError);
+                    throw new Error(`Could not load Python file ${fileName}: ${fetchError.message}`);
+                }
+            }
+            
+            console.log('✅ Step 1 completed: All Python files loaded from server');
+            
+            console.log('🔧 Step 2: Creating Python package in Pyodide...');
+            
+            // Create the package directory and install files
+            this.pyodide.runPython(`
+                print("🔧 Creating weierstrass_playground package...")
+                import sys
+                import types
+                
+                # Create the package module
+                wp_package = types.ModuleType('weierstrass_playground')
+                sys.modules['weierstrass_playground'] = wp_package
+                print("✅ Created weierstrass_playground package module")
+            `);
+            
+            console.log('✅ Step 2 completed: Package module created');
+            
+            console.log('🔧 Step 3: Installing Python package modules...');
+            
+            // Install each Python file as a module
+            for (const [fileName, code] of Object.entries(packageCode)) {
+                const moduleName = fileName.replace('.py', '');
+                console.log(`📦 Installing module: ${moduleName}`);
+                
+                try {
+                    // Use pyodide.runPython with proper code handling
+                    this.pyodide.runPython(`
+                        print(f"📦 Installing module: ${moduleName}")
+                        import sys
+                        import types
+                        
+                        # Create module
+                        module = types.ModuleType('weierstrass_playground.${moduleName}')
+                        module.__package__ = 'weierstrass_playground'
+                        module.__file__ = '${fileName}'
+                        
+                        print(f"✅ Module ${moduleName} created, executing code...")
+                    `);
+                    
+                    // Store the code in a global variable and execute it
+                    this.pyodide.globals.set("module_code", code);
+                    this.pyodide.runPython(`
+                        # Execute module code in module namespace
+                        exec(module_code, module.__dict__)
+                        
+                        # Install in sys.modules
+                        sys.modules['weierstrass_playground.${moduleName}'] = module
+                        
+                        # Add to package
+                        wp_package = sys.modules['weierstrass_playground']
+                        setattr(wp_package, '${moduleName}', module)
+                        
+                        print(f"✅ Module ${moduleName} installed successfully")
+                    `);
+                    
+                    console.log(`✅ Module ${moduleName} installed successfully`);
+                } catch (moduleError) {
+                    console.error(`❌ Failed to install module ${moduleName}:`, moduleError);
+                    throw new Error(`Failed to install Python module ${moduleName}: ${moduleError.message}`);
+                }
+            }
+            
+            console.log('✅ Step 3 completed: All modules installed');
+            
+            console.log('📦 Step 4: Finalizing package setup...');
+            this.pyodide.runPython(`
+                print("📦 Finalizing weierstrass_playground package...")
+                import sys
+                wp_package = sys.modules['weierstrass_playground']
+                
+                # Set package attributes from __init__.py
+                wp_package.__version__ = "1.0.0"
+                wp_package.__author__ = "Weierstrass Playground Contributors"
+                
+                # Import main functions for convenience (from __init__.py)
+                from weierstrass_playground.core import wp_rect, wp_deriv, field_grid
+                from weierstrass_playground.integration import integrate_second_order_with_blowup
+                from weierstrass_playground.visualization import soft_background, add_topo_contours, vector_overlay
+                
+                wp_package.wp_rect = wp_rect
+                wp_package.wp_deriv = wp_deriv
+                wp_package.field_grid = field_grid
+                wp_package.integrate_second_order_with_blowup = integrate_second_order_with_blowup
+                wp_package.soft_background = soft_background
+                wp_package.add_topo_contours = add_topo_contours
+                wp_package.vector_overlay = vector_overlay
+                
+                print("✅ weierstrass_playground package finalized successfully")
+                print(f"📊 Package contents: {dir(wp_package)}")
+            `);
+            console.log('✅ Step 4 completed: Package finalized');
+            
+            console.log('🔧 Step 5: Setting up browser-specific functions...');
+            this.pyodide.runPython(`
+                print("🔧 Setting up browser-specific functions...")
+                # Set up browser-specific functions
+                import io  
+                import base64
+                from matplotlib import pyplot as plt
+                
+                def plot_to_base64(fig):
+                    """Convert matplotlib figure to base64 string for web display."""
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
+                    buf.seek(0)
+                    img_str = base64.b64encode(buf.read()).decode('utf-8')
+                    buf.close()
+                    plt.close(fig)  # Free memory
+                    return img_str
+                
+                print("✅ Browser-specific functions set up successfully")
+            `);
+            console.log('✅ Step 5 completed: browser functions configured');
+            
+            // Test the package import
+            console.log('🧪 Step 6: Testing package import...');
+            this.pyodide.runPython(`
+                print("🧪 Testing weierstrass_playground import...")
                 import weierstrass_playground as wp
-                print("✅ weierstrass_playground base package imported successfully")
-            except Exception as e:
-                print(f"❌ Failed to import weierstrass_playground: {e}")
-                import traceback
-                traceback.print_exc()
-                raise e
-        `);
-        console.log('✅ Step 3 completed: base package imported');
-        
-        console.log('📦 Step 4: Importing browser module...');
-        this.pyodide.runPython(`
-            print("📦 Importing browser module...")
-            try:
                 from weierstrass_playground import browser
-                print("✅ browser module imported successfully")
-            except Exception as e:
-                print(f"❌ Failed to import browser module: {e}")
-                import traceback
-                traceback.print_exc()
-                raise e
-        `);
-        console.log('✅ Step 4 completed: browser module imported');
-        
-        console.log('🔧 Step 5: Setting up browser-specific functions...');
-        this.pyodide.runPython(`
-            print("🔧 Setting up browser-specific functions...")
-            # Set up browser-specific functions
-            import io  
-            import base64
-            from matplotlib import pyplot as plt
+                print("✅ weierstrass_playground package imported successfully")
+                print(f"📦 Available functions: {[attr for attr in dir(wp) if not attr.startswith('_')]}")
+            `);
+            console.log('✅ Step 6 completed: Package import test successful');
             
-            def plot_to_base64(fig):
-                """Convert matplotlib figure to base64 string for web display."""
-                buf = io.BytesIO()
-                fig.savefig(buf, format='png', bbox_inches='tight', facecolor='white', dpi=150)
-                buf.seek(0)
-                img_str = base64.b64encode(buf.read()).decode('utf-8')
-                buf.close()
-                plt.close(fig)  # Free memory
-                return img_str
+            console.log('✅ Python environment setup completed successfully');
             
-            print("✅ Browser-specific functions set up successfully")
-        `);
-        console.log('✅ Step 5 completed: browser functions configured');
-        console.log('✅ Python environment setup completed successfully');
+        } catch (error) {
+            console.error('❌ Python setup failed:', error);
+            throw error;
+        }
     }
 
     /**
