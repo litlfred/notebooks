@@ -109,6 +109,21 @@ console.log('Schema Base:', info.schema_base_url);
 
 ## 📋 Manual Deployment Instructions
 
+### Deploying Branch Previews Manually
+
+**NEW:** You can now manually deploy any branch for preview via GitHub UI:
+
+1. Navigate to **Actions** tab in GitHub repository
+2. Select **"🌿 Branch Preview Deployment"** workflow
+3. Click **"Run workflow"**
+4. **Branch Selection:**
+   - Leave **Branch to deploy** empty to use current branch
+   - Or enter specific branch name (e.g., `feature-xyz`)
+5. Set **Preview deployment type**: `branch-preview` (default)
+6. Click **"Run workflow"**
+
+This creates a preview at: `https://litlfred.github.io/notebooks/branch-preview/{branch-name}`
+
 ### Deploying to Production
 
 1. Navigate to **Actions** tab in GitHub repository
