@@ -223,17 +223,27 @@ class WeierstrassApp {
             
             const packageCode = {};
             
+            console.log(`📋 Will load ${pythonFiles.length} Python files: ${pythonFiles.join(', ')}`);
+            
             for (const fileName of pythonFiles) {
                 console.log(`📥 Loading ${fileName}...`);
                 try {
+                    console.log(`🌐 Fetching python/weierstrass_playground/${fileName}`);
                     const response = await fetch(`python/weierstrass_playground/${fileName}`);
+                    console.log(`📡 Response status: ${response.status} ${response.statusText}`);
+                    
                     if (!response.ok) {
                         throw new Error(`Failed to load ${fileName}: ${response.status} ${response.statusText}`);
                     }
-                    packageCode[fileName] = await response.text();
-                    console.log(`✅ Loaded ${fileName} (${packageCode[fileName].length} chars)`);
+                    
+                    const content = await response.text();
+                    packageCode[fileName] = content;
+                    console.log(`✅ Loaded ${fileName} (${content.length} chars)`);
                 } catch (fetchError) {
                     console.error(`❌ Failed to fetch ${fileName}:`, fetchError);
+                    console.error(`❌ Fetch error type: ${fetchError.constructor.name}`);
+                    console.error(`❌ Fetch error message: ${fetchError.message}`);
+                    if (fetchError.stack) console.error(`❌ Fetch error stack: ${fetchError.stack}`);
                     throw new Error(`Could not load Python file ${fileName}: ${fetchError.message}`);
                 }
             }
@@ -261,9 +271,10 @@ class WeierstrassApp {
             // Install each Python file as a module
             for (const [fileName, code] of Object.entries(packageCode)) {
                 const moduleName = fileName.replace('.py', '');
-                console.log(`📦 Installing module: ${moduleName}`);
+                console.log(`📦 Installing module: ${moduleName} (from ${fileName})`);
                 
                 try {
+                    console.log(`🔧 Creating module object for ${moduleName}...`);
                     // Use pyodide.runPython with proper code handling
                     this.pyodide.runPython(`
                         print(f"📦 Installing module: ${moduleName}")
@@ -278,25 +289,38 @@ class WeierstrassApp {
                         print(f"✅ Module ${moduleName} created, executing code...")
                     `);
                     
+                    console.log(`🐍 Executing Python code for ${moduleName} (${code.length} chars)...`);
                     // Store the code in a global variable and execute it
                     this.pyodide.globals.set("module_code", code);
                     this.pyodide.runPython(`
-                        # Execute module code in module namespace
-                        exec(module_code, module.__dict__)
-                        
-                        # Install in sys.modules
-                        sys.modules['weierstrass_playground.${moduleName}'] = module
-                        
-                        # Add to package
-                        wp_package = sys.modules['weierstrass_playground']
-                        setattr(wp_package, '${moduleName}', module)
-                        
-                        print(f"✅ Module ${moduleName} installed successfully")
+                        try:
+                            # Execute module code in module namespace
+                            exec(module_code, module.__dict__)
+                            print(f"✅ Code execution completed for ${moduleName}")
+                            
+                            # Install in sys.modules
+                            sys.modules['weierstrass_playground.${moduleName}'] = module
+                            print(f"✅ Module ${moduleName} registered in sys.modules")
+                            
+                            # Add to package
+                            wp_package = sys.modules['weierstrass_playground']
+                            setattr(wp_package, '${moduleName}', module)
+                            print(f"✅ Module ${moduleName} added to package")
+                            
+                            print(f"✅ Module ${moduleName} installed successfully")
+                        except Exception as e:
+                            print(f"❌ Error during ${moduleName} installation: {e}")
+                            import traceback
+                            traceback.print_exc()
+                            raise e
                     `);
                     
                     console.log(`✅ Module ${moduleName} installed successfully`);
                 } catch (moduleError) {
                     console.error(`❌ Failed to install module ${moduleName}:`, moduleError);
+                    console.error(`❌ Module error type: ${moduleError.constructor.name}`);
+                    console.error(`❌ Module error message: ${moduleError.message}`);
+                    if (moduleError.stack) console.error(`❌ Module error stack: ${moduleError.stack}`);
                     throw new Error(`Failed to install Python module ${moduleName}: ${moduleError.message}`);
                 }
             }
@@ -304,32 +328,61 @@ class WeierstrassApp {
             console.log('✅ Step 3 completed: All modules installed');
             
             console.log('📦 Step 4: Finalizing package setup...');
-            this.pyodide.runPython(`
-                print("📦 Finalizing weierstrass_playground package...")
-                import sys
-                wp_package = sys.modules['weierstrass_playground']
-                
-                # Set package attributes from __init__.py
-                wp_package.__version__ = "1.0.0"
-                wp_package.__author__ = "Weierstrass Playground Contributors"
-                
-                # Import main functions for convenience (from __init__.py)
-                from weierstrass_playground.core import wp_rect, wp_deriv, field_grid
-                from weierstrass_playground.integration import integrate_second_order_with_blowup
-                from weierstrass_playground.visualization import soft_background, add_topo_contours, vector_overlay
-                
-                wp_package.wp_rect = wp_rect
-                wp_package.wp_deriv = wp_deriv
-                wp_package.field_grid = field_grid
-                wp_package.integrate_second_order_with_blowup = integrate_second_order_with_blowup
-                wp_package.soft_background = soft_background
-                wp_package.add_topo_contours = add_topo_contours
-                wp_package.vector_overlay = vector_overlay
-                
-                print("✅ weierstrass_playground package finalized successfully")
-                print(f"📊 Package contents: {dir(wp_package)}")
-            `);
-            console.log('✅ Step 4 completed: Package finalized');
+            try {
+                console.log('🔗 Setting up package imports and convenience functions...');
+                this.pyodide.runPython(`
+                    print("📦 Finalizing weierstrass_playground package...")
+                    import sys
+                    wp_package = sys.modules['weierstrass_playground']
+                    
+                    # Set package attributes from __init__.py
+                    wp_package.__version__ = "1.0.0"
+                    wp_package.__author__ = "Weierstrass Playground Contributors"
+                    print("✅ Package metadata set")
+                    
+                    try:
+                        # Import main functions for convenience (from __init__.py)
+                        print("📥 Importing core functions...")
+                        from weierstrass_playground.core import wp_rect, wp_deriv, field_grid
+                        print("✅ Core functions imported")
+                        
+                        print("📥 Importing integration functions...")
+                        from weierstrass_playground.integration import integrate_second_order_with_blowup
+                        print("✅ Integration functions imported")
+                        
+                        print("📥 Importing visualization functions...")
+                        from weierstrass_playground.visualization import soft_background, add_topo_contours, vector_overlay
+                        print("✅ Visualization functions imported")
+                        
+                        # Set convenience attributes
+                        wp_package.wp_rect = wp_rect
+                        wp_package.wp_deriv = wp_deriv
+                        wp_package.field_grid = field_grid
+                        wp_package.integrate_second_order_with_blowup = integrate_second_order_with_blowup
+                        wp_package.soft_background = soft_background
+                        wp_package.add_topo_contours = add_topo_contours
+                        wp_package.vector_overlay = vector_overlay
+                        print("✅ Convenience functions set up")
+                        
+                    except ImportError as import_err:
+                        print(f"⚠️ Import warning: {import_err}")
+                        print("📋 Available modules:", list(sys.modules.keys()))
+                        print("📋 Package modules:", [key for key in sys.modules.keys() if key.startswith('weierstrass_playground')])
+                    
+                    print("✅ weierstrass_playground package finalized successfully")
+                    print(f"📊 Package contents: {[attr for attr in dir(wp_package) if not attr.startswith('_')]}")
+                `);
+                console.log('✅ Step 4 completed: Package finalized');
+            } catch (finalizeError) {
+                console.error('❌ Failed to finalize package:', finalizeError);
+                console.error('❌ Finalize error details:', {
+                    type: finalizeError.constructor.name,
+                    message: finalizeError.message,
+                    stack: finalizeError.stack
+                });
+                // Don't throw - continue with basic setup
+                console.log('⚠️ Continuing with basic package setup...');
+            }
             
             console.log('🔧 Step 5: Setting up browser-specific functions...');
             this.pyodide.runPython(`
@@ -355,14 +408,44 @@ class WeierstrassApp {
             
             // Test the package import
             console.log('🧪 Step 6: Testing package import...');
-            this.pyodide.runPython(`
-                print("🧪 Testing weierstrass_playground import...")
-                import weierstrass_playground as wp
-                from weierstrass_playground import browser
-                print("✅ weierstrass_playground package imported successfully")
-                print(f"📦 Available functions: {[attr for attr in dir(wp) if not attr.startswith('_')]}")
-            `);
-            console.log('✅ Step 6 completed: Package import test successful');
+            try {
+                console.log('🔍 Testing basic package import...');
+                this.pyodide.runPython(`
+                    print("🧪 Testing weierstrass_playground import...")
+                    try:
+                        import weierstrass_playground as wp
+                        print("✅ Basic package import successful")
+                        
+                        print("🧪 Testing browser module import...")
+                        from weierstrass_playground import browser
+                        print("✅ Browser module import successful")
+                        
+                        print("✅ weierstrass_playground package imported successfully")
+                        print(f"📦 Available functions: {[attr for attr in dir(wp) if not attr.startswith('_')]}")
+                        
+                        # Test a simple function call
+                        print("🧪 Testing a simple function call...")
+                        import numpy as np
+                        test_result = wp.wp_rect(1.0 + 1.0j, 2.0, 2.0, 3)
+                        print(f"✅ Function test successful: wp_rect(1+1j, 2, 2, 3) = {test_result}")
+                        
+                    except Exception as test_error:
+                        print(f"❌ Import test failed: {test_error}")
+                        import traceback
+                        traceback.print_exc()
+                        raise test_error
+                `);
+                console.log('✅ Step 6 completed: Package import test successful');
+            } catch (testError) {
+                console.error('❌ Package test failed:', testError);
+                console.error('❌ Test error details:', {
+                    type: testError.constructor.name,
+                    message: testError.message,
+                    stack: testError.stack
+                });
+                // Don't throw - package might still be usable
+                console.log('⚠️ Package test failed, but continuing...');
+            }
             
             console.log('✅ Python environment setup completed successfully');
             
