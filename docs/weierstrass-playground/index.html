@@ -37,6 +37,38 @@
         </div>
 
         <div class="main-content" id="main-content" style="display: none;">
+            
+            <!-- Notebook Management Section -->
+            <div class="notebook-section">
+                <div class="notebook-controls">
+                    <h3><i class="fas fa-book"></i> Notebook Management</h3>
+                    <div class="notebook-actions">
+                        <div class="form-group">
+                            <label for="notebook-file">Load Notebook JSON-LD:</label>
+                            <input type="file" id="notebook-file" accept=".jsonld,.json" />
+                            <button id="load-notebook" class="btn btn-primary">
+                                <i class="fas fa-upload"></i> Load
+                            </button>
+                        </div>
+                        <div class="form-group">
+                            <button id="save-notebook" class="btn btn-success">
+                                <i class="fas fa-download"></i> Save Notebook
+                            </button>
+                            <button id="new-notebook" class="btn btn-secondary">
+                                <i class="fas fa-plus"></i> New Notebook
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="notebook-library">
+                    <h4><i class="fas fa-folder-open"></i> Available Notebooks</h4>
+                    <div id="notebook-list" class="notebook-grid">
+                        <!-- Notebooks will be populated here -->
+                    </div>
+                </div>
+            </div>
+            
             <div class="controls-section">
                 <div class="control-panel">
                     <div class="control-group">

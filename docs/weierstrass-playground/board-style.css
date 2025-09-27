@@ -30,6 +30,45 @@
     
     --board-bg: #1e2832;
     --widget-bg: #2c3e50;
+    
+    /* Sticky Note Color Themes as CSS Variables */
+    --sticky-desert-bg: #f4e4c1;
+    --sticky-desert-header: #e6d7b8;
+    --sticky-desert-content: #f9f2e5;
+    --sticky-desert-text: #6b5544;
+    --sticky-desert-border: #d4c5a6;
+    
+    --sticky-classic-bg: #fff740;
+    --sticky-classic-header: #f0e847;
+    --sticky-classic-content: #fffd70;
+    --sticky-classic-text: #333333;
+    --sticky-classic-border: #e6d633;
+    
+    --sticky-ocean-bg: #b3e5fc;
+    --sticky-ocean-header: #81d4fa;
+    --sticky-ocean-content: #e1f5fe;
+    --sticky-ocean-text: #0277bd;
+    --sticky-ocean-border: #4fc3f7;
+    
+    --sticky-forest-bg: #c8e6c9;
+    --sticky-forest-header: #a5d6a7;
+    --sticky-forest-content: #e8f5e8;
+    --sticky-forest-text: #2e7d32;
+    --sticky-forest-border: #81c784;
+    
+    /* Current theme defaults to desert */
+    --current-sticky-bg: var(--sticky-desert-bg);
+    --current-sticky-header: var(--sticky-desert-header);
+    --current-sticky-content: var(--sticky-desert-content);
+    --current-sticky-text: var(--sticky-desert-text);
+    --current-sticky-border: var(--sticky-desert-border);
+    --sticky-ocean-border: #4fc3f7;
+    
+    --sticky-forest-bg: #c8e6c9;
+    --sticky-forest-header: #a5d6a7;
+    --sticky-forest-content: #e8f5e8;
+    --sticky-forest-text: #2e7d32;
+    --sticky-forest-border: #81c784;
 }
 
 /* Light mode override */
@@ -406,37 +445,136 @@ body {
     background: linear-gradient(90deg, var(--bg-secondary), rgba(231, 76, 60, 0.1));
 }
 
+/* Sticky Note Base Styles with CSS Variable Support */
 .widget-sticky-note {
     min-width: 250px;
     min-height: 180px;
-    background: #f4e4c1; /* Soft desert sand */
-    color: #6b5544; /* Desert brown text */
+    background: var(--current-sticky-bg, var(--sticky-desert-bg));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    resize: both;
+    overflow: hidden;
+    position: relative;
 }
 
 .widget-sticky-note .widget-header {
-    background: #e6d7b8; /* Warm beige */
-    color: #6b5544; /* Desert brown text */
+    background: var(--current-sticky-header, var(--sticky-desert-header));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    border-bottom: 1px solid var(--current-sticky-border, var(--sticky-desert-border));
 }
 
 .widget-sticky-note .widget-content {
-    background: #f9f2e5; /* Light desert cream */
-    color: #6b5544; /* Desert brown text */
+    background: var(--current-sticky-content, var(--sticky-desert-content));
+    color: var(--current-sticky-text, var(--sticky-desert-text));
+    resize: none;
+    overflow: auto;
 }
 
-/* Desert tones for light mode */
+/* Sticky Note Theme Variants */
+.widget-sticky-note.theme-desert {
+    --current-sticky-bg: var(--sticky-desert-bg);
+    --current-sticky-header: var(--sticky-desert-header);
+    --current-sticky-content: var(--sticky-desert-content);
+    --current-sticky-text: var(--sticky-desert-text);
+    --current-sticky-border: var(--sticky-desert-border);
+}
+
+.widget-sticky-note.theme-classic {
+    --current-sticky-bg: var(--sticky-classic-bg);
+    --current-sticky-header: var(--sticky-classic-header);
+    --current-sticky-content: var(--sticky-classic-content);
+    --current-sticky-text: var(--sticky-classic-text);
+    --current-sticky-border: var(--sticky-classic-border);
+}
+
+.widget-sticky-note.theme-ocean {
+    --current-sticky-bg: var(--sticky-ocean-bg);
+    --current-sticky-header: var(--sticky-ocean-header);
+    --current-sticky-content: var(--sticky-ocean-content);
+    --current-sticky-text: var(--sticky-ocean-text);
+    --current-sticky-border: var(--sticky-ocean-border);
+}
+
+.widget-sticky-note.theme-forest {
+    --current-sticky-bg: var(--sticky-forest-bg);
+    --current-sticky-header: var(--sticky-forest-header);
+    --current-sticky-content: var(--sticky-forest-content);
+    --current-sticky-text: var(--sticky-forest-text);
+    --current-sticky-border: var(--sticky-forest-border);
+}
+
+/* Sticky Note Edit Mode */
+.widget-sticky-note .markdown-content {
+    padding: 1rem;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+
+.widget-sticky-note .markdown-content h1,
+.widget-sticky-note .markdown-content h2,
+.widget-sticky-note .markdown-content h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: inherit;
+}
+
+.widget-sticky-note .markdown-content p {
+    margin-bottom: 0.5rem;
+}
+
+.widget-sticky-note .markdown-content code {
+    background: rgba(0,0,0,0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+}
+
+/* Edit mode textarea */
+.widget-sticky-note .edit-textarea {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    padding: 1rem;
+    resize: none;
+    outline: none;
+}
+
+/* Resizer handle */
+.widget-sticky-note .resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    background: linear-gradient(-45deg, transparent 0%, transparent 30%, var(--current-sticky-border, var(--sticky-desert-border)) 30%, var(--current-sticky-border, var(--sticky-desert-border)) 40%, transparent 40%, transparent 60%, var(--current-sticky-border, var(--sticky-desert-border)) 60%, var(--current-sticky-border, var(--sticky-desert-border)) 70%, transparent 70%);
+    cursor: nw-resize;
+}
+
+/* Theme selector dropdown in widget menu */
+.sticky-theme-selector {
+    margin: 0.5rem;
+    padding: 0.25rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+}
+
+/* Light mode adjustments */
 [data-theme="light"] .widget-sticky-note {
-    background: #f7ecd2; /* Lighter desert sand */
-    color: #8b6f47; /* Warmer desert brown */
+    box-shadow: var(--shadow);
 }
 
-[data-theme="light"] .widget-sticky-note .widget-header {
-    background: #ede0c7; /* Light warm beige */
-    color: #8b6f47;
+[data-theme="light"] .widget-sticky-note .edit-textarea {
+    background: rgba(255,255,255,0.5);
 }
 
-[data-theme="light"] .widget-sticky-note .widget-content {
-    background: #faf6ed; /* Very light desert cream */
-    color: #8b6f47;
+[data-theme="light"] .widget-sticky-note .markdown-content code {
+    background: rgba(0,0,0,0.05);
 }
 
 .widget-weierstrass {

@@ -376,7 +376,12 @@ class MathematicalBoard {
             return '<div class="widget-error">Schema not found</div>';
         }
 
-        // Show configuration preview
+        // Special handling for sticky note widget
+        if (widget.schema.id === 'sticky-note') {
+            return this.renderStickyNoteContent(widget);
+        }
+
+        // Show configuration preview for other widgets
         const configPreview = this.renderConfigPreview(widget);
         
         // Show last output if available
@@ -392,6 +397,156 @@ class MathematicalBoard {
                 ${outputDisplay}
             </div>
         `;
+    }
+
+    /**
+     * Render sticky note content with markdown display/edit modes and TinyMCE integration
+     */
+    renderStickyNoteContent(widget) {
+        const markdownContent = widget.config.content || '# New Note\n\nEdit to add content...';
+        const isEditMode = widget.editMode || false;
+        const theme = widget.config.theme || 'desert';
+        
+        if (isEditMode) {
+            // Use Monaco Editor for better markdown editing with LaTeX support
+            return `
+                <div class="sticky-note-editor">
+                    <div class="editor-toolbar">
+                        <button class="editor-btn save-btn" onclick="boardApp.saveStickyNote('${widget.id}')">💾 Save</button>
+                        <button class="editor-btn cancel-btn" onclick="boardApp.cancelStickyNoteEdit('${widget.id}')">❌ Cancel</button>
+                        <select class="theme-selector" onchange="boardApp.changeStickyTheme('${widget.id}', this.value)">
+                            <option value="desert" ${theme === 'desert' ? 'selected' : ''}>🏜️ Desert</option>
+                            <option value="classic" ${theme === 'classic' ? 'selected' : ''}>💛 Classic</option>
+                            <option value="ocean" ${theme === 'ocean' ? 'selected' : ''}>🌊 Ocean</option>
+                            <option value="forest" ${theme === 'forest' ? 'selected' : ''}>🌲 Forest</option>
+                            <option value="lavender" ${theme === 'lavender' ? 'selected' : ''}>💜 Lavender</option>
+                            <option value="mint" ${theme === 'mint' ? 'selected' : ''}>🌿 Mint</option>
+                        </select>
+                        <div class="editor-help">
+                            <button class="editor-btn help-btn" onclick="boardApp.toggleMarkdownHelp('${widget.id}')" title="Markdown Help">❓</button>
+                        </div>
+                    </div>
+                    <div id="markdown-help-${widget.id}" class="markdown-help" style="display: none;">
+                        <div class="help-content">
+                            <h4>Markdown & LaTeX Support</h4>
+                            <p><strong>Headers:</strong> # H1, ## H2, ### H3</p>
+                            <p><strong>Emphasis:</strong> *italic*, **bold**, ~~strikethrough~~</p>
+                            <p><strong>Lists:</strong> - item or 1. item</p>
+                            <p><strong>Links:</strong> [text](url)</p>
+                            <p><strong>Code:</strong> \`inline\` or \`\`\`block\`\`\`</p>
+                            <p><strong>Math:</strong> $inline$ or $$block$$</p>
+                            <p><strong>Variables:</strong> {{variable_name}} - access widget values</p>
+                        </div>
+                    </div>
+                    <div class="editor-container" id="editor-container-${widget.id}" 
+                         style="height: calc(100% - 120px); border: 1px solid var(--current-sticky-border);">
+                        <textarea class="sticky-note-textarea" id="editor-${widget.id}" 
+                            style="width: 100%; height: 100%; border: none; padding: 1rem; 
+                                   background: var(--current-sticky-content); color: var(--current-sticky-text);
+                                   font-family: 'Monaco', 'Menlo', 'Courier New', monospace; 
+                                   font-size: 0.9rem; resize: none; outline: none;"
+                            placeholder="Enter markdown content with LaTeX support...">${this.escapeHtml(markdownContent)}</textarea>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Display mode - show rendered markdown with variable substitution
+            const processedContent = this.processMarkdownVariables(markdownContent, widget);
+            return `
+                <div class="sticky-note-display" onclick="boardApp.editStickyNote('${widget.id}')" 
+                     style="cursor: pointer; height: 100%; position: relative; padding: 1rem;">
+                    <div class="markdown-content" style="height: calc(100% - 2rem); overflow-y: auto;">
+                        ${this.renderMarkdown(processedContent)}
+                    </div>
+                    <div class="edit-hint" style="position: absolute; bottom: 5px; right: 5px; 
+                         font-size: 0.7rem; opacity: 0.6; background: rgba(0,0,0,0.1); 
+                         padding: 2px 6px; border-radius: 3px;">✏️ Click to edit</div>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Simple markdown renderer with LaTeX support
+     */
+    renderMarkdown(content) {
+        // Basic markdown parsing
+        let html = content
+            .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+            .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+            .replace(/`([^`]+)`/gim, '<code>$1</code>')
+            .replace(/\n\n/gim, '</p><p>')
+            .replace(/\n/gim, '<br>');
+            
+        // Wrap in paragraphs if not already wrapped
+        if (!html.includes('<h') && !html.includes('<p>')) {
+            html = '<p>' + html + '</p>';
+        }
+            
+        // Basic LaTeX symbol support
+        html = html
+            .replace(/\\wp/g, '℘')
+            .replace(/\\Z/g, 'ℤ')
+            .replace(/\\C/g, 'ℂ')
+            .replace(/\\R/g, 'ℝ')
+            .replace(/\\L/g, 'L')
+            .replace(/\\T/g, 'T');
+            
+        return html;
+    }
+
+    /**
+     * Toggle sticky note edit mode
+     */
+    editStickyNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.editMode = true;
+        this.updateWidgetDisplay(widget);
+    }
+
+    /**
+     * Save sticky note content
+     */
+    saveStickyNote(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        const textarea = document.getElementById(`editor-${widgetId}`);
+        if (textarea) {
+            widget.config.content = textarea.value;
+            widget.editMode = false;
+            this.updateWidgetDisplay(widget);
+            this.saveBoardToStorage();
+        }
+    }
+
+    /**
+     * Cancel sticky note edit
+     */
+    cancelStickyNoteEdit(widgetId) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.editMode = false;
+        this.updateWidgetDisplay(widget);
+    }
+
+    /**
+     * Change sticky note theme
+     */
+    changeStickyTheme(widgetId, theme) {
+        const widget = this.widgets.get(widgetId);
+        if (!widget) return;
+        
+        widget.config.theme = theme;
+        // Update the widget element class
+        widget.element.className = widget.element.className.replace(/theme-\w+/g, '') + ` theme-${theme}`;
+        this.saveBoardToStorage();
     }
 
     /**
@@ -1574,3 +1729,93 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('Mathematical Board initialized');
 });
+
+/**
+ * Sticky Note Widget Enhanced Functions
+ */
+function toggleStickyEditMode(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget || widget.type !== 'sticky-note') return;
+    
+    const contentEl = document.getElementById(`content-${widgetId}`);
+    const isEditing = widget.isEditing || false;
+    
+    if (!isEditing) {
+        // Switch to edit mode
+        const currentContent = widget.config.content || '# New Note\n\nEdit to add content...';
+        contentEl.innerHTML = `
+            <div class="sticky-note-editor">
+                <textarea id="editor-${widgetId}" class="markdown-editor">${currentContent}</textarea>
+                <div class="editor-toolbar">
+                    <button onclick="saveStickyNote('${widgetId}')">💾 Save</button>
+                    <button onclick="cancelStickyEdit('${widgetId}')">❌ Cancel</button>
+                    <button onclick="previewStickyNote('${widgetId}')">👁️ Preview</button>
+                </div>
+            </div>
+        `;
+        widget.isEditing = true;
+        
+        // Auto-resize textarea
+        const textarea = document.getElementById(`editor-${widgetId}`);
+        textarea.style.height = (contentEl.clientHeight - 40) + 'px';
+    } else {
+        // Switch back to view mode
+        saveStickyNote(widgetId);
+    }
+}
+
+function saveStickyNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    const editorEl = document.getElementById(`editor-${widgetId}`);
+    if (editorEl) {
+        widget.config.content = editorEl.value;
+        widget.isEditing = false;
+        boardApp.updateWidgetDisplay(widget);
+        boardApp.saveBoardToStorage();
+    }
+}
+
+function cancelStickyEdit(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    widget.isEditing = false;
+    boardApp.updateWidgetDisplay(widget);
+}
+
+function previewStickyNote(widgetId) {
+    const widget = boardApp.widgets.get(widgetId);
+    const editorEl = document.getElementById(`editor-${widgetId}`);
+    if (!widget || !editorEl) return;
+    
+    const tempContent = editorEl.value;
+    const contentEl = document.getElementById(`content-${widgetId}`);
+    contentEl.innerHTML = `
+        <div class="sticky-note-preview">
+            ${boardApp.renderMarkdown(tempContent)}
+            <div class="preview-toolbar">
+                <button onclick="toggleStickyEditMode('${widgetId}')">✏️ Back to Edit</button>
+            </div>
+        </div>
+    `;
+}
+
+function changeStickyTheme(widgetId, themeName) {
+    const widget = boardApp.widgets.get(widgetId);
+    const widgetEl = document.querySelector(`[data-widget-id="${widgetId}"]`);
+    if (!widget || !widgetEl || widget.type !== 'sticky-note') return;
+    
+    // Remove existing theme classes
+    widgetEl.classList.remove('theme-desert', 'theme-ocean', 'theme-forest', 'theme-sunset');
+    
+    // Add new theme class
+    widgetEl.classList.add(`theme-${themeName}`);
+    
+    // Update widget config
+    widget.config.theme = themeName || 'desert';
+    boardApp.saveBoardToStorage();
+    
+    console.log(`Changed sticky note ${widgetId} theme to ${themeName}`);
+}
