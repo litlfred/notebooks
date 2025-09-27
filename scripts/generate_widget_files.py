@@ -104,14 +104,10 @@ def generate_widget_files():
     widgets_dir.mkdir(exist_ok=True)
     
     generated_count = 0
-    max_widgets = 20  # Limit to avoid too many files
     
     for widget_id, schema in schemas['widget-schemas'].items():
         if not widget_id.startswith('sympy-'):
             continue
-            
-        if generated_count >= max_widgets:
-            break
             
         # Parse widget ID to create hierarchical structure
         # Example: sympy-core-add -> sympy/core/add.py
