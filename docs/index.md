@@ -14,6 +14,13 @@ Welcome to an interactive collection of **mathematical notebooks** that run enti
 
 **Revolutionary Miro-like mathematical workspace** for exploring the Weierstrass ℘ function with drag-and-drop widgets, schema-based configurations, and computational pipelines.
 
+**New in v2.0:** 🔐 **GitHub Integration**
+- **Personal Access Token Authentication** - Secure login with your GitHub PAT
+- **Direct Repository Saves** - Save notebooks directly to the `notebooks/` directory
+- **Collaborative Editing** - Edit and update shared notebooks with proper permissions
+- **Version Control** - Automatic commit messages and change tracking
+- **Create New Notebooks** - Generate empty notebooks from the interface
+
 **Features:**
 - **🧩 Widget-Based Interface**: Drag mathematical components onto a collaborative board
 - **∞ Specialized Visualizations**: 7+ different Weierstrass ℘ visualization types
