@@ -1,0 +1,11 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
+  ],
+  "@type": ["prov:Entity", "weier:output"],
+  "dct:conformsTo": "./output.schema.json",
+  "@id": "https://litlfred.github.io/notebooks/schema/weierstrass/output.jsonld",
+  "dct:title": "Weierstrass Function Output",
+  "dct:description": "JSON-LD context for Weierstrass ℘ function computation results"
+}

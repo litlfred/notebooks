@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/common/execution-result.schema.json",
+  "title": "Common Execution Result Schema",
+  "description": "Shared schema for widget execution results",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the execution was successful"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Execution time in milliseconds",
+      "minimum": 0
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when execution completed"
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "message": {"type": "string"},
+        "code": {"type": "string"},
+        "details": {"type": "object"}
+      },
+      "description": "Error information if execution failed"
+    }
+  },
+  "required": ["success", "timestamp"],
+  "additionalProperties": true
+}

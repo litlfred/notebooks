@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/schema/weierstrass/input.schema.json",
+  "title": "Weierstrass Function Input Schema",
+  "description": "Input parameters for Weierstrass ℘ function widgets",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "number",
+      "description": "Lattice parameter p",
+      "minimum": 0.1,
+      "maximum": 20,
+      "default": 11.0
+    },
+    "q": {
+      "type": "number", 
+      "description": "Lattice parameter q",
+      "minimum": 0.1,
+      "maximum": 20,
+      "default": 5.0
+    },
+    "N": {
+      "type": "integer",
+      "description": "Truncation level",
+      "minimum": 0,
+      "maximum": 6,
+      "default": 3
+    },
+    "grid_size": {
+      "type": "object",
+      "properties": {
+        "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100},
+        "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
+      },
+      "default": {"x": 100, "y": 100}
+    }
+  },
+  "required": ["p", "q", "N"],
+  "additionalProperties": false
+}
