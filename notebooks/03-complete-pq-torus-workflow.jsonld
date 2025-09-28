@@ -2,7 +2,11 @@
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
     "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld"
+    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
+    {
+      "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
+      "Connection": "workflow:Connection"
+    }
   ],
   "@id": "urn:notebook:complete-pq-torus-workflow",
   "@type": ["prov:Entity", "notebook:Notebook"],
@@ -193,6 +197,26 @@
       ]
     },
     {
+      "@id": "urn:output:weierstrass-trajectories",
+      "@type": ["prov:Entity", "weier:output"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/trajectories/input.schema.json",
+      "prov:value": {
+        "success": true,
+        "trajectory_data": {
+          "num_trajectories": 15,
+          "time_steps": 200,
+          "lattice_params": {"p": 11, "q": 5}
+        },
+        "visualization": {
+          "image_base64": "weierstrass_trajectories_p11_q5_N3",
+          "width": 600,
+          "height": 600,
+          "format": "png"
+        }
+      },
+      "prov:wasGeneratedBy": "urn:activity:weierstrass-trajectories-analysis"
+    },
+    {
       "@id": "urn:widget:weierstrass-contours",
       "@type": ["prov:Entity", "weier:widget", "pqt:subwidget"],
       "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/contours/input.schema.json",
@@ -226,6 +250,90 @@
       ]
     },
     {
+      "@id": "urn:output:weierstrass-contours",
+      "@type": ["prov:Entity", "weier:output"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/contours/input.schema.json",
+      "prov:value": {
+        "success": true,
+        "contour_data": {
+          "contour_levels": 25,
+          "lattice_params": {"p": 11, "q": 5},
+          "grid_resolution": {"x": 200, "y": 200}
+        },
+        "visualization": {
+          "image_base64": "weierstrass_contours_p11_q5_levels25",
+          "width": 800,
+          "height": 600,
+          "format": "png"
+        }
+      },
+      "prov:wasGeneratedBy": "urn:activity:weierstrass-contours-analysis"
+    },
+    {
+      "@id": "urn:connection:pq-to-two-panel",
+      "@type": ["prov:Entity", "workflow:Connection"],
+      "dct:description": "Parameter connection from PQ-Torus to Weierstrass Two-Panel",
+      "source": {
+        "widget": "urn:widget:pq-torus-umbrella",
+        "output": "urn:output:pq-torus-umbrella",
+        "parameters": ["p", "q"]
+      },
+      "target": {
+        "widget": "urn:widget:weierstrass-two-panel",
+        "input_parameters": ["p", "q"]
+      },
+      "connection_type": "parameter_flow",
+      "established_at": "2024-09-28T10:00:30Z"
+    },
+    {
+      "@id": "urn:connection:pq-to-five-panel",
+      "@type": ["prov:Entity", "workflow:Connection"],
+      "dct:description": "Parameter connection from PQ-Torus to Weierstrass Five-Panel",
+      "source": {
+        "widget": "urn:widget:pq-torus-umbrella",
+        "output": "urn:output:pq-torus-umbrella",
+        "parameters": ["p", "q"]
+      },
+      "target": {
+        "widget": "urn:widget:weierstrass-five-panel",
+        "input_parameters": ["p", "q"]
+      },
+      "connection_type": "parameter_flow",
+      "established_at": "2024-09-28T10:00:31Z"
+    },
+    {
+      "@id": "urn:connection:pq-to-trajectories",
+      "@type": ["prov:Entity", "workflow:Connection"],
+      "dct:description": "Parameter connection from PQ-Torus to Weierstrass Trajectories",
+      "source": {
+        "widget": "urn:widget:pq-torus-umbrella",
+        "output": "urn:output:pq-torus-umbrella",
+        "parameters": ["p", "q"]
+      },
+      "target": {
+        "widget": "urn:widget:weierstrass-trajectories",
+        "input_parameters": ["p", "q"]
+      },
+      "connection_type": "parameter_flow",
+      "established_at": "2024-09-28T10:00:32Z"
+    },
+    {
+      "@id": "urn:connection:pq-to-contours",
+      "@type": ["prov:Entity", "workflow:Connection"],
+      "dct:description": "Parameter connection from PQ-Torus to Weierstrass Contours",
+      "source": {
+        "widget": "urn:widget:pq-torus-umbrella",
+        "output": "urn:output:pq-torus-umbrella",
+        "parameters": ["p", "q"]
+      },
+      "target": {
+        "widget": "urn:widget:weierstrass-contours",
+        "input_parameters": ["p", "q"]
+      },
+      "connection_type": "parameter_flow",
+      "established_at": "2024-09-28T10:00:33Z"
+    },
+    {
       "@id": "urn:activity:pq-torus-validation",
       "@type": "prov:Activity",
       "prov:startedAtTime": "2024-09-28T10:00:00Z",
@@ -239,18 +347,36 @@
       "@type": "prov:Activity",
       "prov:startedAtTime": "2024-09-28T10:01:00Z",
       "prov:endedAtTime": "2024-09-28T10:01:15Z",
-      "prov:used": ["urn:widget:weierstrass-two-panel", "urn:output:pq-torus-umbrella"],
+      "prov:used": ["urn:widget:weierstrass-two-panel", "urn:output:pq-torus-umbrella", "urn:connection:pq-to-two-panel"],
       "prov:generated": "urn:output:weierstrass-two-panel",
-      "dct:description": "Two-panel Weierstrass ℘(z) and ℘′(z) visualization"
+      "dct:description": "Two-panel Weierstrass ℘(z) and ℘′(z) visualization using PQ-Torus parameters"
     },
     {
       "@id": "urn:activity:weierstrass-five-panel-analysis",
       "@type": "prov:Activity", 
       "prov:startedAtTime": "2024-09-28T10:02:00Z",
       "prov:endedAtTime": "2024-09-28T10:02:30Z",
-      "prov:used": ["urn:widget:weierstrass-five-panel", "urn:output:pq-torus-umbrella"],
+      "prov:used": ["urn:widget:weierstrass-five-panel", "urn:output:pq-torus-umbrella", "urn:connection:pq-to-five-panel"],
       "prov:generated": "urn:output:weierstrass-five-panel",
-      "dct:description": "Complete five-panel Weierstrass function analysis"
+      "dct:description": "Complete five-panel Weierstrass function analysis using PQ-Torus parameters"
+    },
+    {
+      "@id": "urn:activity:weierstrass-trajectories-analysis",
+      "@type": "prov:Activity",
+      "prov:startedAtTime": "2024-09-28T10:03:00Z",
+      "prov:endedAtTime": "2024-09-28T10:03:20Z",
+      "prov:used": ["urn:widget:weierstrass-trajectories", "urn:output:pq-torus-umbrella", "urn:connection:pq-to-trajectories"],
+      "prov:generated": "urn:output:weierstrass-trajectories",
+      "dct:description": "Weierstrass trajectory analysis using PQ-Torus lattice parameters"
+    },
+    {
+      "@id": "urn:activity:weierstrass-contours-analysis",
+      "@type": "prov:Activity",
+      "prov:startedAtTime": "2024-09-28T10:04:00Z",
+      "prov:endedAtTime": "2024-09-28T10:04:25Z",
+      "prov:used": ["urn:widget:weierstrass-contours", "urn:output:pq-torus-umbrella", "urn:connection:pq-to-contours"],
+      "prov:generated": "urn:output:weierstrass-contours",
+      "dct:description": "Weierstrass contour mapping using PQ-Torus lattice parameters"
     },
     {
       "@id": "urn:widget:summary-note",

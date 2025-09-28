@@ -72,10 +72,38 @@ Input: p=11, q=5
 PQ-Torus Widget (validation & processing)
 ↓
 Output: Validated parameters + torus description
-↓
+↓ (via Connection Arrows)
 Sub-Widgets (automatic parameter inheritance)
 ↓
 Mathematical Analysis Results
+```
+
+### Connection Arrows (PROV-O Links)
+
+The examples now include explicit **connection entities** that represent the "arrows" linking widget outputs to inputs:
+
+- **Connection Type**: `workflow:Connection` entities
+- **Source**: PQ-Torus widget output with specific parameters
+- **Target**: Weierstrass widget inputs  
+- **Flow Representation**: Visual arrows showing parameter inheritance
+- **PROV-O Integration**: Activities `prov:used` both widgets and connections
+
+**Example Connection Structure**:
+```json
+{
+  "@id": "urn:connection:pq-to-two-panel",
+  "@type": ["prov:Entity", "workflow:Connection"],
+  "source": {
+    "widget": "urn:widget:pq-torus-umbrella",
+    "output": "urn:output:pq-torus-umbrella", 
+    "parameters": ["p", "q"]
+  },
+  "target": {
+    "widget": "urn:widget:weierstrass-two-panel",
+    "input_parameters": ["p", "q"]
+  },
+  "connection_type": "parameter_flow"
+}
 ```
 
 ## 📊 Schema Conformance
@@ -107,5 +135,8 @@ The complete example addresses the previous JSON-LD issues:
 - **Schema Declarations**: Sub-widgets properly declare input/output schemas
 - **Dependency Linkages**: Explicit parameter connections from umbrella to sub-widgets
 - **Hierarchical IDs**: Widget types follow umbrella pattern (`pq-torus.weierstrass.two-panel`)
+- **Connection Arrows**: Explicit `workflow:Connection` entities representing visual arrows between widget outputs and inputs
+- **Complete PROV-O Flow**: Activities show usage of widgets, outputs, and connection arrows
+- **Parameter Inheritance**: Clear data flow from PQ-Torus umbrella widget to all Weierstrass sub-widgets
 
-This structure ensures proper mathematical workflow orchestration with complete provenance tracking and schema compliance.
+This structure ensures proper mathematical workflow orchestration with complete provenance tracking, visual connection representation, and schema compliance.

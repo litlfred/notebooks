@@ -2,7 +2,11 @@
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld", 
     "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld"
+    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
+    {
+      "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
+      "Connection": "workflow:Connection"
+    }
   ],
   "@id": "urn:notebook:minimal-pq-torus",
   "@type": ["prov:Entity", "notebook:Notebook"],
@@ -50,6 +54,22 @@
         }
       },
       "prov:wasGeneratedBy": "urn:activity:pq-torus-validation"
+    },
+    {
+      "@id": "urn:connection:info-note-params",
+      "@type": ["prov:Entity", "workflow:Connection"],
+      "dct:description": "Information flow from PQ-Torus validation to documentation note",
+      "source": {
+        "widget": "urn:widget:pq-torus-1",
+        "output": "urn:output:pq-torus-1",
+        "parameters": ["p", "q", "torus_description"]
+      },
+      "target": {
+        "widget": "urn:widget:info-note",
+        "purpose": "documentation"
+      },
+      "connection_type": "information_flow",
+      "established_at": "2024-09-28T10:00:06Z"
     },
     {
       "@id": "urn:activity:pq-torus-validation",
