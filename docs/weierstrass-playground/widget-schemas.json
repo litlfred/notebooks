@@ -1,6 +1,30 @@
 {
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "widget-schemas": {
+    "workflow-arrow": {
+      "id": "workflow-arrow",
+      "name": "Workflow Arrow",
+      "description": "Connection arrow between widgets with optional ETL transformation",
+      "category": "utility",
+      "icon": "↗️",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/output.schema.json"
+      ],
+      "python_script": "../libraries/core/arrow/arrow.py",
+      "actions": {
+        "create-arrow": {
+          "name": "Create Arrow",
+          "description": "Create connection arrow with specified configuration"
+        },
+        "execute-connection": {
+          "name": "Execute Connection",
+          "description": "Execute parameter flow through the arrow connection"
+        }
+      }
+    },
     "sticky-note": {
       "id": "sticky-note",
       "name": "Sticky Note", 
