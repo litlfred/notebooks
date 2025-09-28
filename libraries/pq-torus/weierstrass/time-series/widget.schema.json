@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Weierstrass Time-Series Widget Schema",
+  "description": "Widget schema for time evolution visualization of ℘(z(t)) along particle trajectories",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "const": "pq-torus.weierstrass.time-series",
+      "description": "Widget identifier"
+    },
+    "name": {
+      "type": "string",
+      "const": "℘ Time-Series Analysis",
+      "description": "Human-readable widget name"
+    },
+    "description": {
+      "type": "string",
+      "const": "Time evolution of ℘(z(t)) along particle trajectories",
+      "description": "Widget description"
+    },
+    "category": {
+      "type": "string",
+      "const": "visualization",
+      "description": "Widget category"
+    },
+    "icon": {
+      "type": "string", 
+      "const": "📈",
+      "description": "Widget icon (emoji)"
+    },
+    "input_schema": {
+      "type": "string",
+      "format": "uri",
+      "const": "./input.schema.json",
+      "description": "Reference to input schema"
+    },
+    "output_schema": {
+      "type": "string",
+      "format": "uri", 
+      "const": "./output.schema.json",
+      "description": "Reference to output schema"
+    },
+    "implementation": {
+      "type": "string",
+      "const": "./weierstrass_time_series.py",
+      "description": "Python implementation file"
+    },
+    "python_class": {
+      "type": "string",
+      "const": "PQTorusWeierstrassTimeSeriesWidget",
+      "description": "Python class name"
+    },
+    "actions": {
+      "type": "object",
+      "properties": {
+        "visualize": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "const": "Generate time-series visualization of ℘(z(t))"
+            },
+            "method": {
+              "type": "string",
+              "const": "_execute_impl"
+            }
+          },
+          "required": ["description", "method"]
+        }
+      },
+      "required": ["visualize"],
+      "description": "Available widget actions"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "const": ["numpy", "matplotlib"],
+      "description": "Python package dependencies"
+    },
+    "version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Widget version"
+    }
+  },
+  "required": [
+    "id", "name", "description", "category", "icon", 
+    "input_schema", "output_schema", "implementation", 
+    "python_class", "actions", "version"
+  ],
+  "additionalProperties": false
+}

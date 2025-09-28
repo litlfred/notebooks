@@ -1,0 +1,12 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld", 
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+  ],
+  "@type": ["prov:Entity", "weier:time-series-output"],
+  "dct:conformsTo": "./output.schema.json", 
+  "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/time-series/output.jsonld",
+  "dct:title": "Weierstrass Time-Series Output Data",
+  "dct:description": "JSON-LD context for time evolution results including trajectory data, ℘(z(t)) values, and visualization outputs",
+  "prov:wasDerivedFrom": "../output.jsonld"
+}

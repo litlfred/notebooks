@@ -28,7 +28,8 @@ class WidgetExecutor:
         'PQTorusWeierstrassThreePanelWidget': 'pq-torus.weierstrass.three-panel',
         'PQTorusWeierstrassFivePanelWidget': 'pq-torus.weierstrass.five-panel',
         'PQTorusWeierstrassTrajectoriesWidget': 'pq-torus.weierstrass.trajectories',
-        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours'
+        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours',
+        'PQTorusWeierstrassTimeSeriesWidget': 'pq-torus.weierstrass.time-series'
     }
     
     # Reverse mapping for JSON-LD ID to class name
@@ -193,8 +194,6 @@ class WidgetExecutor:
             "json_ld_id": kebab_case,
             "schema_reference": f"{kebab_case}.schema.json"
         }
-            self.input_schemas = [self.input_schema] if self.input_schema else []
-            self.output_schemas = [self.output_schema] if self.output_schema else []
     
     def _resolve_schema_reference(self, schema_ref):
         """Resolve schema reference to actual schema object"""
