@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json",
+  "title": "Weierstrass Function Output Schema",
+  "description": "Generic output data from Weierstrass ℘-function visualization widgets",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "plot_data": {
+      "type": "object",
+      "description": "Generated visualization data",
+      "properties": {
+        "image_base64": {
+          "type": "string",
+          "description": "Base64 encoded image data"
+        },
+        "width": {
+          "type": "integer",
+          "description": "Image width in pixels"
+        },
+        "height": {
+          "type": "integer",
+          "description": "Image height in pixels"
+        },
+        "format": {
+          "type": "string",
+          "enum": ["png", "svg", "jpeg"],
+          "default": "png"
+        }
+      },
+      "required": ["image_base64", "width", "height"]
+    },
+    "field_data": {
+      "type": "object",
+      "description": "Mathematical field analysis data"
+    },
+    "lattice_params": {
+      "type": "object",
+      "description": "Lattice parameter information",
+      "properties": {
+        "p": {"type": "integer"},
+        "q": {"type": "integer"},
+        "lattice_description": {"type": "string"}
+      }
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Computation time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Execution timestamp"
+    },
+    "widget_id": {
+      "type": "string",
+      "description": "Widget identifier"
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": true
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/python-code/output.schema.json",
+  "title": "Python Code Output Schema",
+  "description": "Output data from Python code execution",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether execution was successful"
+    },
+    "result": {
+      "description": "Execution result (any type)"
+    },
+    "stdout": {
+      "type": "string",
+      "description": "Standard output from execution"
+    },
+    "stderr": {
+      "type": "string", 
+      "description": "Standard error from execution"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Execution time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": true
+}

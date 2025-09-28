@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus/weierstrass/contours/input.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/contours/input.schema.json",
   "title": "Weierstrass Contours Input Schema",
   "description": "Input parameters for topographic contour mapping of Weierstrass ℘ field",
   "type": "object",

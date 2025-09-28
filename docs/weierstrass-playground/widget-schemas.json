@@ -13,7 +13,7 @@
       "output_schemas": [
         "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
       ],
-      "python_script": "widgets/sticky_note.py",
+      "python_script": "sticky_note.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["markdown", "content", "note"],
@@ -95,10 +95,10 @@
       "category": "computation",
       "icon": "🐍",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/python-code/input"
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/python-code/output"
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/output.schema.json"
       ],
       "python_script": "widgets/python_widget.py",
       "version": "1.0.0",
@@ -113,7 +113,7 @@
       "category": "visualization",
       "icon": "∞",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/weierstrass_input",
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/input.schema.json",
         {
           "type": "object",
           "properties": {
@@ -123,7 +123,7 @@
         }
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/weierstrass_output"
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json"
       ],
       "python_script": "widgets/wp_two_panel.py",
       "version": "1.0.0",
@@ -205,10 +205,10 @@
       "category": "visualization",
       "icon": "📊",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_output"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
       ],
       "python_script": "widgets/plot_widget.py",
       "version": "1.0.0",
@@ -223,10 +223,10 @@
       "category": "data",
       "icon": "📋",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_output"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
       ],
       "python_script": "widgets/data_generator_widget.py",
       "version": "1.0.0",
@@ -246,7 +246,7 @@
       "output_schemas": [
         "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json"
       ],
-      "python_script": "widgets/pq_torus.py",
+      "python_script": "pq_torus.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"],
@@ -264,7 +264,7 @@
           "output_schemas": [
             "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/output.schema.json"
           ],
-          "python_script": "widgets/weierstrass_two_panel.py",
+          "python_script": "weierstrass_two_panel.py",
           "actions": {
             "render-two-panel": {
               "slug": "render-two-panel",
@@ -313,7 +313,7 @@
           "output_schemas": [
             "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json"
           ],
-          "python_script": "widgets/weierstrass_five_panel.py",
+          "python_script": "weierstrass_five_panel.py",
           "actions": {
             "render-five-panel": {
               "slug": "render-five-panel",

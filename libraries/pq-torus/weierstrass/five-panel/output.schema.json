@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus/weierstrass/five-panel/output.schema.json",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json",
   "title": "Weierstrass Five-Panel Function Output Schema",
   "description": "Output data from complete Weierstrass ℘ function five-panel analysis",
   "type": "object",
