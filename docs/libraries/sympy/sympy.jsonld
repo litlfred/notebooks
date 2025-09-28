@@ -1,0 +1,136 @@
+{
+  "@context": [
+    "https://litlfred.github.io/notebooks/libraries/",
+    {
+      "sympy": "https://litlfred.github.io/notebooks/libraries/sympy/",
+      "workflow": "https://w3id.org/ro/terms/workflow-run#",
+      "prov": "http://www.w3.org/ns/prov#"
+    }
+  ],
+  "@type": "WidgetLibrary",
+  "@id": "sympy",
+  "name": "SymPy Mathematical Functions Library", 
+  "description": "Complete SymPy function widgets with class introspection for symbolic mathematics",
+  "version": "1.0.0",
+  "author": "SymPy Widgets Team",
+  "base_url": "https://litlfred.github.io/notebooks/libraries/sympy/",
+  
+  "widgets": {
+    "calculus/euler/euler-equations": {
+      "python_class": "SymPyCalculusEulerEulerEquationsWidget",
+      "description": "Find the Euler-Lagrange equations for a given Lagrangian",
+      "input_schemas": ["sympy:calculus/euler/euler-equations/input.schema.json"],
+      "output_schemas": ["sympy:calculus/euler/euler-equations/output.schema.json"]
+    },
+    "calculus/util/continuous-domain": {
+      "python_class": "SymPyCalculusUtilContinuousDomainWidget",
+      "description": "Find the continuous domain of a function",
+      "input_schemas": ["sympy:calculus/util/continuous-domain/input.schema.json"],
+      "output_schemas": ["sympy:calculus/util/continuous-domain/output.schema.json"]
+    },
+    "calculus/util/function-range": {
+      "python_class": "SymPyCalculusUtilFunctionRangeWidget",
+      "description": "Find the range of a function",
+      "input_schemas": ["sympy:calculus/util/function-range/input.schema.json"],
+      "output_schemas": ["sympy:calculus/util/function-range/output.schema.json"]
+    },
+    "core/function/expand": {
+      "python_class": "SymPyCoreFunctionExpandWidget",
+      "description": "Expand mathematical expressions",
+      "input_schemas": ["sympy:core/function/expand/input.schema.json"],
+      "output_schemas": ["sympy:core/function/expand/output.schema.json"]
+    },
+    "core/function/diff": {
+      "python_class": "SymPyCoreFunctionDiffWidget", 
+      "description": "Compute derivatives of expressions",
+      "input_schemas": ["sympy:core/function/diff/input.schema.json"],
+      "output_schemas": ["sympy:core/function/diff/output.schema.json"]
+    },
+    "simplify/simplify/simplify": {
+      "python_class": "SymPySimplifySimplifySimplifyWidget",
+      "description": "Simplify mathematical expressions",
+      "input_schemas": ["sympy:simplify/simplify/simplify/input.schema.json"],
+      "output_schemas": ["sympy:simplify/simplify/simplify/output.schema.json"]
+    },
+    "functions/elementary/miscellaneous/sqrt": {
+      "python_class": "SymPyFunctionsElementaryMiscellaneousSqrtWidget",
+      "description": "Compute square root of expressions",
+      "input_schemas": ["sympy:functions/elementary/miscellaneous/sqrt/input.schema.json"],
+      "output_schemas": ["sympy:functions/elementary/miscellaneous/sqrt/output.schema.json"]
+    },
+    "plotting/plot/plot": {
+      "python_class": "SymPyPlottingPlotPlotWidget",
+      "description": "Create 2D plots of mathematical expressions",
+      "input_schemas": ["sympy:plotting/plot/plot/input.schema.json"],
+      "output_schemas": ["sympy:plotting/plot/plot/output.schema.json"]
+    },
+    "matrices/common/classof": {
+      "python_class": "SymPyMatricesCommonClassofWidget",
+      "description": "Determine the class of matrix expressions",
+      "input_schemas": ["sympy:matrices/common/classof/input.schema.json"],
+      "output_schemas": ["sympy:matrices/common/classof/output.schema.json"]
+    }
+  },
+  
+  "actions": {
+    "execute": {
+      "description": "Execute the SymPy function with given parameters",
+      "method": "execute_sympy_function"
+    },
+    "validate": {
+      "description": "Validate input parameters", 
+      "method": "validate_input"
+    },
+    "simplify": {
+      "description": "Simplify the result expression",
+      "method": "simplify_result"
+    }
+  },
+  
+  "base_class": {
+    "name": "BaseSymPyWidget",
+    "path": "sympy:widgets/base_sympy_widget.py",
+    "inherits_from": "WidgetExecutor"
+  },
+  
+  "input_variables": {
+    "expr": {
+      "type": "string",
+      "default": "x + x",
+      "description": "Mathematical expression to process"
+    },
+    "variables": {
+      "type": "string", 
+      "default": "x",
+      "description": "Variables in the expression"
+    }
+  },
+  
+  "output_variables": {
+    "result": {
+      "type": "string",
+      "description": "String representation of the result"
+    },
+    "latex": {
+      "type": "string", 
+      "description": "LaTeX representation of the result"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Function metadata and execution information"
+    }
+  },
+  
+  "etl_capabilities": {
+    "parameter_flow": true,
+    "transformation_support": true,
+    "sympy_conversion": true,
+    "latex_output": true
+  },
+  
+  "documentation": {
+    "readme": "sympy:README.md",
+    "completeness_report": "sympy:COMPLETENESS_REPORT.md",
+    "implementation_summary": "sympy:IMPLEMENTATION_SUMMARY.md"
+  }
+}

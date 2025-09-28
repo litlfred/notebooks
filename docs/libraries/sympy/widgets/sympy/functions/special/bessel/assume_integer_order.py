@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.special.bessel import assume_integer_order
 
 
-class SymPyAssume_Integer_OrderWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsSpecialBesselAssumeintegerorderWidget(BaseSymPyWidget):
     """Widget for SymPy assume_integer_order function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import hypersimilar
 
 
-class SymPyHypersimilarWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyHypersimilarWidget(BaseSymPyWidget):
     """Widget for SymPy hypersimilar function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

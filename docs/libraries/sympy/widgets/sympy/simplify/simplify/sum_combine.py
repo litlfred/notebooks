@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import sum_combine
 
 
-class SymPySum_CombineWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifySumcombineWidget(BaseSymPyWidget):
     """Widget for SymPy sum_combine function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

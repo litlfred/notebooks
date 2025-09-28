@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting.plot import plot_contour
 
 
-class SymPyPlot_ContourWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlotcontourWidget(BaseSymPyWidget):
     """Widget for SymPy plot_contour function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

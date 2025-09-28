@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import inversecombine
 
 
-class SymPyInversecombineWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyInversecombineWidget(BaseSymPyWidget):
     """Widget for SymPy inversecombine function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

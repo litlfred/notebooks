@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import dotprodsimp
 
 
-class SymPyDotprodsimpWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyDotprodsimpWidget(BaseSymPyWidget):
     """Widget for SymPy dotprodsimp function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import expand_log
 
 
-class SymPyExpand_LogWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionExpandlogWidget(BaseSymPyWidget):
     """Widget for SymPy expand_log function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import hypersimp
 
 
-class SymPyHypersimpWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyHypersimpWidget(BaseSymPyWidget):
     """Widget for SymPy hypersimp function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -15,7 +15,7 @@ except ImportError:
 from sympy.matrices.common import a2idx
 
 
-class SymPyA2IdxWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyMatricesCommonA2IdxWidget(BaseSymPyWidget):
     """Widget for SymPy a2idx function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -4,7 +4,7 @@ import sympy as sp
 from sympy.functions.special.bessel import jn_zeros
 
 
-class SymPyJn_ZerosWidget:
+class SymPyWidgetsSympyFunctionsSpecialBesselJnzerosWidget:
 """
 
 
@@ -19,7 +19,7 @@ except ImportError:
 from sympy.functions.special.bessel import jn_zeros
 
 
-class SymPyJn_ZerosWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsSpecialBesselJnzerosWidget(BaseSymPyWidget):
     """Widget for SymPy jn_zeros function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

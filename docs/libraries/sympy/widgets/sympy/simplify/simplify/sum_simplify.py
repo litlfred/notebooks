@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import sum_simplify
 
 
-class SymPySum_SimplifyWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifySumsimplifyWidget(BaseSymPyWidget):
     """Widget for SymPy sum_simplify function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

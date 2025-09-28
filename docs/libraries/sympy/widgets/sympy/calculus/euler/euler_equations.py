@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.euler import euler_equations
 
 
-class SymPyEuler_EquationsWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusEulerEulerequationsWidget(BaseSymPyWidget):
     """Widget for SymPy euler_equations function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

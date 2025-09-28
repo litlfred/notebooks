@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import maximum
 
 
-class SymPyMaximumWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilMaximumWidget(BaseSymPyWidget):
     """Widget for SymPy maximum function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

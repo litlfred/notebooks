@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import count_ops
 
 
-class SymPyCount_OpsWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionCountopsWidget(BaseSymPyWidget):
     """Widget for SymPy count_ops function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

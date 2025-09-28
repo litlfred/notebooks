@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting.plot import plot_parametric
 
 
-class SymPyPlot_ParametricWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlotparametricWidget(BaseSymPyWidget):
     """Widget for SymPy plot_parametric function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

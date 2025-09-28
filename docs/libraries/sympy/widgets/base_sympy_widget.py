@@ -1,21 +1,80 @@
 """
 Base SymPy Widget class to handle common functionality and avoid repetitive code.
 Uses introspection to automatically handle parameter conversion and execution.
+Enhanced for new widget framework from PR #31.
 """
 
-from typing import Dict, Any, Callable, Optional
+from typing import Dict, Any, Callable, Optional, List
 import sympy as sp
 import inspect
+import json
+import re
+import time
+from datetime import datetime
 from abc import ABC, abstractmethod
 
+# Import WidgetExecutor from the new framework
+try:
+    from ..core.base_widget import WidgetExecutor
+except ImportError:
+    try:
+        from ...core.base_widget import WidgetExecutor
+    except ImportError:
+        # Fallback minimal WidgetExecutor implementation
+        class WidgetExecutor:
+            def __init__(self, widget_schema: Dict[str, Any]):
+                self.schema = widget_schema
+                self.id = widget_schema.get('id', 'unknown')
+                self.name = widget_schema.get('name', 'Unknown Widget')
 
-class BaseSymPyWidget(ABC):
-    """Base class for all SymPy widgets using introspection to minimize repetitive code."""
+
+class BaseSymPyWidget(WidgetExecutor, ABC):
+    """Base class for all SymPy widgets using introspection to minimize repetitive code.
+    Enhanced for new widget framework from PR #31.
+    """
+    
+    # Framework-compliant variable declarations
+    input_variables: Dict[str, Any] = {
+        'expr': 'x + x',  # Default symbolic expression
+        'variables': 'x'   # Default variables
+    }
+    
+    output_variables: Dict[str, Any] = {
+        'result': None,
+        'latex': None, 
+        'metadata': None
+    }
+    
+    # Action mapping to class methods (framework requirement)
+    actions: Dict[str, str] = {
+        'execute': 'execute_sympy_function',
+        'validate': 'validate_input',
+        'simplify': 'simplify_result'
+    }
     
     def __init__(self, schema: Dict[str, Any]):
-        self.schema = schema
+        # Initialize WidgetExecutor first
+        super().__init__(schema)
+        
+        # SymPy-specific initialization
         self.function = self.get_sympy_function()
         self.function_signature = inspect.signature(self.function)
+    
+    def _get_sympy_parameter_names(self) -> List[str]:
+        """Get parameter names that should be treated as SymPy expressions."""
+        return ['expr', 'L', 'equation', 'expression', 'f', 'g', 'h', 'args', 'funcs', 'vars']
+    
+    def process_parameter_flow(self, arrows: List[Dict[str, Any]], source_widgets: Dict[str, Any]):
+        """Process incoming parameter flow with SymPy-specific transformations."""
+        super().process_parameter_flow(arrows, source_widgets)
+        
+        # SymPy-specific parameter transformations
+        for param_name, value in self.__dict__.items():
+            if isinstance(value, str) and param_name in self.sympy_parameters:
+                try:
+                    setattr(self, param_name, sp.sympify(value))
+                except:
+                    pass  # Keep original value if conversion fails
     
     @abstractmethod
     def get_sympy_function(self) -> Callable:
@@ -121,6 +180,10 @@ class BaseSymPyWidget(ABC):
         }
     
     def execute(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute the SymPy function with framework-compliant input/output."""
+        return self.execute_sympy_function(validated_input)
+    
+    def execute_sympy_function(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the SymPy function with automatic parameter handling."""
         function_info = self.get_function_info()
         
@@ -134,14 +197,19 @@ class BaseSymPyWidget(ABC):
             # Format output
             formatted_result = self.format_result(result)
             
+            # Set output variables for framework compatibility
+            self.result = formatted_result.get('result')
+            self.latex = formatted_result.get('latex')
+            self.metadata = {
+                'function': function_info['name'],
+                'module': function_info['module'],
+                'result_type': type(result).__name__,
+                'parameters_used': parameters
+            }
+            
             return {
                 **formatted_result,
-                'metadata': {
-                    'function': function_info['name'],
-                    'module': function_info['module'],
-                    'result_type': type(result).__name__,
-                    'parameters_used': parameters
-                }
+                'metadata': self.metadata
             }
             
         except Exception as e:
@@ -154,6 +222,89 @@ class BaseSymPyWidget(ABC):
                     'function': function_info['name'],
                     'module': function_info['module']
                 }
+            }
+    
+    def validate_input(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate input parameters for the SymPy function."""
+        function_info = self.get_function_info()
+        errors = []
+        warnings = []
+        
+        try:
+            # Check required parameters
+            for param_name, param_info in self.function_signature.parameters.items():
+                if param_info.default == inspect.Parameter.empty and param_name not in validated_input:
+                    errors.append(f"Required parameter '{param_name}' is missing")
+            
+            # Validate parameter types
+            for param_name, value in validated_input.items():
+                if param_name in self.function_signature.parameters:
+                    # Try to convert and validate
+                    try:
+                        self.convert_parameter(param_name, value, self.function_signature.parameters[param_name])
+                    except Exception as e:
+                        warnings.append(f"Parameter '{param_name}' may have conversion issues: {str(e)}")
+                        
+            return {
+                'valid': len(errors) == 0,
+                'errors': errors,
+                'warnings': warnings,
+                'metadata': {
+                    'function': function_info['name'],
+                    'module': function_info['module']
+                }
+            }
+            
+        except Exception as e:
+            return {
+                'valid': False,
+                'errors': [f"Validation error: {str(e)}"],
+                'warnings': warnings
+            }
+    
+    def simplify_result(self, result_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Simplify the result if it's a SymPy expression."""
+        try:
+            if 'result' in result_data:
+                result_str = result_data['result']
+                # Try to parse and simplify
+                try:
+                    expr = sp.sympify(result_str)
+                    simplified = sp.simplify(expr)
+                    simplified_str = str(simplified)
+                    simplified_latex = sp.latex(simplified)
+                    
+                    return {
+                        'result': simplified_str,
+                        'latex': simplified_latex,
+                        'original_result': result_str,
+                        'simplified': True,
+                        'metadata': {
+                            'simplification_applied': True,
+                            'original_complexity': len(result_str),
+                            'simplified_complexity': len(simplified_str)
+                        }
+                    }
+                except:
+                    # If can't simplify, return original
+                    return {
+                        **result_data,
+                        'simplified': False,
+                        'metadata': {
+                            'simplification_applied': False,
+                            'reason': 'Could not parse result as SymPy expression'
+                        }
+                    }
+            else:
+                return {
+                    'error': 'No result to simplify',
+                    'simplified': False
+                }
+                
+        except Exception as e:
+            return {
+                'error': f"Simplification error: {str(e)}",
+                'simplified': False
             }
 
 

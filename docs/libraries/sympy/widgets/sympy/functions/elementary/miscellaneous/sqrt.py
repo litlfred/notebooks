@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.elementary.miscellaneous import sqrt
 
 
-class SymPySqrtWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsElementaryMiscellaneousSqrtWidget(BaseSymPyWidget):
     """Widget for SymPy sqrt function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

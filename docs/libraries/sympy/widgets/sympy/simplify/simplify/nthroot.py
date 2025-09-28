@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import nthroot
 
 
-class SymPyNthrootWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyNthrootWidget(BaseSymPyWidget):
     """Widget for SymPy nthroot function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

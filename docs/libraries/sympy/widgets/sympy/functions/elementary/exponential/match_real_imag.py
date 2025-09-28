@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.elementary.exponential import match_real_imag
 
 
-class SymPyMatch_Real_ImagWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsElementaryExponentialMatchrealimagWidget(BaseSymPyWidget):
     """Widget for SymPy match_real_imag function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

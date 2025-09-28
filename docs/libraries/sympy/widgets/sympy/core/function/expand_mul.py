@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import expand_mul
 
 
-class SymPyExpand_MulWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionExpandmulWidget(BaseSymPyWidget):
     """Widget for SymPy expand_mul function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -15,7 +15,7 @@ except ImportError:
 from sympy.matrices.matrixbase import classof
 
 
-class SymPyClassofWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyMatricesCommonClassofWidget(BaseSymPyWidget):
     """Widget for SymPy classof function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

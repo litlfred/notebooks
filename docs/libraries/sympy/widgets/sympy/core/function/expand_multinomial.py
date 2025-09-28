@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import expand_multinomial
 
 
-class SymPyExpand_MultinomialWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionExpandmultinomialWidget(BaseSymPyWidget):
     """Widget for SymPy expand_multinomial function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

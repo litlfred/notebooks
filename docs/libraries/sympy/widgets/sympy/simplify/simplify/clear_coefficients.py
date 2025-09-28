@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import clear_coefficients
 
 
-class SymPyClear_CoefficientsWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyClearcoefficientsWidget(BaseSymPyWidget):
     """Widget for SymPy clear_coefficients function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

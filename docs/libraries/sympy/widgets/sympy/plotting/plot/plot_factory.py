@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting.plot import plot_factory
 
 
-class SymPyPlot_FactoryWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlotfactoryWidget(BaseSymPyWidget):
     """Widget for SymPy plot_factory function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

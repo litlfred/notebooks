@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.elementary.miscellaneous import cbrt
 
 
-class SymPyCbrtWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsElementaryMiscellaneousCbrtWidget(BaseSymPyWidget):
     """Widget for SymPy cbrt function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

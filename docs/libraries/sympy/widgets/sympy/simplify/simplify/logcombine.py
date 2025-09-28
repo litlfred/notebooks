@@ -15,7 +15,7 @@ except ImportError:
 from sympy.abc import a
 
 
-class SymPyLogcombineWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyLogcombineWidget(BaseSymPyWidget):
     """Widget for SymPy a function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

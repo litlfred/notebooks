@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import diff
 
 
-class SymPyDiffWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionDiffWidget(BaseSymPyWidget):
     """Widget for SymPy diff function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

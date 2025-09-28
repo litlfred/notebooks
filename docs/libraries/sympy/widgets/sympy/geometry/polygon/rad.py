@@ -15,7 +15,7 @@ except ImportError:
 from sympy.geometry.polygon import rad
 
 
-class SymPyRadWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyGeometryPolygonRadWidget(BaseSymPyWidget):
     """Widget for SymPy rad function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

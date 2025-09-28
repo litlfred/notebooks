@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting.plot import check_arguments
 
 
-class SymPyCheck_ArgumentsWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotCheckargumentsWidget(BaseSymPyWidget):
     """Widget for SymPy check_arguments function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

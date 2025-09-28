@@ -15,7 +15,7 @@ except ImportError:
 from sympy.geometry.polygon import deg
 
 
-class SymPyDegWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyGeometryPolygonDegWidget(BaseSymPyWidget):
     """Widget for SymPy deg function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

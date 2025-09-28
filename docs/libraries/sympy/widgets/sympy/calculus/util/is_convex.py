@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import is_convex
 
 
-class SymPyIs_ConvexWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilIsconvexWidget(BaseSymPyWidget):
     """Widget for SymPy is_convex function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

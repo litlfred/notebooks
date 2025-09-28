@@ -15,7 +15,7 @@ except ImportError:
 from sympy.abc import z
 
 
-class SymPyExpand_ComplexWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionExpandcomplexWidget(BaseSymPyWidget):
     """Widget for SymPy z function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

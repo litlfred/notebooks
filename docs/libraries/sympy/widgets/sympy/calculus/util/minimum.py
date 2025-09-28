@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import minimum
 
 
-class SymPyMinimumWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilMinimumWidget(BaseSymPyWidget):
     """Widget for SymPy minimum function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

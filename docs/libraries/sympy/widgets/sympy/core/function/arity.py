@@ -15,7 +15,7 @@ except ImportError:
 from sympy.core.function import arity
 
 
-class SymPyArityWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionArityWidget(BaseSymPyWidget):
     """Widget for SymPy arity function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

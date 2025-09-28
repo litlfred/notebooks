@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.special.gamma_functions import intlike
 
 
-class SymPyIntlikeWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsSpecialGammafunctionsIntlikeWidget(BaseSymPyWidget):
     """Widget for SymPy intlike function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

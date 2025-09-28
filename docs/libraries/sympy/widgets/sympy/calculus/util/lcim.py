@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import lcim
 
 
-class SymPyLcimWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilLcimWidget(BaseSymPyWidget):
     """Widget for SymPy lcim function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

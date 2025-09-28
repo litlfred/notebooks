@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import periodicity
 
 
-class SymPyPeriodicityWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilPeriodicityWidget(BaseSymPyWidget):
     """Widget for SymPy periodicity function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

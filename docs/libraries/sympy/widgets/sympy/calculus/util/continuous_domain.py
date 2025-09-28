@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import continuous_domain
 
 
-class SymPyContinuous_DomainWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilContinuousdomainWidget(BaseSymPyWidget):
     """Widget for SymPy continuous_domain function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

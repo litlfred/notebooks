@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting.plot import plot
 
 
-class SymPyPlotWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlotWidget(BaseSymPyWidget):
     """Widget for SymPy plot function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

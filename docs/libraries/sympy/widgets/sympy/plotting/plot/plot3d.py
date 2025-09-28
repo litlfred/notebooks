@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting import plot3d
 
 
-class SymPyPlot3DWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlot3DWidget(BaseSymPyWidget):
     """Widget for SymPy plot3d function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

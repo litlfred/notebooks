@@ -15,7 +15,7 @@ except ImportError:
 from sympy.functions.elementary.miscellaneous import root
 
 
-class SymPyRootWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyFunctionsElementaryMiscellaneousRootWidget(BaseSymPyWidget):
     """Widget for SymPy root function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

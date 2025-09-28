@@ -15,7 +15,7 @@ except ImportError:
 from sympy.abc import x
 
 
-class SymPyExpand_Power_BaseWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCoreFunctionExpandpowerbaseWidget(BaseSymPyWidget):
     """Widget for SymPy x function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

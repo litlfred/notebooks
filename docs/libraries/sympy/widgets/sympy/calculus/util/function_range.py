@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import function_range
 
 
-class SymPyFunction_RangeWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilFunctionrangeWidget(BaseSymPyWidget):
     """Widget for SymPy function_range function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

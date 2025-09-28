@@ -4,7 +4,7 @@ import sympy as sp
 from sympy.simplify.simplify import nc_simplify
 
 
-class SymPyNc_SimplifyWidget:
+class SymPyWidgetsSympySimplifySimplifyNcsimplifyWidget:
 """
 
 
@@ -19,7 +19,7 @@ except ImportError:
 from sympy.simplify.simplify import nc_simplify
 
 
-class SymPyNc_SimplifyWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyNcsimplifyWidget(BaseSymPyWidget):
     """Widget for SymPy nc_simplify function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

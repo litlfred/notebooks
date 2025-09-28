@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import stationary_points
 
 
-class SymPyStationary_PointsWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilStationarypointsWidget(BaseSymPyWidget):
     """Widget for SymPy stationary_points function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

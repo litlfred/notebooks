@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import nsimplify
 
 
-class SymPyNsimplifyWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyNsimplifyWidget(BaseSymPyWidget):
     """Widget for SymPy nsimplify function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

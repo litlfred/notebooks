@@ -15,7 +15,7 @@ except ImportError:
 from sympy.abc import i
 
 
-class SymPyKroneckersimpWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyKroneckersimpWidget(BaseSymPyWidget):
     """Widget for SymPy i function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

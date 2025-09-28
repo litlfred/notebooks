@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting import plot3d_parametric_surface
 
 
-class SymPyPlot3D_Parametric_SurfaceWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlot3DparametricsurfaceWidget(BaseSymPyWidget):
     """Widget for SymPy plot3d_parametric_surface function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

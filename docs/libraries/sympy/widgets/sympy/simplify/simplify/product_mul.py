@@ -15,7 +15,7 @@ except ImportError:
 from sympy.simplify.simplify import product_mul
 
 
-class SymPyProduct_MulWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyProductmulWidget(BaseSymPyWidget):
     """Widget for SymPy product_mul function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

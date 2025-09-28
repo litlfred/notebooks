@@ -15,7 +15,7 @@ except ImportError:
 from sympy.calculus.util import not_empty_in
 
 
-class SymPyNot_Empty_InWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyCalculusUtilNotemptyinWidget(BaseSymPyWidget):
     """Widget for SymPy not_empty_in function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

@@ -4,7 +4,7 @@ import sympy as sp
 from sympy.simplify.simplify import besselsimp
 
 
-class SymPyBesselsimpWidget:
+class SymPyWidgetsSympySimplifySimplifyBesselsimpWidget:
 """
 
 
@@ -19,7 +19,7 @@ except ImportError:
 from sympy.abc import z
 
 
-class SymPyBesselsimpWidget(BaseSymPyWidget):
+class SymPyWidgetsSympySimplifySimplifyBesselsimpWidget(BaseSymPyWidget):
     """Widget for SymPy z function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:

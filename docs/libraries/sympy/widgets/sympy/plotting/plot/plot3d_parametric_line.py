@@ -15,7 +15,7 @@ except ImportError:
 from sympy.plotting import plot3d_parametric_line
 
 
-class SymPyPlot3D_Parametric_LineWidget(BaseSymPyWidget):
+class SymPyWidgetsSympyPlottingPlotPlot3DparametriclineWidget(BaseSymPyWidget):
     """Widget for SymPy plot3d_parametric_line function using base class for common functionality."""
     
     def get_sympy_function(self) -> Callable:
