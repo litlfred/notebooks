@@ -1,0 +1,203 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    {
+      "notebooks": "https://litlfred.github.io/notebooks/vocab/",
+      "core": "https://litlfred.github.io/notebooks/libraries/core/",
+      "pqt": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+      "dct": "http://purl.org/dc/terms/",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#"
+    }
+  ],
+  "@id": "https://litlfred.github.io/notebooks/notebooks.jsonld",
+  "@type": [
+    "prov:Collection",
+    "notebooks:Repository"
+  ],
+  "dct:title": "Notebooks - Interactive Mathematical Computing Repository",
+  "dct:description": "A collection of interactive Python notebooks and widget libraries for mathematical explorations, featuring self-contained widget directories and comprehensive schema-based framework.",
+  "dct:created": "2024-09-28T12:00:00Z",
+  "dct:modified": "2024-09-28T12:00:00Z",
+  "dct:creator": "litlfred",
+  "dct:license": "https://github.com/litlfred/notebooks/blob/main/LICENSE",
+  "notebooks:deploymentUrl": "https://litlfred.github.io/notebooks/",
+  "notebooks:repositoryUrl": "https://github.com/litlfred/notebooks",
+  "prov:hadMember": [
+    {
+      "@id": "https://litlfred.github.io/notebooks/notebooks/01-simple-sticky-notes.jsonld",
+      "@type": [
+        "prov:Entity",
+        "notebooks:Notebook"
+      ],
+      "dct:title": "Simple Sticky Notes Demo",
+      "dct:description": "Basic demonstration notebook with sticky note widgets showcasing fundamental widget framework usage.",
+      "notebooks:complexity": "beginner",
+      "notebooks:widgets": [
+        "core:sticky-note"
+      ]
+    },
+    {
+      "@id": "https://litlfred.github.io/notebooks/notebooks/02-minimal-pq-torus.jsonld",
+      "@type": [
+        "prov:Entity",
+        "notebooks:Notebook"
+      ],
+      "dct:title": "Minimal PQ-Torus Usage",
+      "dct:description": "Minimal example demonstrating PQ-Torus widget library usage with prime lattice parameter validation.",
+      "notebooks:complexity": "intermediate",
+      "notebooks:widgets": [
+        "pqt:pq-torus"
+      ]
+    },
+    {
+      "@id": "https://litlfred.github.io/notebooks/notebooks/03-complete-pq-torus-workflow.jsonld",
+      "@type": [
+        "prov:Entity",
+        "notebooks:Notebook"
+      ],
+      "dct:title": "Complete PQ-Torus Mathematical Workflow",
+      "dct:description": "Comprehensive notebook showcasing complete PQ-Torus umbrella widget with all Weierstrass sub-widgets and explicit connection arrows demonstrating parameter flow.",
+      "notebooks:complexity": "advanced",
+      "notebooks:widgets": [
+        "pqt:pq-torus",
+        "pqt:weierstrass.two-panel",
+        "pqt:weierstrass.five-panel", 
+        "pqt:weierstrass.trajectories",
+        "pqt:weierstrass.contours"
+      ],
+      "notebooks:connections": 4,
+      "notebooks:demonstrates": "umbrella-widget-pattern"
+    }
+  ],
+  "notebooks:libraries": [
+    {
+      "@id": "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+      "@type": [
+        "prov:Entity",
+        "notebooks:WidgetLibrary"
+      ],
+      "dct:title": "Core Widget Library",
+      "dct:description": "Base widgets and shared functionality including sticky notes, Python code execution, and data visualization widgets.",
+      "notebooks:category": "foundation",
+      "notebooks:widgets": [
+        {
+          "@id": "core:sticky-note",
+          "dct:title": "Sticky Note Widget",
+          "notebooks:type": "content"
+        },
+        {
+          "@id": "core:python-code", 
+          "dct:title": "Python Code Execution Widget",
+          "notebooks:type": "computation"
+        },
+        {
+          "@id": "core:data-visualization",
+          "dct:title": "Data Visualization Widget",
+          "notebooks:type": "visualization"
+        }
+      ],
+      "notebooks:baseClass": "https://litlfred.github.io/notebooks/libraries/core/base_widget.py#WidgetExecutor"
+    },
+    {
+      "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
+      "@type": [
+        "prov:Entity", 
+        "notebooks:WidgetLibrary",
+        "notebooks:UmbrellaWidgetLibrary"
+      ],
+      "dct:title": "PQ-Torus Mathematical Widget Library",
+      "dct:description": "Specialized mathematical widget library for prime lattice torus analysis and Weierstrass ℘-function visualizations with hierarchical umbrella pattern.",
+      "notebooks:category": "mathematics",
+      "notebooks:umbrellaWidget": {
+        "@id": "pqt:pq-torus",
+        "dct:title": "PQ-Torus Umbrella Widget",
+        "dct:description": "Defines torus T = ℂ / L where L = ℤp + ℤqi with prime lattice parameters",
+        "notebooks:type": "umbrella",
+        "notebooks:provides": ["p", "q"],
+        "notebooks:validates": "prime-parameters"
+      },
+      "notebooks:subWidgets": [
+        {
+          "@id": "pqt:weierstrass.two-panel",
+          "dct:title": "Weierstrass Two-Panel Widget",
+          "notebooks:type": "visualization",
+          "notebooks:inherits": ["p", "q"],
+          "notebooks:renders": "two-panel-weierstrass-function"
+        },
+        {
+          "@id": "pqt:weierstrass.five-panel",
+          "dct:title": "Weierstrass Five-Panel Widget", 
+          "notebooks:type": "visualization",
+          "notebooks:inherits": ["p", "q"],
+          "notebooks:renders": "comprehensive-weierstrass-analysis"
+        },
+        {
+          "@id": "pqt:weierstrass.three-panel",
+          "dct:title": "Weierstrass Three-Panel Widget",
+          "notebooks:type": "visualization", 
+          "notebooks:inherits": ["p", "q"],
+          "notebooks:renders": "intermediate-weierstrass-display"
+        },
+        {
+          "@id": "pqt:weierstrass.trajectories",
+          "dct:title": "Weierstrass Trajectories Widget",
+          "notebooks:type": "analysis",
+          "notebooks:inherits": ["p", "q"], 
+          "notebooks:renders": "lattice-point-trajectories"
+        },
+        {
+          "@id": "pqt:weierstrass.contours",
+          "dct:title": "Weierstrass Contours Widget",
+          "notebooks:type": "visualization",
+          "notebooks:inherits": ["p", "q"],
+          "notebooks:renders": "topographic-field-contours"
+        }
+      ],
+      "notebooks:hierarchicalPattern": "umbrella → sub-widgets",
+      "notebooks:parameterFlow": "pq-torus.output → weierstrass.input"
+    }
+  ],
+  "notebooks:applications": [
+    {
+      "@id": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/board.html",
+      "@type": [
+        "prov:Entity",
+        "notebooks:InteractiveApplication"
+      ],
+      "dct:title": "Widget Blackboard - Mathematical Board Application",
+      "dct:description": "Interactive drag-and-drop workspace for creating mathematical workflows with widgets, connections, and real-time visualization.",
+      "notebooks:type": "blackboard",
+      "notebooks:features": [
+        "drag-and-drop-widgets",
+        "real-time-connections", 
+        "json-ld-export",
+        "notebook-import-export",
+        "schema-based-validation"
+      ],
+      "notebooks:supports": "all-widget-libraries"
+    }
+  ],
+  "notebooks:framework": {
+    "@id": "https://litlfred.github.io/notebooks/WIDGET_DEVELOPMENT_GUIDE.md",
+    "@type": "notebooks:DevelopmentFramework",
+    "dct:title": "Widget Framework Development Guide",
+    "dct:description": "Comprehensive guide for creating compliant widget libraries with schema-based validation, JSON-LD integration, and hierarchical widget patterns.",
+    "notebooks:compliance": "https://litlfred.github.io/notebooks/WIDGET_FRAMEWORK_COMPLIANCE_REPORT.md",
+    "notebooks:requirements": [
+      "self-contained-widget-directories",
+      "schema-json-plus-python-implementation", 
+      "base-class-inheritance",
+      "action-method-association",
+      "json-ld-provenance-tracking"
+    ]
+  },
+  "notebooks:statistics": {
+    "notebooks:totalNotebooks": 3,
+    "notebooks:totalLibraries": 2,
+    "notebooks:totalWidgets": 8,
+    "notebooks:umbrellaWidgets": 1,
+    "notebooks:subWidgets": 5,
+    "notebooks:coreWidgets": 3
+  }
+}
