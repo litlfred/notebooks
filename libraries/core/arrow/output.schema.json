@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/arrow/output.schema.json",
+  "title": "Workflow Arrow Output Schema",
+  "description": "Schema for arrow execution results and status",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the arrow connection was successful"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the connection was executed"
+    },
+    "parameters_transferred": {
+      "type": "object",
+      "description": "Actual parameter values that were transferred"
+    },
+    "transformation_applied": {
+      "type": "boolean",
+      "description": "Whether optional transformation was executed"
+    },
+    "validation_results": {
+      "type": "object",
+      "properties": {
+        "source_validation": {
+          "type": "object",
+          "description": "Validation results from source widget output"
+        },
+        "target_validation": {
+          "type": "object", 
+          "description": "Validation results for target widget input"
+        }
+      }
+    },
+    "error_message": {
+      "type": "string",
+      "description": "Error message if connection failed"
+    }
+  },
+  "required": ["success", "timestamp"],
+  "additionalProperties": false
+}
