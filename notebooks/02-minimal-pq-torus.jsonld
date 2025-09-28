@@ -1,0 +1,82 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld", 
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld"
+  ],
+  "@id": "urn:notebook:minimal-pq-torus",
+  "@type": ["prov:Entity", "notebook:Notebook"],
+  "dct:title": "Minimal PQ-Torus Example",
+  "dct:description": "Basic demonstration of PQ-Torus widget with prime lattice parameters",
+  "dct:created": "2024-09-28T10:00:00Z",
+  "@graph": [
+    {
+      "@id": "urn:widget:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:widget"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/widget.schema.json",
+      "widget_id": "pq-torus-1",
+      "widget_type": "pq-torus",
+      "prov:generatedAtTime": "2024-09-28T10:00:00Z",
+      "layout": {
+        "position": {"x": 200, "y": 150},
+        "size": {"width": 350, "height": 250}
+      },
+      "input": {
+        "@type": ["prov:Entity", "pqt:input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json",
+        "p": 5,
+        "q": 7
+      }
+    },
+    {
+      "@id": "urn:output:pq-torus-1",
+      "@type": ["prov:Entity", "pqt:output"],
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json",
+      "prov:value": {
+        "success": true,
+        "p": 5,
+        "q": 7,
+        "torus_description": "T = ℂ / L where L = ℤ5 + ℤ7i",
+        "lattice_description": "L = ℤ5 + ℤ7i (rectangular prime lattice)",
+        "prime_validation": {
+          "p_is_prime": true,
+          "q_is_prime": true,
+          "validation_message": "Both 5 and 7 are prime numbers ✓"
+        },
+        "mathematical_properties": {
+          "fundamental_domain": {"width": 5, "height": 7},
+          "lattice_area": 35,
+          "lattice_determinant": 35
+        }
+      },
+      "prov:wasGeneratedBy": "urn:activity:pq-torus-validation"
+    },
+    {
+      "@id": "urn:activity:pq-torus-validation",
+      "@type": "prov:Activity",
+      "prov:startedAtTime": "2024-09-28T10:00:00Z",
+      "prov:endedAtTime": "2024-09-28T10:00:05Z",
+      "prov:used": "urn:widget:pq-torus-1",
+      "prov:generated": "urn:output:pq-torus-1",
+      "dct:description": "Prime validation and torus parameter generation"
+    },
+    {
+      "@id": "urn:widget:info-note",
+      "@type": ["prov:Entity", "sticky:widget"], 
+      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/widget.schema.json",
+      "widget_id": "info-note",
+      "widget_type": "sticky-note",
+      "prov:generatedAtTime": "2024-09-28T10:00:10Z",
+      "layout": {
+        "position": {"x": 600, "y": 150},
+        "size": {"width": 300, "height": 200}
+      },
+      "input": {
+        "@type": ["prov:Entity", "sticky:input"],
+        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
+        "content": "## PQ-Torus Analysis\n\n**Prime Parameters:**\n- p = 5 (prime ✓)\n- q = 7 (prime ✓)\n\n**Torus Definition:**\nT = ℂ / L where L = ℤ5 + ℤ7i\n\nThis creates a rectangular lattice with fundamental domain area = 35.",
+        "show_note": true
+      }
+    }
+  ]
+}
