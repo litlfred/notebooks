@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json",
+  "title": "Workflow Arrow Input Schema",
+  "description": "Schema for defining arrows/connections between widgets with optional transformations",
+  "type": "object",
+  "properties": {
+    "source_widget": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI reference to source widget instance"
+    },
+    "target_widget": {
+      "type": "string", 
+      "format": "uri",
+      "description": "URI reference to target widget instance"
+    },
+    "source_parameters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Output parameter names from source widget"
+    },
+    "target_parameters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Input parameter names for target widget"
+    },
+    "arrow_type": {
+      "type": "string",
+      "enum": ["parameter_flow", "data_flow", "control_flow", "dependency"],
+      "default": "parameter_flow",
+      "description": "Type of connection between widgets"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Optional markdown comment displayed as arrow title"
+    },
+    "transformation": {
+      "type": "object",
+      "properties": {
+        "python_code": {
+          "type": "string",
+          "description": "Optional Python function body for ETL transformation"
+        },
+        "input_mapping": {
+          "type": "object",
+          "description": "Optional parameter name mapping from source to target"
+        }
+      },
+      "description": "Optional transformation logic applied during parameter flow"
+    }
+  },
+  "required": ["source_widget", "target_widget", "source_parameters", "target_parameters"],
+  "additionalProperties": false
+}

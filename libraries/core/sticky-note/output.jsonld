@@ -1,0 +1,11 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+  ],
+  "@type": ["prov:Entity", "sticky:output"],
+  "dct:conformsTo": "./output.schema.json",
+  "@id": "https://litlfred.github.io/notebooks/schema/sticky-note/output.jsonld",
+  "dct:title": "Sticky Note Output",
+  "dct:description": "JSON-LD context for sticky note widget rendering results"
+}

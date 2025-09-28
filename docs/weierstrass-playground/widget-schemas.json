@@ -1,6 +1,30 @@
 {
-  "$schema": "https://litlfred.github.io/notebooks/schema/widget-definition.json",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
   "widget-schemas": {
+    "workflow-arrow": {
+      "id": "workflow-arrow",
+      "name": "Workflow Arrow",
+      "description": "Connection arrow between widgets with optional ETL transformation",
+      "category": "utility",
+      "icon": "↗️",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/output.schema.json"
+      ],
+      "python_script": "../libraries/core/arrow/arrow.py",
+      "actions": {
+        "create-arrow": {
+          "name": "Create Arrow",
+          "description": "Create connection arrow with specified configuration"
+        },
+        "execute-connection": {
+          "name": "Execute Connection",
+          "description": "Execute parameter flow through the arrow connection"
+        }
+      }
+    },
     "sticky-note": {
       "id": "sticky-note",
       "name": "Sticky Note", 
@@ -8,12 +32,12 @@
       "category": "content",
       "icon": "📝",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/sticky-note/input.schema.json"
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/sticky-note.json#/definitions/output"
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
       ],
-      "python_script": "widgets/sticky_note.py",
+      "python_script": "sticky-note/sticky_note.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["markdown", "content", "note"],
@@ -77,12 +101,12 @@
       "category": "content",
       "icon": "📝",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/common.json#/definitions/markdown_content"
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/sticky-note.json#/definitions/output"
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
       ],
-      "python_script": "widgets/markdown_widget.py",
+      "python_script": "sticky-note/sticky_note.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["markdown", "latex", "content"]
@@ -95,12 +119,12 @@
       "category": "computation",
       "icon": "🐍",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/python-code.json#/definitions/input"
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/python-code.json#/definitions/output"
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/output.schema.json"
       ],
-      "python_script": "widgets/python_widget.py",
+      "python_script": "python-code/python_code.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["python", "code", "computation"]
@@ -113,7 +137,7 @@
       "category": "visualization",
       "icon": "∞",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/weierstrass.json#/definitions/weierstrass_input",
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/input.schema.json",
         {
           "type": "object",
           "properties": {
@@ -123,9 +147,9 @@
         }
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/weierstrass.json#/definitions/weierstrass_output"
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json"
       ],
-      "python_script": "widgets/wp_two_panel.py",
+      "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
       "version": "1.0.0",
       "author": "Widget Framework", 
       "tags": ["weierstrass", "mathematics", "visualization"],
@@ -205,12 +229,12 @@
       "category": "visualization",
       "icon": "📊",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/data-visualization.json#/definitions/plot_input"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/data-visualization.json#/definitions/plot_output"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
       ],
-      "python_script": "widgets/plot_widget.py",
+      "python_script": "data-visualization/data_visualization.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["data", "plot", "visualization"]
@@ -223,12 +247,12 @@
       "category": "data",
       "icon": "📋",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/data-visualization.json#/definitions/data_generator_input"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/data-visualization.json#/definitions/data_generator_output"
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
       ],
-      "python_script": "widgets/data_generator_widget.py",
+      "python_script": "data-visualization/data_visualization.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["data", "generator", "synthetic"]
@@ -241,12 +265,12 @@
       "category": "computation",
       "icon": "🔴",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/schema/pq-torus/input.schema.json"
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/schema/pq-torus/output.schema.json"
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json"
       ],
-      "python_script": "widgets/pq_torus.py",
+      "python_script": "pq_torus.py",
       "version": "1.0.0",
       "author": "Widget Framework",
       "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"],
@@ -259,12 +283,12 @@
           "icon": "∞",
           "parent": "pq-torus",
           "input_schemas": [
-            "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/input.schema.json"
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/input.schema.json"
           ],
           "output_schemas": [
-            "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/two-panel/output.schema.json"
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/output.schema.json"
           ],
-          "python_script": "widgets/weierstrass_two_panel.py",
+          "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
           "actions": {
             "render-two-panel": {
               "slug": "render-two-panel",
@@ -308,12 +332,12 @@
           "icon": "🔍",
           "parent": "pq-torus",
           "input_schemas": [
-            "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/input.schema.json"
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/input.schema.json"
           ],
           "output_schemas": [
-            "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/five-panel/output.schema.json"
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json"
           ],
-          "python_script": "widgets/weierstrass_five_panel.py",
+          "python_script": "weierstrass/five-panel/weierstrass_five_panel.py",
           "actions": {
             "render-five-panel": {
               "slug": "render-five-panel",

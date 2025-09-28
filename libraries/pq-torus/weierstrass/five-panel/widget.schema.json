@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/widget.schema.json",
+  "title": "Weierstrass Five-Panel Widget Schema",
+  "description": "Schema for complete Weierstrass ℘ function five-panel analysis widget instances",
+  "type": "object",
+  "properties": {
+    "@context": {
+      "type": ["array", "string", "object"],
+      "description": "JSON-LD context"
+    },
+    "@type": {
+      "type": "array", 
+      "description": "JSON-LD type array including prov:Entity"
+    },
+    "input": {
+      "$ref": "./input.schema.json"
+    },
+    "output": {
+      "$ref": "./output.schema.json"
+    },
+    "actions": {
+      "type": "object",
+      "description": "Available widget actions",
+      "properties": {
+        "render-five-panel": {
+          "type": "object",
+          "properties": {
+            "slug": {"type": "string", "pattern": "^[a-z]+(-[a-z]+)*$"},
+            "names": {"type": "object"},
+            "icon": {"type": "string"},
+            "menu_category": {"type": "string"},
+            "output_format": {"type": "string"}
+          }
+        },
+        "export-analysis": {
+          "type": "object",
+          "properties": {
+            "slug": {"type": "string", "pattern": "^[a-z]+(-[a-z]+)*$"},
+            "names": {"type": "object"},
+            "icon": {"type": "string"},
+            "menu_category": {"type": "string"},
+            "output_format": {"type": "string"}
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "description": "Widget layout information for blackboard positioning",
+      "properties": {
+        "position": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number", "description": "X coordinate relative to origin"},
+            "y": {"type": "number", "description": "Y coordinate relative to origin"}
+          }
+        },
+        "size": {
+          "type": "object", 
+          "properties": {
+            "width": {"type": "integer", "minimum": 300, "maximum": 1200, "default": 450},
+            "height": {"type": "integer", "minimum": 250, "maximum": 800, "default": 350}
+          }
+        },
+        "z_index": {"type": "integer", "description": "Widget stacking order"},
+        "locked": {"type": "boolean", "description": "Whether position/size is locked"}
+      }
+    },
+    "svg_visualization": {
+      "type": "object",
+      "description": "SVG visualization configuration",
+      "properties": {
+        "enabled": {"type": "boolean", "default": true},
+        "widget_rect": {
+          "type": "object",
+          "properties": {
+            "x": {"type": "number"},
+            "y": {"type": "number"},
+            "width": {"type": "number"},
+            "height": {"type": "number"}
+          }
+        }
+      }
+    }
+  },
+  "required": ["input", "output"]
+}

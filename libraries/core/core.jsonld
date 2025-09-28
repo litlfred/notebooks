@@ -1,0 +1,49 @@
+{
+  "@context": {
+    "@vocab": "https://litlfred.github.io/notebooks/ontology/",
+    "weier": "https://litlfred.github.io/notebooks/ontology/weier#",
+    "pqt": "https://litlfred.github.io/notebooks/ontology/pqt#", 
+    "sticky": "https://litlfred.github.io/notebooks/ontology/sticky#",
+    "python": "https://litlfred.github.io/notebooks/ontology/python#",
+    "data": "https://litlfred.github.io/notebooks/ontology/data#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dct": "http://purl.org/dc/terms/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "library": "https://litlfred.github.io/notebooks/ontology/library#",
+    
+    "input": "@type",
+    "output": "@type", 
+    "widget": "@type",
+    
+    "conformsTo": {
+      "@id": "dct:conformsTo",
+      "@type": "@id"
+    },
+    "value": {
+      "@id": "prov:value"
+    }
+  },
+  "@id": "https://litlfred.github.io/notebooks/libraries/core/",
+  "@type": ["prov:Collection", "library:WidgetLibrary"],
+  "dct:title": "Core Widget Library",
+  "dct:description": "Base widgets and common functionality for the widget framework",
+  "dct:version": "1.0.0",
+  "widgets": {
+    "sticky-note": {
+      "@id": "sticky-note",
+      "@type": "library:WidgetDefinition",
+      "name": "Sticky Note",
+      "description": "Simple markdown note widget - the most basic widget example",
+      "category": "content",
+      "icon": "📝",
+      "input_schema": "sticky-note/input.schema.json",
+      "output_schema": "sticky-note/output.schema.json",
+      "widget_schema": "sticky-note/widget.schema.json",
+      "python_script": "sticky_note.py"
+    }
+  },
+  "common": {
+    "metadata_schema": "common/metadata.schema.json",
+    "execution_result_schema": "common/execution-result.schema.json"
+  }
+}

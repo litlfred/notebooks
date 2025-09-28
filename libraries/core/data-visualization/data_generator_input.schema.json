@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input.schema.json",
+  "title": "Data Generator Input Schema", 
+  "description": "Input parameters for synthetic data generation",
+  "type": "object",
+  "properties": {
+    "generator_type": {
+      "type": "string",
+      "enum": ["random", "linear", "sinusoidal", "polynomial"],
+      "default": "random",
+      "description": "Type of data to generate"
+    },
+    "sample_size": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 10000,
+      "default": 100,
+      "description": "Number of data points to generate"
+    },
+    "parameters": {
+      "type": "object",
+      "description": "Generator-specific parameters",
+      "default": {}
+    }
+  },
+  "required": ["generator_type", "sample_size"],
+  "additionalProperties": true
+}
