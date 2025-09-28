@@ -11,7 +11,7 @@ from base_widget import WidgetExecutor
 from typing import Dict, Any
 from datetime import datetime
 
-class WeierstrassFivePanelWidget(WidgetExecutor):
+class PQTorusWeierstrassFivePanelWidget(WidgetExecutor):
     """Complete Weierstrass ℘ function analysis with five-panel visualization"""
     
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:

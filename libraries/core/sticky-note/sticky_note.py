@@ -16,6 +16,18 @@ class StickyNoteWidget(WidgetExecutor):
     Output: rendered HTML 
     """
     
+    # Override input/output variable declarations
+    input_variables = {
+        'content': '# New Sticky Note\n\nClick edit to add your **markdown** content...',
+        'show_note': True
+    }
+    
+    output_variables = {
+        'success': True,
+        'rendered_html': '',
+        'metadata': {}
+    }
+    
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
         """Execute the sticky note widget"""
         content = validated_input.get('content', '')

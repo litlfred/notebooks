@@ -11,7 +11,7 @@ from base_widget import WidgetExecutor
 from typing import Dict, Any
 from datetime import datetime
 
-class WeierstrassContoursWidget(WidgetExecutor):
+class PQTorusPQTorusWeierstrassContoursWidget(WidgetExecutor):
     """Topographic field contour mapping for Weierstrass ℘ function"""
     
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -46,6 +46,6 @@ class WeierstrassContoursWidget(WidgetExecutor):
             }
         }
 
-def create_weierstrass_contours_widget(widget_schema: Dict[str, Any]) -> WeierstrassContoursWidget:
+def create_weierstrass_contours_widget(widget_schema: Dict[str, Any]) -> PQTorusWeierstrassContoursWidget:
     """Factory function to create weierstrass contours widget instance"""
-    return WeierstrassContoursWidget(widget_schema)
+    return PQTorusWeierstrassContoursWidget(widget_schema)

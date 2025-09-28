@@ -11,7 +11,7 @@ from base_widget import WidgetExecutor
 from typing import Dict, Any
 from datetime import datetime
 
-class WeierstrassTrajectoriesWidget(WidgetExecutor):
+class PQTorusPQTorusWeierstrassTrajectoriesWidget(WidgetExecutor):
     """Particle trajectory analysis for Weierstrass ℘ function dynamics"""
     
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -46,6 +46,6 @@ class WeierstrassTrajectoriesWidget(WidgetExecutor):
             }
         }
 
-def create_weierstrass_trajectories_widget(widget_schema: Dict[str, Any]) -> WeierstrassTrajectoriesWidget:
+def create_weierstrass_trajectories_widget(widget_schema: Dict[str, Any]) -> PQTorusWeierstrassTrajectoriesWidget:
     """Factory function to create weierstrass trajectories widget instance"""
-    return WeierstrassTrajectoriesWidget(widget_schema)
+    return PQTorusWeierstrassTrajectoriesWidget(widget_schema)

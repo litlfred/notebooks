@@ -12,6 +12,10 @@ from typing import Dict, Any, List, Optional
 class WidgetExecutor:
     """Base class for executing schema-based widgets with multi-action support"""
     
+    # Default empty input/output variable declarations - can be overridden by subclasses
+    input_variables: Dict[str, Any] = {}
+    output_variables: Dict[str, Any] = {}
+    
     def __init__(self, widget_schema: Dict[str, Any]):
         self.schema = widget_schema
         self.id = widget_schema['id']
@@ -215,10 +219,22 @@ class WidgetExecutor:
     
     def _execute_action_impl(self, validated_input: Dict[str, Any], action_slug: str, action_config: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Abstract method for action-specific execution logic.
-        Subclasses can override this method for custom action handling.
+        Execute action by calling corresponding class method.
+        Action methods should be named 'action_<action_slug>' and take validated_input as parameter.
+        Each method is responsible for doing its own validation before executing.
         """
-        # Default implementation calls the main execute method
+        # Try to find a method named 'action_<action_slug>'
+        method_name = f'action_{action_slug.replace("-", "_")}'
+        
+        if hasattr(self, method_name):
+            action_method = getattr(self, method_name)
+            if callable(action_method):
+                # Call the action method with validated input
+                result = action_method(validated_input)
+                result['action'] = action_slug
+                return result
+        
+        # Fallback to default implementation if no specific method found
         result = self._execute_impl(validated_input)
         result['action'] = action_slug
         return result

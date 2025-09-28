@@ -11,7 +11,7 @@ from base_widget import WidgetExecutor
 from typing import Dict, Any
 from datetime import datetime
 
-class WeierstrassThreePanelWidget(WidgetExecutor):
+class PQTorusPQTorusWeierstrassThreePanelWidget(WidgetExecutor):
     """Three-panel ℘(z), Re(℘′(z)), Im(℘′(z)) analysis using PQ-Torus lattice"""
     
     def _execute_impl(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -45,6 +45,6 @@ class WeierstrassThreePanelWidget(WidgetExecutor):
             }
         }
 
-def create_weierstrass_three_panel_widget(widget_schema: Dict[str, Any]) -> WeierstrassThreePanelWidget:
+def create_weierstrass_three_panel_widget(widget_schema: Dict[str, Any]) -> PQTorusWeierstrassThreePanelWidget:
     """Factory function to create weierstrass three-panel widget instance"""
-    return WeierstrassThreePanelWidget(widget_schema)
+    return PQTorusWeierstrassThreePanelWidget(widget_schema)
