@@ -22,6 +22,11 @@ class WidgetExecutor:
         self.name = widget_schema['name']
         self.actions = widget_schema.get('actions', {})
         
+        # Initialize parameter flow tracking
+        self.incoming_arrows = []
+        self.outgoing_arrows = []
+        self.parameter_flow_processed = False
+        
         # Handle both old and new schema formats
         if 'input_schemas' in widget_schema:
             # New format with multiple schemas
@@ -34,6 +39,93 @@ class WidgetExecutor:
             # Old format with single schema
             self.input_schema = widget_schema.get('input_schema', {})
             self.output_schema = widget_schema.get('output_schema', {})
+            
+        # Initialize input variables with defaults or empty values
+        self._initialize_input_variables()
+        
+    def _initialize_input_variables(self):
+        """Initialize input parameters with empty or default values"""
+        if hasattr(self, 'input_variables') and isinstance(self.input_variables, dict):
+            for param_name, default_value in self.input_variables.items():
+                if not hasattr(self, param_name):
+                    setattr(self, param_name, default_value)
+    
+    def add_incoming_arrow(self, arrow: 'WorkflowArrow'):
+        """Add an incoming parameter flow arrow to this widget"""
+        self.incoming_arrows.append(arrow)
+    
+    def add_outgoing_arrow(self, arrow: 'WorkflowArrow'):
+        """Add an outgoing parameter flow arrow from this widget"""
+        self.outgoing_arrows.append(arrow)
+    
+    def process_parameter_flow(self, widget_registry: Dict[str, 'WidgetExecutor']):
+        """Process all incoming parameter flow arrows to populate input variables."""
+        if self.parameter_flow_processed:
+            return
+        
+        for arrow in self.incoming_arrows:
+            try:
+                # Find source widget instance
+                source_widget = widget_registry.get(arrow.source_widget)
+                if not source_widget:
+                    print(f"Warning: Source widget {arrow.source_widget} not found in registry")
+                    continue
+                
+                # Execute the arrow connection
+                connection_result = arrow.execute_connection(source_widget, self)
+                
+                if not connection_result['success']:
+                    print(f"Warning: Arrow connection failed: {connection_result.get('error_message')}")
+                    continue
+                    
+            except Exception as e:
+                print(f"Error processing parameter flow arrow: {e}")
+                continue
+        
+        self.parameter_flow_processed = True
+    
+    def validate_inputs(self) -> Dict[str, Any]:
+        """Validate current input variables against input schema"""
+        if not self.input_schema:
+            return {"valid": True, "message": "No input schema defined"}
+        
+        try:
+            # Basic validation - in practice would use jsonschema library
+            validation_errors = []
+            
+            if 'required' in self.input_schema:
+                for required_field in self.input_schema['required']:
+                    if not hasattr(self, required_field) or getattr(self, required_field) is None:
+                        validation_errors.append(f"Required field '{required_field}' is missing")
+            
+            return {
+                "valid": len(validation_errors) == 0,
+                "errors": validation_errors,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            return {
+                "valid": False,
+                "errors": [f"Validation error: {str(e)}"],
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def get_class_name_mapping(self) -> Dict[str, str]:
+        """Get mapping between Python class names and JSON-LD identifiers."""
+        class_name = self.__class__.__name__
+        
+        # Convert PythonCamelCase to kebab-case for JSON-LD
+        kebab_case = re.sub('([a-z0-9])([A-Z])', r'\1-\2', class_name).lower()
+        
+        # Remove common suffixes
+        kebab_case = kebab_case.replace('-widget', '').replace('-executor', '')
+        
+        return {
+            "python_class": class_name,
+            "json_ld_id": kebab_case,
+            "schema_reference": f"{kebab_case}.schema.json"
+        }
             self.input_schemas = [self.input_schema] if self.input_schema else []
             self.output_schemas = [self.output_schema] if self.output_schema else []
     
