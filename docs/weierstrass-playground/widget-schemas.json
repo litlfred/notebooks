@@ -1,0 +1,430 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "widget-schemas": {
+    "workflow-arrow": {
+      "id": "workflow-arrow",
+      "name": "Workflow Arrow",
+      "description": "Connection arrow between widgets with optional ETL transformation",
+      "category": "utility",
+      "icon": "↗️",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/arrow/output.schema.json"
+      ],
+      "python_script": "../libraries/core/arrow/arrow.py",
+      "actions": {
+        "create-arrow": {
+          "name": "Create Arrow",
+          "description": "Create connection arrow with specified configuration"
+        },
+        "execute-connection": {
+          "name": "Execute Connection",
+          "description": "Execute parameter flow through the arrow connection"
+        }
+      }
+    },
+    "sticky-note": {
+      "id": "sticky-note",
+      "name": "Sticky Note", 
+      "description": "Simple markdown note widget - the most basic widget example",
+      "category": "content",
+      "icon": "📝",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
+      ],
+      "python_script": "sticky-note/sticky_note.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["markdown", "content", "note"],
+      "actions": {
+        "render-markdown": {
+          "slug": "render-markdown",
+          "names": {
+            "en": "Render Markdown",
+            "es": "Renderizar Markdown",
+            "fr": "Rendre Markdown",
+            "de": "Markdown Rendern"
+          },
+          "icon": "📝",
+          "description": {
+            "en": "Render markdown content with LaTeX support",
+            "es": "Renderizar contenido markdown con soporte LaTeX"
+          },
+          "menu_category": "display",
+          "output_format": "html",
+          "validation_required": true
+        },
+        "export-pdf": {
+          "slug": "export-pdf",
+          "names": {
+            "en": "Export PDF",
+            "es": "Exportar PDF", 
+            "fr": "Exporter PDF",
+            "de": "PDF Exportieren"
+          },
+          "icon": "📄",
+          "description": {
+            "en": "Export note as PDF document"
+          },
+          "menu_category": "export",
+          "output_format": "pdf",
+          "validation_required": true
+        },
+        "export-html": {
+          "slug": "export-html",
+          "names": {
+            "en": "Export HTML",
+            "es": "Exportar HTML",
+            "fr": "Exporter HTML", 
+            "de": "HTML Exportieren"
+          },
+          "icon": "🌐",
+          "description": {
+            "en": "Export note as standalone HTML file"
+          },
+          "menu_category": "export",
+          "output_format": "html",
+          "validation_required": true
+        }
+      }
+    },
+
+    "markdown-note": {
+      "id": "markdown-note",
+      "name": "Markdown Note",
+      "description": "Rich text widget with LaTeX math and variable substitution support",
+      "category": "content",
+      "icon": "📝",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
+      ],
+      "python_script": "sticky-note/sticky_note.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["markdown", "latex", "content"]
+    },
+    
+    "python-code": {
+      "id": "python-code",
+      "name": "Python Code",
+      "description": "Executable Python code widget with output capture",
+      "category": "computation",
+      "icon": "🐍",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/python-code/output.schema.json"
+      ],
+      "python_script": "python-code/python_code.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["python", "code", "computation"]
+    },
+    
+    "wp-two-panel": {
+      "id": "wp-two-panel",
+      "name": "℘ Two-Panel Plot",
+      "description": "Standard ℘(z) and ℘′(z) visualization with color mapping",
+      "category": "visualization",
+      "icon": "∞",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/input.schema.json",
+        {
+          "type": "object",
+          "properties": {
+            "contours": {"type": "integer", "minimum": 0, "maximum": 30, "default": 10},
+            "saturation": {"type": "number", "minimum": 0.1, "maximum": 1.0, "default": 0.3}
+          }
+        }
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json"
+      ],
+      "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
+      "version": "1.0.0",
+      "author": "Widget Framework", 
+      "tags": ["weierstrass", "mathematics", "visualization"],
+      "actions": {
+        "render-png": {
+          "slug": "render-png",
+          "names": {
+            "en": "Render PNG",
+            "es": "Renderizar PNG",
+            "fr": "Rendre PNG",
+            "de": "PNG Rendern"
+          },
+          "icon": "🖼️",
+          "description": {
+            "en": "Generate high-quality PNG visualization of ℘-function",
+            "es": "Generar visualización PNG de alta calidad de función ℘"
+          },
+          "menu_category": "render",
+          "output_format": "png",
+          "validation_required": true
+        },
+        "render-svg": {
+          "slug": "render-svg",
+          "names": {
+            "en": "Render SVG",
+            "es": "Renderizar SVG",
+            "fr": "Rendre SVG",
+            "de": "SVG Rendern"
+          },
+          "icon": "📐",
+          "description": {
+            "en": "Generate scalable SVG visualization of ℘-function"
+          },
+          "menu_category": "render",
+          "output_format": "svg",
+          "validation_required": true
+        },
+        "export-pdf": {
+          "slug": "export-pdf",
+          "names": {
+            "en": "Export PDF",
+            "es": "Exportar PDF",
+            "fr": "Exporter PDF",
+            "de": "PDF Exportieren"
+          },
+          "icon": "📄",
+          "description": {
+            "en": "Export publication-ready PDF of visualization"
+          },
+          "menu_category": "export", 
+          "output_format": "pdf",
+          "validation_required": true
+        },
+        "analyze-properties": {
+          "slug": "analyze-properties",
+          "names": {
+            "en": "Analyze Properties",
+            "es": "Analizar Propiedades",
+            "fr": "Analyser Propriétés",
+            "de": "Eigenschaften Analysieren"
+          },
+          "icon": "🔍",
+          "description": {
+            "en": "Mathematical analysis of ℘-function properties"
+          },
+          "menu_category": "analysis",
+          "output_format": "json",
+          "validation_required": true
+        }
+      }
+    },
+
+    "data-plot": {
+      "id": "data-plot",
+      "name": "Data Plot",
+      "description": "2D plotting widget for data visualization", 
+      "category": "visualization",
+      "icon": "📊",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
+      ],
+      "python_script": "data-visualization/data_visualization.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["data", "plot", "visualization"]
+    },
+
+    "data-generator": {
+      "id": "data-generator",
+      "name": "Data Generator",
+      "description": "Generate synthetic datasets for analysis",
+      "category": "data",
+      "icon": "📋",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
+      ],
+      "python_script": "data-visualization/data_visualization.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["data", "generator", "synthetic"]
+    },
+
+    "pq-torus": {
+      "id": "pq-torus",
+      "name": "PQ-Torus",
+      "description": "Defines torus T = ℂ / L where L = ℤp + ℤqi with prime lattice parameters - umbrella widget",
+      "category": "computation",
+      "icon": "🔴",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json"
+      ],
+      "python_script": "pq_torus.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["mathematics", "torus", "lattice", "prime", "weierstrass-compatible"],
+      "sub_widgets": {
+        "weierstrass-two-panel": {
+          "id": "pq-torus.weierstrass.two-panel",
+          "name": "Weierstrass ℘ Two-Panel Plot",
+          "description": "℘(z) and ℘′(z) two-panel visualization using PQ-Torus lattice",
+          "category": "visualization",
+          "icon": "∞",
+          "parent": "pq-torus",
+          "input_schemas": [
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/input.schema.json"
+          ],
+          "output_schemas": [
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/output.schema.json"
+          ],
+          "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
+          "actions": {
+            "render-two-panel": {
+              "slug": "render-two-panel",
+              "names": {
+                "en": "Render Two-Panel",
+                "es": "Renderizar Dos Paneles",
+                "fr": "Rendre Deux Panneaux",
+                "de": "Zwei-Panel Rendern"
+              },
+              "icon": "∞",
+              "description": {
+                "en": "Generate ℘(z) and ℘′(z) two-panel visualization"
+              },
+              "menu_category": "render",
+              "output_format": "png",
+              "validation_required": true
+            },
+            "export-svg": {
+              "slug": "export-svg",
+              "names": {
+                "en": "Export SVG",
+                "es": "Exportar SVG",
+                "fr": "Exporter SVG",
+                "de": "SVG Exportieren"
+              },
+              "icon": "📐",
+              "description": {
+                "en": "Export two-panel plot as scalable SVG"
+              },
+              "menu_category": "export",
+              "output_format": "svg",
+              "validation_required": true
+            }
+          }
+        },
+        "weierstrass-five-panel": {
+          "id": "pq-torus.weierstrass.five-panel",
+          "name": "Weierstrass ℘ Five-Panel Analysis",
+          "description": "Complete Weierstrass ℘ function analysis with derivatives and properties",
+          "category": "visualization",
+          "icon": "🔍",
+          "parent": "pq-torus",
+          "input_schemas": [
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/input.schema.json"
+          ],
+          "output_schemas": [
+            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json"
+          ],
+          "python_script": "weierstrass/five-panel/weierstrass_five_panel.py",
+          "actions": {
+            "render-five-panel": {
+              "slug": "render-five-panel",
+              "names": {
+                "en": "Render Five-Panel Analysis",
+                "es": "Renderizar Análisis Cinco Paneles",
+                "fr": "Rendre Analyse Cinq Panneaux",
+                "de": "Fünf-Panel Analyse Rendern"
+              },
+              "icon": "🔍",
+              "description": {
+                "en": "Generate complete five-panel mathematical analysis"
+              },
+              "menu_category": "analysis",
+              "output_format": "png",
+              "validation_required": true
+            },
+            "export-analysis": {
+              "slug": "export-analysis",
+              "names": {
+                "en": "Export Analysis",
+                "es": "Exportar Análisis",
+                "fr": "Exporter Analyse",
+                "de": "Analyse Exportieren"
+              },
+              "icon": "📄",
+              "description": {
+                "en": "Export mathematical analysis as PDF report"
+              },
+              "menu_category": "export",
+              "output_format": "pdf",
+              "validation_required": true
+            }
+          }
+        }
+      },
+      "actions": {
+        "compute-lattice": {
+          "slug": "compute-lattice",
+          "names": {
+            "en": "Compute Lattice",
+            "es": "Calcular Retícula",
+            "fr": "Calculer Treillis",
+            "de": "Gitter Berechnen"
+          },
+          "icon": "🔢",
+          "description": {
+            "en": "Compute rectangular prime lattice parameters and validation",
+            "es": "Calcular parámetros de retícula prima rectangular y validación"
+          },
+          "menu_category": "computation",
+          "output_format": "json",
+          "validation_required": true
+        },
+        "export-latex": {
+          "slug": "export-latex",
+          "names": {
+            "en": "Export LaTeX",
+            "es": "Exportar LaTeX",
+            "fr": "Exporter LaTeX",
+            "de": "LaTeX Exportieren"
+          },
+          "icon": "📐",
+          "description": {
+            "en": "Export torus definition as LaTeX mathematical notation"
+          },
+          "menu_category": "export",
+          "output_format": "markdown",
+          "validation_required": true
+        },
+        "generate-summary": {
+          "slug": "generate-summary", 
+          "names": {
+            "en": "Generate Summary",
+            "es": "Generar Resumen",
+            "fr": "Générer Résumé",
+            "de": "Zusammenfassung Generieren"
+          },
+          "icon": "📋",
+          "description": {
+            "en": "Generate mathematical summary of torus properties"
+          },
+          "menu_category": "analysis",
+          "output_format": "html",
+          "validation_required": true
+        }
+      }
+    }
+  }
+}

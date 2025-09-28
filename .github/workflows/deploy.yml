@@ -8,28 +8,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
-      environment:
-        description: '🌍 Choose deployment environment'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-        - production
-        - staging
-      deployment_type:
-        description: '📦 Deployment type'
-        required: true
-        default: 'full'
-        type: choice
-        options:
-        - full
-        - hotfix
-        - preview
-      notify_pr:
-        description: '📢 Notify associated PR (if any)'
+      deploy_branch:
+        description: '🌿 Branch to deploy from (defaults to current branch)'
         required: false
-        default: true
-        type: boolean
+        default: ''
+        type: string
       
   # Runs when PR is approved (for review deployments)
   pull_request_review:
@@ -40,6 +23,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: write
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
@@ -51,14 +35,81 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
+    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')))
     
     steps:
     - name: Checkout
       uses: actions/checkout@v4
     
+    - name: Display deployment info
+      run: |
+        echo "🚀 Deployment Information"
+        echo "========================"
+        echo "📦 Repository: ${{ github.repository }}"
+        echo "🌿 Branch: ${{ github.ref_name }}"
+        echo "⚡ Trigger: ${{ github.event_name }}"
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          echo "👤 Triggered by: ${{ github.actor }}"
+          echo "ℹ️  Manual deployment from branch: ${{ github.ref_name }}"
+        fi
+        echo "========================"
+    
+    - name: Post deployment start comment
+      if: github.event.pull_request.number != null || github.event_name == 'pull_request_review'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const prNumber = context.payload.pull_request?.number || context.payload.review?.pull_request?.number;
+          if (!prNumber) {
+            console.log('No PR number found, skipping comment');
+            return;
+          }
+          
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: prNumber,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🚀 **Deployment Status**')
+          );
+          
+          const body = `🚀 **Deployment Status**
+          
+          ⏳ **Deployment in progress...**
+          
+          📦 Repository: \`${{ github.repository }}\`
+          🌿 Branch: \`${{ github.ref_name }}\`
+          ⚡ Trigger: \`${{ github.event_name }}\`
+          👤 Started by: @${{ github.actor }}
+          🕐 Started at: ${new Date().toUTCString()}
+          
+          ---
+          *This comment will be updated with deployment results.*`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+            core.setOutput('comment_id', botComment.id);
+          } else {
+            const { data: newComment } = await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: body
+            });
+            core.setOutput('comment_id', newComment.id);
+          }
+          core.setOutput('pr_number', prNumber);
+    
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
@@ -100,7 +151,7 @@ jobs:
         echo "✓ Static files validated"
     
     - name: Setup Pages
-      uses: actions/configure-pages@v3
+      uses: actions/configure-pages@v5
       
     - name: Build with Jekyll
       uses: actions/jekyll-build-pages@v1
@@ -109,7 +160,7 @@ jobs:
         destination: ./_site
     
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v2
+      uses: actions/upload-pages-artifact@v3
 
   # Deployment job
   deploy:
@@ -121,10 +172,130 @@ jobs:
     steps:
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v2
+      uses: actions/deploy-pages@v4
     
     - name: Update deployment status
       run: |
         echo "🚀 Deployment completed successfully!"
         echo "📱 Site URL: ${{ steps.deployment.outputs.page_url }}"
         echo "⏰ Deployed at: $(date)"
+    
+    - name: Update PR comment with success
+      if: always() && (github.event.pull_request.number != null || github.event_name == 'pull_request_review') && needs.build.result == 'success' && steps.deployment.conclusion == 'success'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const prNumber = context.payload.pull_request?.number || context.payload.review?.pull_request?.number;
+          if (!prNumber) {
+            console.log('No PR number found, skipping comment update');
+            return;
+          }
+          
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: prNumber,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🚀 **Deployment Status**')
+          );
+          
+          const deploymentUrl = '${{ steps.deployment.outputs.page_url }}';
+          
+          const body = `🚀 **Deployment Status**
+          
+          ✅ **Deployment Successful!** 
+          
+          📦 Repository: \`${{ github.repository }}\`
+          🌿 Branch: \`${{ github.ref_name }}\`
+          ⚡ Trigger: \`${{ github.event_name }}\`
+          👤 Started by: @${{ github.actor }}
+          🕐 Completed at: ${new Date().toUTCString()}
+          
+          ## 🎉 Preview your deployment:
+          
+          <div align="center">
+          
+          [![🌐 View Live Preview](https://img.shields.io/badge/🌐_View_Live_Preview-brightgreen?style=for-the-badge&logo=github-pages)](${deploymentUrl})
+          
+          </div>
+          
+          ---
+          📱 **Direct URL**: ${deploymentUrl}`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: body
+            });
+          }
+    
+    - name: Update PR comment with failure
+      if: always() && (github.event.pull_request.number != null || github.event_name == 'pull_request_review') && (needs.build.result == 'failure' || steps.deployment.conclusion == 'failure')
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const prNumber = context.payload.pull_request?.number || context.payload.review?.pull_request?.number;
+          if (!prNumber) {
+            console.log('No PR number found, skipping comment update');
+            return;
+          }
+          
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: prNumber,
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('🚀 **Deployment Status**')
+          );
+          
+          const body = `🚀 **Deployment Status**
+          
+          ❌ **Deployment Failed**
+          
+          📦 Repository: \`${{ github.repository }}\`
+          🌿 Branch: \`${{ github.ref_name }}\`
+          ⚡ Trigger: \`${{ github.event_name }}\`
+          👤 Started by: @${{ github.actor }}
+          🕐 Failed at: ${new Date().toUTCString()}
+          
+          ## 🔍 Check the logs for details:
+          
+          <div align="center">
+          
+          [![📋 View Deployment Logs](https://img.shields.io/badge/📋_View_Deployment_Logs-red?style=for-the-badge&logo=github-actions)](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          
+          </div>
+          
+          ---
+          Please check the workflow logs above for error details and try again once issues are resolved.`;
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: body
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: body
+            });
+          }

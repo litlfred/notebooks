@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#", 
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json",
+  "title": "Python Code Input Schema",
+  "description": "Input parameters for Python code execution widget",
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "string",
+      "description": "Python code to execute",
+      "default": "# Enter your Python code here\nprint('Hello, World!')"
+    },
+    "imports": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Required import statements",
+      "default": []
+    },
+    "variables": {
+      "type": "object",
+      "description": "Input variables for code execution",
+      "default": {}
+    }
+  },
+  "required": ["code"],
+  "additionalProperties": true
+}

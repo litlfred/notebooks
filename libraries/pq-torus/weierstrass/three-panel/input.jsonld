@@ -1,0 +1,12 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+  ],
+  "@type": ["prov:Entity", "weier:three-panel-input"],
+  "dct:conformsTo": "./input.schema.json", 
+  "@id": "https://litlfred.github.io/notebooks/schema/pq-torus/weierstrass/three-panel/input.jsonld",
+  "dct:title": "Weierstrass Three-Panel Function Input",
+  "dct:description": "JSON-LD context for Weierstrass ℘(z), Re(℘′(z)), Im(℘′(z)) three-panel input parameters",
+  "prov:wasDerivedFrom": "../../widget.jsonld"
+}

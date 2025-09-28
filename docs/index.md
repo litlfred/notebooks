@@ -10,29 +10,47 @@ Welcome to an interactive collection of **mathematical notebooks** that run enti
 
 ## Available Notebooks
 
-### [℘ Weierstrass ℘ Playground](/weierstrass-playground)
+### [℘ Weierstrass Mathematical Workspace](weierstrass-playground/)
 
-Interactive visualization of the **Weierstrass ℘ function** with particle trajectory dynamics. Explore elliptic functions, complex analysis, and differential equations in real-time.
+**Revolutionary Miro-like mathematical workspace** for exploring the Weierstrass ℘ function with drag-and-drop widgets, schema-based configurations, and computational pipelines.
 
 **Features:**
-- Complex field visualization with HSV color mapping
-- Real-time particle trajectory integration
-- RK4 numerical integration with blow-up detection  
-- Dynamic parameter adjustment
-- Mobile responsive interface
+- **🧩 Widget-Based Interface**: Drag mathematical components onto a collaborative board
+- **∞ Specialized Visualizations**: 7+ different Weierstrass ℘ visualization types
+- **🔗 Widget Connections**: Connect outputs to inputs for computational pipelines  
+- **📝 Rich Content**: Markdown with LaTeX, Python code execution, data analysis
+- **💾 Session Management**: Save/load complete workspace configurations
+- **📱 Responsive Design**: Desktop and mobile layouts with touch support
+- **🌙 Dark Mode Default**: Professional dark theme with light mode option
 
-**Topics:** Complex Analysis • Elliptic Functions • Differential Equations • Numerical Integration
+**Widget Library:**
+- **∞ Two-Panel Plot**: ℘(z) and ℘′(z) with color mapping
+- **∞ Three-Panel Analysis**: Grayscale ℘(z), Re(℘′(z)), Im(℘′(z))  
+- **∞ Five-Panel Complete**: Full derivative and magnitude analysis
+- **🎯 Trajectory Integration**: Particle dynamics in ℘ potential field
+- **🔗 Lattice Analysis**: Systematic lattice point trajectories
+- **⚪ Pole Structure**: Singularity and residue analysis
+- **📈 Contour Mapping**: Topographic field visualization
+- **📝 Markdown Notes**: Rich text with variable substitution
+- **🐍 Python Execution**: Interactive code cells with output
+- **📊 Data Visualization**: Configurable 2D plotting widgets
+- **📋 Data Generation**: Synthetic datasets for analysis
+
+**Topics:** Complex Analysis • Elliptic Functions • Interactive Workspaces • Computational Notebooks
 
 ---
 
 ## About This Platform
 
-This platform transforms mathematical concepts into **interactive experiences** that run entirely in your web browser. Each notebook combines:
+This platform transforms mathematical concepts into **interactive collaborative workspaces** that run entirely in your web browser. Each notebook combines:
 
-- **Rich mathematical content** with proper documentation
-- **Interactive visualizations** powered by Python scientific libraries
-- **Zero installation requirements** - just click and explore
-- **Educational accessibility** for students and researchers worldwide
+- **🧩 Widget-Based Architecture** with drag-and-drop mathematical components
+- **📊 Interactive Visualizations** powered by Python scientific libraries in WebAssembly
+- **🔗 Schema-Driven Connections** for building computational pipelines
+- **💾 Session Persistence** with JSON-based configuration management
+- **📱 Responsive Design** optimized for desktop, tablet, and mobile
+- **🌙 Professional Dark Mode** with clean, modern interface design
+- **⚡ Zero Installation** - just click and start building mathematical workspaces
 
 ## Technology
 

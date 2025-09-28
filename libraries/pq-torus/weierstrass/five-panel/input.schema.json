@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/input.schema.json",
+  "title": "Weierstrass Five-Panel Function Input Schema",
+  "description": "Input parameters for complete Weierstrass ℘ function analysis widget (inherits from PQ-Torus)",
+  "type": "object",
+  "properties": {
+    "p": {
+      "type": "integer",
+      "description": "First prime integer p for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 11,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    },
+    "q": {
+      "type": "integer",
+      "description": "Second prime integer q for rectangular lattice L = ℤp + ℤqi",
+      "minimum": 2,
+      "maximum": 100,
+      "default": 5,
+      "examples": [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+    },
+    "N": {
+      "type": "integer",
+      "description": "Truncation level for five-panel Weierstrass computation",
+      "minimum": 0,
+      "maximum": 6,
+      "default": 3
+    },
+    "analysis_depth": {
+      "type": "integer",
+      "description": "Depth of mathematical analysis for five-panel view",
+      "default": 2,
+      "minimum": 1,
+      "maximum": 5
+    },
+    "derivative_order": {
+      "type": "integer",
+      "description": "Maximum derivative order to compute",
+      "default": 2,
+      "minimum": 1,
+      "maximum": 4
+    },
+    "grid_size": {
+      "type": "object",
+      "properties": {
+        "x": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100},
+        "y": {"type": "integer", "minimum": 50, "maximum": 300, "default": 100}
+      },
+      "required": ["x", "y"]
+    }
+  },
+  "required": ["p", "q"]
+}

@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@v4
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
@@ -119,6 +119,29 @@ print('\n🎉 All mathematical tests passed!')
         test -f docs/weierstrass-playground/style.css
         test -d docs/weierstrass-playground/python/weierstrass_playground
         
+        # Validate widget framework schema files
+        echo "🧩 Validating widget framework schemas..."
+        test -d docs/schema
+        test -f docs/schema/README.md
+        test -f docs/schema/ontology/context.jsonld
+        test -d docs/schema/weierstrass
+        test -d docs/schema/pq-torus
+        test -d docs/schema/sticky-note
+        test -d docs/schema/common
+        
+        # Check widget schema structure for each widget
+        for widget in weierstrass pq-torus sticky-note; do
+          echo "✅ Validating $widget widget schemas..."
+          test -f "docs/schema/$widget/input.schema.json"
+          test -f "docs/schema/$widget/input.jsonld" 
+          test -f "docs/schema/$widget/output.schema.json"
+          test -f "docs/schema/$widget/output.jsonld"
+          test -f "docs/schema/$widget/widget.schema.json"
+          test -f "docs/schema/$widget/widget.jsonld"
+        done
+        
+        echo "✅ Widget framework structure validated!"
+        
         # Check main index markdown structure
         echo "✅ Validating main index markdown structure..."
         grep -q "Mathematical Notebooks" docs/index.md
@@ -155,6 +178,65 @@ print('\n🎉 All mathematical tests passed!')
         echo "🔍 Checking JavaScript syntax..."
         node -c docs/weierstrass-playground/weierstrass-app.js
         echo "✅ JavaScript syntax is valid"
+    
+    - name: Validate JSON Schema files
+      run: |
+        echo "🔍 Validating JSON Schema and JSON-LD files..."
+        
+        # Install Python for JSON validation
+        python3 -c "
+import json
+import os
+
+def validate_json_files(directory):
+    errors = []
+    success_count = 0
+    
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.endswith('.json') or file.endswith('.jsonld'):
+                filepath = os.path.join(root, file)
+                try:
+                    with open(filepath, 'r') as f:
+                        data = json.load(f)
+                    print(f'✅ {filepath} - Valid JSON')
+                    success_count += 1
+                    
+                    # Additional schema validation
+                    if 'schema' in file and 'input' in file:
+                        required_fields = ['\$schema', '\$id', 'title', 'type', 'properties']
+                        for field in required_fields:
+                            if field not in data:
+                                print(f'⚠️  {filepath} - Missing recommended field: {field}')
+                    
+                    if file.endswith('.jsonld'):
+                        required_jsonld_fields = ['@context', '@type']
+                        for field in required_jsonld_fields:
+                            if field not in data:
+                                errors.append(f'{filepath} - Missing required JSON-LD field: {field}')
+                                
+                except json.JSONDecodeError as e:
+                    error_msg = f'{filepath} - JSON Error: {e}'
+                    print(f'❌ {error_msg}')
+                    errors.append(error_msg)
+                except Exception as e:
+                    error_msg = f'{filepath} - Error: {e}'
+                    print(f'❌ {error_msg}') 
+                    errors.append(error_msg)
+    
+    print(f'\\nValidation Results: {success_count} valid JSON files')
+    if errors:
+        print(f'❌ Errors found: {len(errors)}')
+        for error in errors:
+            print(f'  {error}')
+        exit(1)
+    else:
+        print('✅ All JSON/JSON-LD files are valid!')
+
+validate_json_files('docs/schema')
+        "
+        
+        echo "🎉 JSON Schema validation completed!"
 
   test-performance:
     runs-on: ubuntu-latest
@@ -164,7 +246,7 @@ print('\n🎉 All mathematical tests passed!')
     - uses: actions/checkout@v4
     
     - name: Setup Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     

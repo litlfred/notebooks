@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output.schema.json",
+  "title": "Data Visualization Output Schema",
+  "description": "Generic output schema for data visualization widgets",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the operation was successful"
+    },
+    "plot_data": {
+      "type": "object",
+      "description": "Generated visualization data",
+      "properties": {
+        "image_base64": {"type": "string"},
+        "width": {"type": "integer"},
+        "height": {"type": "integer"},
+        "format": {"type": "string", "enum": ["png", "svg", "jpeg"]}
+      }
+    },
+    "data": {
+      "type": "array",
+      "description": "Generated or processed data",
+      "items": {
+        "type": "object"
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "description": "Data analysis summary"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Visualization metadata"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Processing time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": true
+}

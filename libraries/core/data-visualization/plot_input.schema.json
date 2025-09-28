@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input.schema.json",
+  "title": "Data Plot Input Schema",
+  "description": "Input parameters for data plotting widget",
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "description": "Input data arrays for plotting",
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": {"type": "array", "items": {"type": "number"}},
+          "y": {"type": "array", "items": {"type": "number"}}
+        }
+      }
+    },
+    "plot_type": {
+      "type": "string",
+      "enum": ["scatter", "line", "histogram", "bar", "area"],
+      "default": "line",
+      "description": "Type of visualization"
+    },
+    "styling": {
+      "type": "object",
+      "description": "Plot styling options",
+      "properties": {
+        "title": {"type": "string"},
+        "xlabel": {"type": "string"},
+        "ylabel": {"type": "string"},
+        "colors": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  },
+  "required": ["data"],
+  "additionalProperties": true
+}

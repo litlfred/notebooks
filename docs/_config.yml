@@ -30,9 +30,10 @@ exclude:
   - "*.py"
   - weierstrass-playground/python/
   - DEVELOPMENT.md
-  - README.md
+  - "../README.md"  # Exclude root README
   - Gemfile
   - Gemfile.lock
+  - index.html.backup
 
 # Include files that would normally be excluded
 include:

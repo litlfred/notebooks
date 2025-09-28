@@ -1,0 +1,23 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+    {
+      "arrow": "https://litlfred.github.io/notebooks/libraries/core/arrow/",
+      "workflow": "https://litlfred.github.io/notebooks/vocab/workflow/",
+      "dct": "http://purl.org/dc/terms/",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+    }
+  ],
+  "@id": "https://litlfred.github.io/notebooks/libraries/core/arrow/input.jsonld",
+  "@type": ["prov:Entity", "arrow:input", "workflow:ConnectionDefinition"],
+  "dct:title": "Workflow Arrow Input Definition",
+  "dct:description": "JSON-LD context for defining connections between widgets with optional transformations",
+  "dct:conformsTo": "./input.schema.json",
+  "rdfs:comment": "Arrows represent the connections between widget outputs and inputs, supporting ETL transformations",
+  "workflow:connectionType": "parameter_flow",
+  "prov:wasGeneratedBy": {
+    "@type": "prov:Activity",
+    "prov:wasAssociatedWith": "arrow:ConnectionBuilder"
+  }
+}
