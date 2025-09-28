@@ -16,6 +16,24 @@ class WidgetExecutor:
     input_variables: Dict[str, Any] = {}
     output_variables: Dict[str, Any] = {}
     
+    # Hard-coded class name to JSON-LD ID mapping
+    _class_name_to_jsonld_id = {
+        'WidgetExecutor': 'base-widget',
+        'StickyNoteWidget': 'sticky-note',
+        'PythonCodeWidget': 'python-code', 
+        'DataVisualizationWidget': 'data-visualization',
+        'ArrowWidget': 'arrow',
+        'PQTorusWidget': 'pq-torus',
+        'PQTorusWeierstrassTwoPanelWidget': 'pq-torus.weierstrass.two-panel',
+        'PQTorusWeierstrassThreePanelWidget': 'pq-torus.weierstrass.three-panel',
+        'PQTorusWeierstrassFivePanelWidget': 'pq-torus.weierstrass.five-panel',
+        'PQTorusWeierstrassTrajectoriesWidget': 'pq-torus.weierstrass.trajectories',
+        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours'
+    }
+    
+    # Reverse mapping for JSON-LD ID to class name
+    _jsonld_id_to_class_name = {v: k for k, v in _class_name_to_jsonld_id.items()}
+    
     def __init__(self, widget_schema: Dict[str, Any]):
         self.schema = widget_schema
         self.id = widget_schema['id']
@@ -308,6 +326,17 @@ class WidgetExecutor:
             'message': f'Base widget {self.id} executed successfully',
             'input_received': validated_input
         }
+    
+    @classmethod
+    def get_jsonld_id(cls) -> str:
+        """Get the JSON-LD identifier for this widget class"""
+        class_name = cls.__name__
+        return cls._class_name_to_jsonld_id.get(class_name, class_name.lower())
+    
+    @classmethod
+    def get_class_for_jsonld_id(cls, jsonld_id: str) -> str:
+        """Get the class name for a JSON-LD identifier"""
+        return cls._jsonld_id_to_class_name.get(jsonld_id, jsonld_id)
     
     def _execute_action_impl(self, validated_input: Dict[str, Any], action_slug: str, action_config: Dict[str, Any]) -> Dict[str, Any]:
         """
