@@ -68,6 +68,55 @@ class WidgetExecutor:
                 if not hasattr(self, param_name):
                     setattr(self, param_name, default_value)
     
+    def process_parameter_flow(self, arrows: List[Dict[str, Any]], source_widgets: Dict[str, Any]):
+        """
+        Process parameter flow arrows coming into this widget.
+        Loop through arrows and merge data with optional ETL transformations.
+        """
+        if self.parameter_flow_processed:
+            return  # Already processed
+            
+        for arrow in arrows:
+            if arrow.get('target', {}).get('widget') == f'urn:widget:{self.id}':
+                source_widget_id = arrow.get('source', {}).get('widget', '').replace('urn:widget:', '')
+                source_widget = source_widgets.get(source_widget_id)
+                
+                if source_widget:
+                    # Get source parameters
+                    source_params = arrow.get('source', {}).get('parameters', [])
+                    target_params = arrow.get('target', {}).get('input_parameters', [])
+                    
+                    # Optional ETL transformation
+                    transform_code = arrow.get('transformation_python')
+                    
+                    for i, source_param in enumerate(source_params):
+                        if i < len(target_params):
+                            target_param = target_params[i]
+                            
+                            # Get value from source widget
+                            source_value = getattr(source_widget, source_param, None)
+                            
+                            if transform_code:
+                                # Apply ETL transformation
+                                try:
+                                    # Create safe execution environment
+                                    transform_globals = {
+                                        'source_value': source_value,
+                                        'source_param': source_param,
+                                        'target_param': target_param
+                                    }
+                                    exec(transform_code, transform_globals)
+                                    transformed_value = transform_globals.get('result', source_value)
+                                    setattr(self, target_param, transformed_value)
+                                except Exception as e:
+                                    print(f"ETL transformation error: {e}")
+                                    setattr(self, target_param, source_value)
+                            else:
+                                # Direct parameter flow
+                                setattr(self, target_param, source_value)
+        
+        self.parameter_flow_processed = True
+    
     def add_incoming_arrow(self, arrow: 'WorkflowArrow'):
         """Add an incoming parameter flow arrow to this widget"""
         self.incoming_arrows.append(arrow)
