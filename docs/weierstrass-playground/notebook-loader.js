@@ -34,16 +34,28 @@ class NotebookLoader {
      */
     async loadAvailableNotebooks() {
         try {
-            // In a real implementation, this would fetch from a server endpoint
-            // For now, we'll use a static list of known notebooks
-            this.availableNotebooks = [
-                {
-                    filename: 'example-weierstrass-workflow.jsonld',
-                    title: 'Weierstrass Function Analysis with p=5, q=7',
-                    description: 'Complete mathematical workflow demonstrating PQ-Torus lattice parameters',
-                    modified: '2024-01-15T12:15:00Z'
-                }
-            ];
+            // Try to fetch from GitHub API (for GitHub Pages deployment)
+            await this.loadFromGitHub();
+            
+            // Fallback to static list if GitHub API fails
+            if (this.availableNotebooks.length === 0) {
+                this.availableNotebooks = [
+                    {
+                        filename: 'example-weierstrass-workflow.jsonld',
+                        title: 'Weierstrass Function Analysis with p=5, q=7',
+                        description: 'Complete mathematical workflow demonstrating PQ-Torus lattice parameters',
+                        modified: '2024-01-15T12:15:00Z',
+                        type: 'jsonld'
+                    },
+                    {
+                        filename: 'sample-mathematical-analysis.ipynb',
+                        title: 'Mathematical Analysis Demo',
+                        description: 'Sample Jupyter notebook with mathematical computations',
+                        modified: '2024-01-15T14:30:00Z',
+                        type: 'ipynb'
+                    }
+                ];
+            }
             
             this.updateNotebookList();
         } catch (error) {
@@ -52,21 +64,126 @@ class NotebookLoader {
     }
 
     /**
+     * Load notebooks from GitHub repository
+     */
+    async loadFromGitHub() {
+        try {
+            // Get repository info from current URL
+            const repoInfo = this.getRepositoryInfo();
+            if (!repoInfo) return;
+
+            const apiUrl = `https://api.github.com/repos/${repoInfo.owner}/${repoInfo.repo}/contents/notebooks`;
+            
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                console.log('GitHub API not available, using static list');
+                return;
+            }
+
+            const files = await response.json();
+            this.availableNotebooks = [];
+
+            for (const file of files) {
+                if (file.type === 'file') {
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    if (['ipynb', 'jsonld', 'json'].includes(extension)) {
+                        const notebook = {
+                            filename: file.name,
+                            title: this.generateTitleFromFilename(file.name),
+                            description: `${extension.toUpperCase()} notebook (${Math.round(file.size / 1024)}KB)`,
+                            modified: file.sha ? 'From GitHub' : 'Unknown',
+                            type: extension,
+                            download_url: file.download_url,
+                            github_url: file.html_url
+                        };
+                        this.availableNotebooks.push(notebook);
+                    }
+                }
+            }
+
+            console.log(`Loaded ${this.availableNotebooks.length} notebooks from GitHub`);
+            
+        } catch (error) {
+            console.error('GitHub API error:', error);
+        }
+    }
+
+    /**
+     * Extract repository info from current URL
+     */
+    getRepositoryInfo() {
+        // Check if we're on GitHub Pages
+        const hostname = window.location.hostname;
+        if (hostname.includes('github.io')) {
+            // Extract from GitHub Pages URL: username.github.io/repository-name
+            const pathParts = window.location.pathname.split('/').filter(p => p);
+            if (pathParts.length > 0) {
+                return {
+                    owner: hostname.split('.')[0],
+                    repo: pathParts[0]
+                };
+            }
+        }
+        
+        // Fallback: try to extract from referrer or assume defaults
+        return {
+            owner: 'litlfred',
+            repo: 'notebooks'
+        };
+    }
+
+    /**
+     * Generate a readable title from filename
+     */
+    generateTitleFromFilename(filename) {
+        return filename
+            .replace(/\.(ipynb|jsonld|json)$/, '')
+            .replace(/[-_]/g, ' ')
+            .replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    /**
      * Update the notebook list in UI
      */
     updateNotebookList() {
-        const notebookList = document.getElementById('notebook-list');
+        const notebookList = document.getElementById('notebook-items');
         if (!notebookList) return;
 
-        const html = this.availableNotebooks.map(notebook => `
-            <div class="notebook-item" onclick="notebookLoader.loadNotebook('${notebook.filename}')">
-                <div class="notebook-title">${notebook.title}</div>
-                <div class="notebook-description">${notebook.description}</div>
-                <div class="notebook-modified">Modified: ${new Date(notebook.modified).toLocaleDateString()}</div>
-            </div>
-        `).join('');
+        const html = this.availableNotebooks.map(notebook => {
+            const icon = this.getNotebookIcon(notebook.type);
+            const modifiedText = notebook.modified.includes('T') ? 
+                new Date(notebook.modified).toLocaleDateString() : 
+                notebook.modified;
+            
+            return `
+                <div class="notebook-item" onclick="notebookLoader.loadNotebook('${notebook.filename}')">
+                    <div class="notebook-header">
+                        <span class="notebook-icon">${icon}</span>
+                        <div class="notebook-title">${notebook.title}</div>
+                        <span class="notebook-type">${notebook.type.toUpperCase()}</span>
+                    </div>
+                    <div class="notebook-description">${notebook.description}</div>
+                    <div class="notebook-meta">
+                        <span class="notebook-modified">Modified: ${modifiedText}</span>
+                        ${notebook.github_url ? `<a href="${notebook.github_url}" target="_blank" class="github-link">View on GitHub</a>` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
 
         notebookList.innerHTML = html || '<div class="no-notebooks">No notebooks available</div>';
+    }
+
+    /**
+     * Get icon for notebook type
+     */
+    getNotebookIcon(type) {
+        const icons = {
+            'ipynb': '📓',
+            'jsonld': '🔗', 
+            'json': '📄'
+        };
+        return icons[type] || '📄';
     }
 
     /**
@@ -153,8 +270,17 @@ class NotebookLoader {
                 throw new Error(`Failed to fetch notebook: ${response.statusText}`);
             }
             
-            const notebook = await response.json();
-            await this.loadNotebookData(notebook);
+            const content = await response.text();
+            
+            // Check if it's a Jupyter notebook
+            if (filename.endsWith('.ipynb')) {
+                await this.handleJupyterNotebook(content, filename);
+            } else {
+                // Handle as JSON-LD notebook
+                const notebook = JSON.parse(content);
+                await this.loadNotebookData(notebook);
+            }
+            
             this.boardApp.updateStatus(`Loaded notebook: ${filename}`, 'success');
         } catch (error) {
             console.error('Failed to load notebook:', error);
