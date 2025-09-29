@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/notebook/widget.schema.json",
+  "title": "Notebook Widget Schema",
+  "description": "Schema for notebook widget instances",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique widget identifier"
+    },
+    "name": {
+      "type": "string",
+      "description": "Display name of the widget"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the widget functionality"
+    },
+    "category": {
+      "type": "string",
+      "enum": ["content", "visualization", "computation", "notebook"],
+      "default": "notebook",
+      "description": "Widget category"
+    },
+    "icon": {
+      "type": "string",
+      "default": "📓",
+      "description": "Icon representing the widget"
+    },
+    "input_schemas": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "URLs to input schema definitions"
+    },
+    "output_schemas": {
+      "type": "array", 
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "URLs to output schema definitions"
+    },
+    "python_script": {
+      "type": "string",
+      "description": "Path to Python implementation"
+    },
+    "actions": {
+      "type": "object",
+      "description": "Available actions for the widget",
+      "properties": {
+        "render-board-fullscreen": {
+          "type": "object",
+          "properties": {
+            "names": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Open Interactive Board"}
+              }
+            },
+            "icon": {"type": "string", "default": "🔳"},
+            "description": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Open notebook as fullscreen interactive board"}
+              }
+            },
+            "menu_category": {"type": "string", "default": "view"},
+            "output_format": {"type": "string", "default": "board-render"}
+          }
+        },
+        "render-board-windowed": {
+          "type": "object",
+          "properties": {
+            "names": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Open in Window"}
+              }
+            },
+            "icon": {"type": "string", "default": "🪟"},
+            "description": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Open notebook in resizable window"}
+              }
+            },
+            "menu_category": {"type": "string", "default": "view"},
+            "output_format": {"type": "string", "default": "windowed-render"}
+          }
+        },
+        "export-notebook-state": {
+          "type": "object",
+          "properties": {
+            "names": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Export as JSON-LD"}
+              }
+            },
+            "icon": {"type": "string", "default": "💾"},
+            "description": {
+              "type": "object",
+              "properties": {
+                "en": {"type": "string", "default": "Export notebook state as JSON-LD"}
+              }
+            },
+            "menu_category": {"type": "string", "default": "export"},
+            "output_format": {"type": "string", "default": "jsonld"}
+          }
+        }
+      }
+    }
+  },
+  "required": ["id", "name"],
+  "additionalProperties": false
+}

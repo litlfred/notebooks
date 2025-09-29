@@ -1310,3 +1310,324 @@ body {
     color: var(--text-secondary);
     font-style: italic;
 }
+/* Fullscreen and Windowed Widget Modes */
+
+/* Fullscreen Overlay */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--board-bg);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.fullscreen-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.fullscreen-active {
+    overflow: hidden;
+}
+
+/* Fullscreen Toolbar */
+.fullscreen-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.fullscreen-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.fullscreen-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.fullscreen-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.fullscreen-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Fullscreen Content */
+.fullscreen-content {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+}
+
+/* Notebook Board Fullscreen */
+.notebook-board-fullscreen {
+    display: flex;
+    height: 100%;
+}
+
+.notebook-board-sidebar {
+    width: 280px;
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border-color);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.notebook-info h3 {
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.notebook-info p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.notebook-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px 16px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.btn-secondary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.notebook-board-content {
+    flex: 1;
+    position: relative;
+}
+
+.mini-board {
+    width: 100%;
+    height: 100%;
+    background: var(--board-bg);
+    position: relative;
+    overflow: hidden;
+}
+
+.board-workspace {
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.1) 1px, transparent 0);
+    background-size: 20px 20px;
+    position: relative;
+    cursor: crosshair;
+}
+
+.placeholder-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 18px;
+    pointer-events: none;
+}
+
+.placeholder-text small {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+/* Demo Widgets in Mini Board */
+.demo-widget {
+    position: absolute;
+    width: 200px;
+    background: var(--widget-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    cursor: move;
+}
+
+.demo-widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.demo-widget-header button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.demo-widget-header button:hover {
+    color: var(--warning-color);
+}
+
+.demo-widget-content {
+    padding: 12px;
+    color: var(--text-secondary);
+    font-size: 12px;
+}
+
+/* Generic Widget Fullscreen */
+.generic-widget-fullscreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: var(--board-bg);
+}
+
+.widget-fullscreen-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+}
+
+.widget-icon-large {
+    font-size: 64px;
+    margin-bottom: 20px;
+}
+
+.widget-fullscreen-content h2 {
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.widget-fullscreen-content p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+}
+
+/* Windowed Widget Mode */
+.windowed-widget-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 5000;
+}
+
+.windowed-widget {
+    position: absolute;
+    background: var(--widget-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    pointer-events: all;
+    resize: both;
+    overflow: hidden;
+    min-width: 400px;
+    min-height: 300px;
+}
+
+.windowed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+    cursor: move;
+    user-select: none;
+}
+
+.windowed-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.windowed-controls button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.windowed-controls button:hover {
+    background: var(--warning-color);
+    color: white;
+}
+
+.windowed-content {
+    padding: 20px;
+    height: calc(100% - 49px);
+    overflow: auto;
+    color: var(--text-primary);
+}

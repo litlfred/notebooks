@@ -36,6 +36,10 @@ class WidgetExecutor:
         self.schema_warnings = []
         self._validate_schema_alignment()
         
+        # Fullscreen mode support
+        self.supports_fullscreen = self._check_fullscreen_support()
+        self.fullscreen_config = self._get_fullscreen_config()
+        
         # Handle both old and new schema formats
         if 'input_schemas' in widget_schema:
             # New format with multiple schemas
@@ -113,6 +117,60 @@ class WidgetExecutor:
     def get_warnings(self) -> List[Dict[str, str]]:
         """Get list of schema warnings"""
         return self.schema_warnings.copy()
+    
+    def _check_fullscreen_support(self) -> bool:
+        """Check if widget supports fullscreen mode"""
+        # Check if widget has fullscreen-related actions
+        for action_slug in self.actions.keys():
+            if 'fullscreen' in action_slug.lower() or 'board' in action_slug.lower():
+                return True
+        
+        # Check widget category/type for fullscreen capability
+        category = self.schema.get('category', '').lower()
+        if category in ['notebook', 'visualization', 'analysis']:
+            return True
+            
+        return False
+    
+    def _get_fullscreen_config(self) -> Dict[str, Any]:
+        """Get fullscreen configuration for widget"""
+        return {
+            'enable_exit': True,
+            'show_toolbar': True,
+            'allow_editing': True,
+            'theme': 'dark',
+            'overlay_mode': 'modal',
+            'animation': 'fade',
+            'close_on_escape': True,
+            'show_controls': True
+        }
+    
+    def enter_fullscreen_mode(self, config: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Enter fullscreen mode with given configuration"""
+        if not self.supports_fullscreen:
+            return {
+                'success': False,
+                'error': 'Widget does not support fullscreen mode'
+            }
+        
+        fullscreen_config = {**self.fullscreen_config, **(config or {})}
+        
+        return {
+            'success': True,
+            'mode': 'fullscreen',
+            'config': fullscreen_config,
+            'widget_id': self.id,
+            'widget_type': self.schema.get('category', 'unknown')
+        }
+    
+    def exit_fullscreen_mode(self) -> Dict[str, Any]:
+        """Exit fullscreen mode and return to normal view"""
+        return {
+            'success': True,
+            'mode': 'windowed',
+            'widget_id': self.id,
+            'return_to_board': True
+        }
     
     def process_parameter_flow(self, arrows: List[Dict[str, Any]], source_widgets: Dict[str, Any]):
         """

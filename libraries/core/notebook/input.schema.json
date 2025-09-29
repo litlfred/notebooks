@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/notebook/input.schema.json",
+  "title": "Notebook Widget Input Schema",
+  "description": "Input parameters for notebook widget rendering",
+  "type": "object",
+  "properties": {
+    "notebook_data": {
+      "type": "object",
+      "description": "JSON-LD notebook data to render",
+      "properties": {
+        "@context": {
+          "type": "array",
+          "description": "JSON-LD context"
+        },
+        "@id": {
+          "type": "string",
+          "description": "Notebook identifier"
+        },
+        "@type": {
+          "type": "array",
+          "description": "Notebook types"
+        },
+        "@graph": {
+          "type": "array",
+          "description": "Notebook content graph"
+        }
+      },
+      "required": ["@id", "@type", "@graph"]
+    },
+    "render_mode": {
+      "type": "string",
+      "enum": ["windowed", "fullscreen"],
+      "default": "windowed",
+      "description": "Rendering mode for the notebook board"
+    },
+    "show_panels": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show side panels in board view"
+    },
+    "panel_config": {
+      "type": "object",
+      "description": "Configuration for side panels",
+      "properties": {
+        "show_library": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show widget library panel"
+        },
+        "show_controls": {
+          "type": "boolean", 
+          "default": true,
+          "description": "Show controls panel"
+        },
+        "library_collapsed": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether library panel starts collapsed"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["notebook_data"],
+  "additionalProperties": false
+}

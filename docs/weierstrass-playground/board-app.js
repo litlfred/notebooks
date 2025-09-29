@@ -15,6 +15,11 @@ class MathematicalBoard {
         this.gridEnabled = true;
         this.connections = new Map(); // widget connections for data flow
         
+        // Fullscreen mode management
+        this.fullscreenManager = new FullscreenManager(this);
+        this.isFullscreenMode = false;
+        this.fullscreenWidget = null;
+        
         this.initializeBoard();
         this.setupEventListeners();
         this.initializeUserPreferences();
@@ -2154,6 +2159,12 @@ function executeWidgetAction(widgetId, actionSlug) {
     
     console.log(`Executing action ${actionSlug} on widget ${widgetId}`);
     
+    // Handle fullscreen actions
+    if (actionSlug.includes('fullscreen') || actionSlug.includes('board')) {
+        boardApp.fullscreenManager.handleFullscreenAction(widgetId, actionSlug);
+        return;
+    }
+    
     // Hide the menu
     toggleWidgetMenu(widgetId);
     
@@ -2167,4 +2178,344 @@ function executeWidgetAction(widgetId, actionSlug) {
         boardApp.updateWidgetDisplay(widgetId);
         boardApp.updateStatus(`Executed ${actionSlug} on ${widget.title}`, 'success');
     }, 1000);
+}
+
+
+/**
+ * Fullscreen Manager for Widget Framework
+ * Handles fullscreen mode for widgets, especially notebook widgets
+ */
+class FullscreenManager {
+    constructor(boardApp) {
+        this.boardApp = boardApp;
+        this.currentFullscreenWidget = null;
+        this.previousState = null;
+        this.fullscreenOverlay = null;
+        this.createOverlayElements();
+    }
+    
+    createOverlayElements() {
+        // Create fullscreen overlay container
+        this.fullscreenOverlay = document.createElement('div');
+        this.fullscreenOverlay.id = 'fullscreen-overlay';
+        this.fullscreenOverlay.className = 'fullscreen-overlay hidden';
+        
+        // Create fullscreen content area
+        const contentArea = document.createElement('div');
+        contentArea.className = 'fullscreen-content';
+        contentArea.id = 'fullscreen-content';
+        
+        // Create fullscreen toolbar
+        const toolbar = document.createElement('div');
+        toolbar.className = 'fullscreen-toolbar';
+        toolbar.innerHTML = `
+            <div class="fullscreen-title">
+                <span id="fullscreen-widget-title">Widget Fullscreen Mode</span>
+            </div>
+            <div class="fullscreen-controls">
+                <button id="fullscreen-minimize" class="fullscreen-btn" title="Minimize to window">
+                    🪟
+                </button>
+                <button id="fullscreen-close" class="fullscreen-btn" title="Close fullscreen (Esc)">
+                    ✕
+                </button>
+            </div>
+        `;
+        
+        this.fullscreenOverlay.appendChild(toolbar);
+        this.fullscreenOverlay.appendChild(contentArea);
+        document.body.appendChild(this.fullscreenOverlay);
+        
+        // Setup event listeners
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Close button
+        document.getElementById('fullscreen-close').addEventListener('click', () => {
+            this.exitFullscreen();
+        });
+        
+        // Minimize button
+        document.getElementById('fullscreen-minimize').addEventListener('click', () => {
+            this.minimizeToWindow();
+        });
+        
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.currentFullscreenWidget) {
+                this.exitFullscreen();
+            }
+        });
+        
+        // Prevent closing on content click
+        document.getElementById('fullscreen-content').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
+    handleFullscreenAction(widgetId, actionSlug) {
+        const widget = this.boardApp.widgets.get(widgetId);
+        if (!widget) return;
+        
+        console.log(`Handling fullscreen action ${actionSlug} for widget ${widgetId}`);
+        
+        if (actionSlug.includes('fullscreen')) {
+            this.enterFullscreen(widget);
+        } else if (actionSlug.includes('windowed')) {
+            this.openInWindow(widget);
+        }
+    }
+    
+    enterFullscreen(widget) {
+        if (this.currentFullscreenWidget) {
+            this.exitFullscreen();
+        }
+        
+        console.log(`Entering fullscreen mode for widget: ${widget.id}`);
+        
+        // Store current state
+        this.previousState = {
+            selectedWidget: this.boardApp.selectedWidget,
+            scrollPosition: {
+                x: window.scrollX,
+                y: window.scrollY
+            }
+        };
+        
+        this.currentFullscreenWidget = widget;
+        
+        // Update title
+        document.getElementById('fullscreen-widget-title').textContent = 
+            `${widget.title} - Interactive Board`;
+        
+        // Render widget content in fullscreen
+        this.renderWidgetInFullscreen(widget);
+        
+        // Show overlay
+        this.fullscreenOverlay.classList.remove('hidden');
+        document.body.classList.add('fullscreen-active');
+        
+        // Update board app state
+        this.boardApp.isFullscreenMode = true;
+        this.boardApp.fullscreenWidget = widget;
+        
+        this.boardApp.updateStatus(`Opened ${widget.title} in fullscreen mode`, 'success');
+    }
+    
+    renderWidgetInFullscreen(widget) {
+        const contentArea = document.getElementById('fullscreen-content');
+        
+        if (widget.type === 'notebook') {
+            this.renderNotebookBoard(widget, contentArea);
+        } else {
+            this.renderGenericWidgetFullscreen(widget, contentArea);
+        }
+    }
+    
+    renderNotebookBoard(widget, container) {
+        // Create a mini board environment for the notebook
+        container.innerHTML = `
+            <div class="notebook-board-fullscreen">
+                <div class="notebook-board-sidebar">
+                    <div class="notebook-info">
+                        <h3>${widget.title}</h3>
+                        <p>${widget.description || 'Interactive notebook board'}</p>
+                    </div>
+                    <div class="notebook-controls">
+                        <button class="btn-secondary" onclick="boardApp.fullscreenManager.loadNotebookExample()">
+                            📁 Load Notebook
+                        </button>
+                        <button class="btn-secondary" onclick="boardApp.fullscreenManager.saveNotebookState()">
+                            💾 Save State
+                        </button>
+                    </div>
+                </div>
+                <div class="notebook-board-content">
+                    <div class="mini-board" id="notebook-mini-board">
+                        <div class="board-workspace">
+                            <p class="placeholder-text">
+                                🔮 Interactive Board Mode<br>
+                                <small>Drag widgets from library to create your mathematical workflow</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Initialize mini-board functionality
+        this.initializeNotebookBoard();
+    }
+    
+    initializeNotebookBoard() {
+        // Add simplified widget creation for demo
+        const workspace = document.querySelector('.board-workspace');
+        workspace.addEventListener('click', (e) => {
+            if (e.target.classList.contains('board-workspace')) {
+                this.addDemoWidget(e.offsetX, e.offsetY);
+            }
+        });
+    }
+    
+    addDemoWidget(x, y) {
+        const workspace = document.querySelector('.board-workspace');
+        const demoWidget = document.createElement('div');
+        demoWidget.className = 'demo-widget';
+        demoWidget.style.left = `${x - 50}px`;
+        demoWidget.style.top = `${y - 25}px`;
+        demoWidget.innerHTML = `
+            <div class="demo-widget-header">
+                📝 Demo Widget
+                <button onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+            <div class="demo-widget-content">
+                Interactive widget placeholder
+            </div>
+        `;
+        
+        // Remove placeholder if this is the first widget
+        const placeholder = workspace.querySelector('.placeholder-text');
+        if (placeholder) {
+            placeholder.remove();
+        }
+        
+        workspace.appendChild(demoWidget);
+    }
+    
+    renderGenericWidgetFullscreen(widget, container) {
+        container.innerHTML = `
+            <div class="generic-widget-fullscreen">
+                <div class="widget-fullscreen-content">
+                    <div class="widget-icon-large">${widget.icon}</div>
+                    <h2>${widget.title}</h2>
+                    <p>${widget.description}</p>
+                    <div class="widget-fullscreen-actions">
+                        <p>Widget actions would be rendered here in fullscreen mode.</p>
+                        <div class="action-buttons">
+                            <button class="btn-primary">Execute Primary Action</button>
+                            <button class="btn-secondary">Configure Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    exitFullscreen() {
+        if (!this.currentFullscreenWidget) return;
+        
+        console.log(`Exiting fullscreen mode for widget: ${this.currentFullscreenWidget.id}`);
+        
+        // Hide overlay
+        this.fullscreenOverlay.classList.add('hidden');
+        document.body.classList.remove('fullscreen-active');
+        
+        // Restore previous state
+        if (this.previousState) {
+            window.scrollTo(this.previousState.scrollPosition.x, this.previousState.scrollPosition.y);
+        }
+        
+        // Update board app state
+        this.boardApp.isFullscreenMode = false;
+        this.boardApp.fullscreenWidget = null;
+        
+        this.boardApp.updateStatus(`Closed fullscreen mode`, 'info');
+        
+        // Clear current fullscreen widget
+        this.currentFullscreenWidget = null;
+        this.previousState = null;
+    }
+    
+    minimizeToWindow() {
+        if (!this.currentFullscreenWidget) return;
+        
+        // Exit fullscreen first
+        this.exitFullscreen();
+        
+        // Then open in windowed mode
+        this.openInWindow(this.currentFullscreenWidget);
+    }
+    
+    openInWindow(widget) {
+        console.log(`Opening widget ${widget.id} in windowed mode`);
+        
+        // Create windowed version
+        this.createWindowedWidget(widget);
+        
+        this.boardApp.updateStatus(`Opened ${widget.title} in window`, 'success');
+    }
+    
+    createWindowedWidget(widget) {
+        // Create windowed widget overlay
+        const windowedOverlay = document.createElement('div');
+        windowedOverlay.className = 'windowed-widget-overlay';
+        windowedOverlay.innerHTML = `
+            <div class="windowed-widget" style="width: 600px; height: 400px; top: 100px; left: 200px;">
+                <div class="windowed-header">
+                    <span class="windowed-title">${widget.title}</span>
+                    <div class="windowed-controls">
+                        <button onclick="this.closest('.windowed-widget-overlay').remove()" title="Close">×</button>
+                    </div>
+                </div>
+                <div class="windowed-content">
+                    <p>Windowed widget content for: ${widget.title}</p>
+                    <p><small>This is a resizable, movable window.</small></p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(windowedOverlay);
+        
+        // Make draggable
+        this.makeWindowDraggable(windowedOverlay.querySelector('.windowed-widget'));
+    }
+    
+    makeWindowDraggable(windowElement) {
+        const header = windowElement.querySelector('.windowed-header');
+        let isDragging = false;
+        let currentX, currentY, initialX, initialY;
+        
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            initialX = e.clientX - windowElement.offsetLeft;
+            initialY = e.clientY - windowElement.offsetTop;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                
+                windowElement.style.left = `${currentX}px`;
+                windowElement.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    }
+    
+    loadNotebookExample() {
+        console.log('Loading notebook example...');
+        this.boardApp.updateStatus('Loading notebook example...', 'info');
+        
+        // Simulate loading a notebook
+        setTimeout(() => {
+            this.addDemoWidget(150, 100);
+            this.addDemoWidget(350, 150);
+            this.boardApp.updateStatus('Notebook example loaded', 'success');
+        }, 1000);
+    }
+    
+    saveNotebookState() {
+        console.log('Saving notebook state...');
+        this.boardApp.updateStatus('Saving notebook state...', 'info');
+        
+        // Simulate saving
+        setTimeout(() => {
+            this.boardApp.updateStatus('Notebook state saved', 'success');
+        }, 500);
+    }
 }

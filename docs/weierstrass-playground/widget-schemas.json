@@ -129,6 +129,76 @@
       "author": "Widget Framework",
       "tags": ["python", "code", "computation"]
     },
+
+    "notebook": {
+      "id": "notebook",
+      "name": "📓 Notebook Widget",
+      "description": "Interactive notebook that can render as fullscreen or windowed board",
+      "category": "notebook",
+      "icon": "📓",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/notebook/input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/notebook/output.schema.json"
+      ],
+      "python_script": "notebook/notebook_widget.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["notebook", "board", "fullscreen", "interactive"],
+      "actions": {
+        "render-board-fullscreen": {
+          "slug": "render-board-fullscreen",
+          "names": {
+            "en": "Open Interactive Board",
+            "es": "Abrir Tablero Interactivo",
+            "fr": "Ouvrir Tableau Interactif",
+            "de": "Interaktives Board Öffnen"
+          },
+          "icon": "🔳",
+          "description": {
+            "en": "Open notebook as fullscreen interactive board with panels",
+            "es": "Abrir notebook como tablero interactivo en pantalla completa"
+          },
+          "menu_category": "view",
+          "output_format": "board-render",
+          "validation_required": true
+        },
+        "render-board-windowed": {
+          "slug": "render-board-windowed",
+          "names": {
+            "en": "Open in Window",
+            "es": "Abrir en Ventana",
+            "fr": "Ouvrir en Fenêtre",
+            "de": "In Fenster Öffnen"
+          },
+          "icon": "🪟",
+          "description": {
+            "en": "Open notebook in resizable, movable window",
+            "es": "Abrir notebook en ventana redimensionable"
+          },
+          "menu_category": "view",
+          "output_format": "windowed-render",
+          "validation_required": true
+        },
+        "export-notebook-state": {
+          "slug": "export-notebook-state", 
+          "names": {
+            "en": "Export as JSON-LD",
+            "es": "Exportar como JSON-LD",
+            "fr": "Exporter en JSON-LD",
+            "de": "Als JSON-LD Exportieren"
+          },
+          "icon": "💾",
+          "description": {
+            "en": "Export current notebook state as JSON-LD file"
+          },
+          "menu_category": "export",
+          "output_format": "jsonld",
+          "validation_required": true
+        }
+      }
+    },
     
     "wp-two-panel": {
       "id": "wp-two-panel",
