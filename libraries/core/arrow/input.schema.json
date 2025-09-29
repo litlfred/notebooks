@@ -40,38 +40,14 @@
       "description": "Optional markdown comment displayed as arrow title"
     },
     "transformation": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/legacy_transformation"
-        },
-        {
-          "$ref": "#/$defs/multitype_transformation"
-        }
-      ],
-      "description": "Transformation logic applied during parameter flow - supports both legacy and new multi-type formats"
+      "$ref": "#/$defs/multitype_transformation",
+      "description": "Transformation logic applied during parameter flow using multi-type format"
     }
   },
   "required": ["source_widget", "target_widget", "source_parameters", "target_parameters"],
   "additionalProperties": false,
   
   "$defs": {
-    "legacy_transformation": {
-      "type": "object",
-      "title": "Legacy Python-only Transformation (Backward Compatibility)",
-      "properties": {
-        "python_code": {
-          "type": "string",
-          "description": "Legacy: Python function body for ETL transformation"
-        },
-        "input_mapping": {
-          "type": "object",
-          "description": "Legacy: Parameter name mapping from source to target"
-        }
-      },
-      "required": ["python_code"],
-      "additionalProperties": false
-    },
-    
     "multitype_transformation": {
       "type": "object", 
       "title": "Multi-Type Transformation with MIME Type Support",

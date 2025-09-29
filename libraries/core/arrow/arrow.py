@@ -34,13 +34,11 @@ class WorkflowArrow:
     
     def _compile_transformation(self):
         """Compile transformation based on content type using appropriate transformer"""
-        # Check for legacy python_code format first
-        if 'python_code' in self.transformation:
-            self._compile_legacy_python_transformation()
-            return
+        # Use multi-type system only - no legacy support
+        content_type = self.transformation.get('content_type')
+        if not content_type:
+            raise ValueError("content_type is required in transformation")
         
-        # Use new multi-type system
-        content_type = self.transformation.get('content_type', 'application/x-python')
         content = self._resolve_content()
         
         if not content.strip():
@@ -60,27 +58,6 @@ class WorkflowArrow:
             
         except ValueError as e:
             raise ValueError(f"Failed to compile transformation: {e}")
-    
-    def _compile_legacy_python_transformation(self):
-        """Compile legacy Python transformation for backward compatibility"""
-        python_code = self.transformation['python_code']
-        
-        # Create transformation function with proper signature
-        function_code = f"""
-def transform_parameters(source_data, input_mapping=None):
-    '''User-defined transformation function'''
-    {python_code}
-    return source_data
-"""
-        
-        try:
-            # Compile and execute the function definition
-            local_scope = {}
-            exec(function_code, {"__builtins__": __builtins__}, local_scope)
-            self.transform_function = local_scope['transform_parameters']
-            self.transformer = TransformerFactory.get_transformer('application/x-python')
-        except Exception as e:
-            raise ValueError(f"Failed to compile legacy Python transformation: {e}")
     
     def _resolve_content(self) -> str:
         """Resolve content from inline, URL, or IRI source"""
@@ -199,18 +176,13 @@ def transform_parameters(source_data, input_mapping=None):
                 "@type": ["prov:Entity", "workflow:Transformation"]
             }
             
-            # Add content type if using new format
+            # Add content type
             if 'content_type' in self.transformation:
                 transformation_jsonld["dct:format"] = self.transformation['content_type']
             
             # Add content source info
             if 'content_source' in self.transformation:
                 transformation_jsonld["workflow:contentSource"] = self.transformation['content_source']
-            
-            # Add legacy support indicator
-            if 'python_code' in self.transformation:
-                transformation_jsonld["workflow:legacy"] = True
-                transformation_jsonld["dct:format"] = "application/x-python"
             
             jsonld["workflow:transformation"] = transformation_jsonld
         

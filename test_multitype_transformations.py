@@ -32,40 +32,9 @@ def test_transformer_factory():
     print("  ✅ Transformer factory working correctly")
 
 
-def test_legacy_python_transformation():
-    """Test backward compatibility with legacy python_code format"""
-    print("\n🐍 Testing Legacy Python Transformation...")
-    
-    arrow_config = {
-        'source_widget': 'urn:widget:source',
-        'target_widget': 'urn:widget:target',
-        'source_parameters': ['x', 'y'],
-        'target_parameters': ['a', 'b'],
-        'transformation': {
-            'python_code': 'source_data["result"] = source_data["x"] * 2 + source_data["y"]',
-            'input_mapping': {'x': 'input_x', 'y': 'input_y'}
-        }
-    }
-    
-    try:
-        arrow = WorkflowArrow(arrow_config)
-        assert arrow.transform_function is not None, "Transform function not compiled"
-        print("  ✅ Legacy Python transformation compiled successfully")
-        
-        # Test JSON-LD output
-        jsonld = arrow.to_jsonld()
-        assert jsonld['workflow:hasTransformation'] == True, "Transformation not indicated in JSON-LD"
-        assert jsonld['workflow:transformation']['workflow:legacy'] == True, "Legacy indicator missing"
-        print("  ✅ Legacy JSON-LD output correct")
-        
-    except Exception as e:
-        print(f"  ❌ Legacy Python transformation failed: {e}")
-        raise
-
-
-def test_new_python_transformation():
-    """Test new multi-type Python transformation format"""
-    print("\n🆕 Testing New Python Transformation Format...")
+def test_python_transformation():
+    """Test Python transformation format"""
+    print("\n🐍 Testing Python Transformation Format...")
     
     arrow_config = {
         'source_widget': 'urn:widget:source',
@@ -98,16 +67,16 @@ else:
     try:
         arrow = WorkflowArrow(arrow_config)
         assert arrow.transform_function is not None, "Transform function not compiled"
-        print("  ✅ New Python transformation compiled successfully")
+        print("  ✅ Python transformation compiled successfully")
         
         # Test JSON-LD output
         jsonld = arrow.to_jsonld()
         assert jsonld['workflow:hasTransformation'] == True, "Transformation not indicated in JSON-LD"
         assert jsonld['workflow:transformation']['dct:format'] == 'application/x-python', "Content type missing"
-        print("  ✅ New Python JSON-LD output correct")
+        print("  ✅ Python JSON-LD output correct")
         
     except Exception as e:
-        print(f"  ❌ New Python transformation failed: {e}")
+        print(f"  ❌ Python transformation failed: {e}")
         raise
 
 
@@ -255,8 +224,7 @@ def main():
     
     try:
         test_transformer_factory()
-        test_legacy_python_transformation()
-        test_new_python_transformation()
+        test_python_transformation()
         test_javascript_transformation()
         test_validation_errors()
         test_mock_execution()
@@ -264,8 +232,7 @@ def main():
         print("\n🎉 All tests passed!")
         print("\n📊 Summary:")
         print("  ✅ Transformer factory working")
-        print("  ✅ Legacy Python transformation backward compatible")
-        print("  ✅ New Python transformation format working")
+        print("  ✅ Python transformation format working")
         print("  ✅ JavaScript transformation system ready")
         print("  ✅ Validation and error handling working")
         print("  ✅ Arrow execution working")
