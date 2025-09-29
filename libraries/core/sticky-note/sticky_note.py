@@ -58,10 +58,13 @@ class StickyNoteWidget(WidgetExecutor):
     
     def render_simple_markdown(self, content: str) -> str:
         """
-        Simple markdown rendering for basic formatting.
-        Supports: headers, bold, italic, code blocks, lists
+        Enhanced markdown rendering with variable substitution and LaTeX support.
+        Supports: headers, bold, italic, code blocks, lists, variables, math symbols
         """
         html = content
+        
+        # Process variable substitution first
+        html = self.process_markdown_variables(html)
         
         # Headers
         html = re.sub(r'^# (.*$)', r'<h1>\1</h1>', html, flags=re.MULTILINE)
@@ -99,6 +102,14 @@ class StickyNoteWidget(WidgetExecutor):
         
         html = '\n'.join(processed_lines)
         
+        # Mathematical symbols (LaTeX-like)
+        html = html.replace('\\wp', '℘')
+        html = html.replace('\\Z', 'ℤ')
+        html = html.replace('\\C', 'ℂ')
+        html = html.replace('\\R', 'ℝ')
+        html = html.replace('\\L', 'L')
+        html = html.replace('\\T', 'T')
+        
         # Convert line breaks to HTML
         html = html.replace('\n\n', '</p><p>').replace('\n', '<br>')
         html = f'<p>{html}</p>'
@@ -107,6 +118,75 @@ class StickyNoteWidget(WidgetExecutor):
         html = re.sub(r'<p>\s*</p>', '', html)
         
         return html
+    
+    def process_markdown_variables(self, content: str) -> str:
+        """
+        Process variable substitution in markdown content.
+        Supports {{variable_name}} syntax with widget metadata.
+        """
+        # Get widget metadata variables
+        variables = {
+            'widget_id': self.id,
+            'widget_name': self.name,
+            'timestamp': self._get_current_timestamp()
+        }
+        
+        # Add any additional variables from widget configuration  
+        if hasattr(self, 'variables') and isinstance(self.variables, dict):
+            variables.update(self.variables)
+        
+        # Process variable substitution
+        variable_pattern = re.compile(r'\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}')
+        
+        def replace_variable(match):
+            var_name = match.group(1)
+            if var_name in variables:
+                return str(variables[var_name])
+            else:
+                # Return error marker for undefined variables
+                return f'<span style="color: red; text-decoration: underline;">{{undefined:{var_name}}}</span>'
+        
+        return variable_pattern.sub(replace_variable, content)
+    
+    def _get_current_timestamp(self) -> str:
+        """Get current timestamp in ISO format"""
+        from datetime import datetime
+        return datetime.now().isoformat()
+    
+    # Action methods for multi-action support as defined in the schema
+    def action_render_markdown(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Render markdown content action"""
+        result = self._execute_impl(validated_input)
+        result['action_type'] = 'render-markdown'
+        result['output_format'] = 'html'
+        return result
+    
+    def action_export_pdf(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Export note as PDF action (mock implementation)"""
+        content = validated_input.get('content', '')
+        
+        return {
+            'success': True,
+            'action_type': 'export-pdf',
+            'output_format': 'pdf',
+            'message': 'PDF export functionality would be implemented here',
+            'content_length': len(content),
+            'export_ready': True
+        }
+    
+    def action_export_html(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Export note as HTML file action"""
+        result = self._execute_impl(validated_input)
+        html_content = result.get('rendered_html', '')
+        
+        return {
+            'success': True,
+            'action_type': 'export-html',
+            'output_format': 'html',
+            'html_content': html_content,
+            'standalone_html': f'<!DOCTYPE html><html><head><title>Sticky Note</title></head><body>{html_content}</body></html>',
+            'message': 'HTML export ready'
+        }
 
 
 # Widget schema definition for the sticky note
@@ -158,7 +238,58 @@ STICKY_NOTE_SCHEMA = {
             }
         }
     },
-    "python_script": "widgets/sticky_note.py"
+    "actions": {
+        "render-markdown": {
+            "slug": "render-markdown",
+            "names": {
+                "en": "Render Markdown",
+                "es": "Renderizar Markdown",
+                "fr": "Rendre Markdown",
+                "de": "Markdown Rendern"
+            },
+            "icon": "📝",
+            "description": {
+                "en": "Render markdown content with LaTeX support",
+                "es": "Renderizar contenido markdown con soporte LaTeX"
+            },
+            "menu_category": "display",
+            "output_format": "html",
+            "validation_required": True
+        },
+        "export-pdf": {
+            "slug": "export-pdf",
+            "names": {
+                "en": "Export PDF",
+                "es": "Exportar PDF", 
+                "fr": "Exporter PDF",
+                "de": "PDF Exportieren"
+            },
+            "icon": "📄",
+            "description": {
+                "en": "Export note as PDF document"
+            },
+            "menu_category": "export",
+            "output_format": "pdf",
+            "validation_required": True
+        },
+        "export-html": {
+            "slug": "export-html",
+            "names": {
+                "en": "Export HTML",
+                "es": "Exportar HTML",
+                "fr": "Exporter HTML", 
+                "de": "HTML Exportieren"
+            },
+            "icon": "🌐",
+            "description": {
+                "en": "Export note as standalone HTML file"
+            },
+            "menu_category": "export",
+            "output_format": "html",
+            "validation_required": True
+        }
+    },
+    "python_script": "libraries/core/sticky-note/sticky_note.py"
 }
 
 

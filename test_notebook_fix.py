@@ -8,7 +8,7 @@ import json
 def test_notebook_structure():
     """Test that the notebook has the correct structure to avoid NameError."""
     
-    with open('weierstrass_playground.ipynb', 'r') as f:
+    with open('legacy/weierstrass_playground.ipynb', 'r') as f:
         nb = json.load(f)
     
     # Extract code cells
@@ -44,7 +44,7 @@ def test_notebook_structure():
 def test_notebook_instructions():
     """Test that the notebook has proper usage instructions."""
     
-    with open('weierstrass_playground.ipynb', 'r') as f:
+    with open('legacy/weierstrass_playground.ipynb', 'r') as f:
         nb = json.load(f)
     
     # Check first markdown cell for instructions
