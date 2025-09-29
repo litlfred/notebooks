@@ -14,7 +14,13 @@ from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'widget_threading'))
 
-from notebook_widget import NotebookWidget
+try:
+    from notebook_widget import NotebookWidget
+except ImportError:
+    # Create a minimal base if not available
+    class NotebookWidget:
+        pass
+
 from widget_threading.widget_executor import ThreadedWidgetExecutor
 from widget_threading.thread_pool_engine import get_global_engine
 

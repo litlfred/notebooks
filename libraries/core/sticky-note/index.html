@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticky Note Widget Schema - Mathematical Widget</title>
+    <link rel="stylesheet" href="../../js/minimal-launcher-styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-container" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing Sticky Note Widget Schema</div>
+        <div class="loading-details" id="loading-details">
+            Setting up widget execution environment...
+        </div>
+    </div>
+
+    <!-- Error Overlay -->
+    <div id="error-container" class="error-container">
+        <div class="error-content">
+            <div class="error-title">Widget Loading Error</div>
+            <div class="error-message" id="error-message">
+                Failed to load the Sticky Note Widget Schema widget.
+            </div>
+            <div class="error-details" id="error-details"></div>
+            <div class="shutdown-links">
+                <a href="javascript:window.location.reload()" class="shutdown-link">🔄 Retry</a>
+                <a href="../index.html" class="shutdown-link">🏠 Home</a>
+                <a href="https://github.com/litlfred/notebooks" class="shutdown-link" target="_blank">💻 GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../js/github-pages-launcher.js"></script>
+    <script>
+        // Initialize widget launcher
+        document.addEventListener('DOMContentLoaded', () => {
+            const launcher = GitHubPagesLauncher.createForGitHubPages({
+                threadPoolWorkers: 2,
+                enableLazyLoading: true,
+                showLoadingScreen: true,
+                loadingDelay: 500,
+                playgroundPath: '../sticky-note.html'
+            });
+            launcher.launch();
+        });
+    </script>
+</body>
+</html>

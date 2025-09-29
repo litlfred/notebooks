@@ -91,36 +91,6 @@ class GitHubPagesLauncher {
         
         // Navigate directly to the playground page
         window.location.href = this.config.playgroundPath;
-        
-        // If we're staying on the same page (for testing), initialize threading bridge
-        if (this.config.enableThreadingBridge && window.boardApp) {
-            this.initializeThreadingBridge();
-        }
-    }
-
-    /**
-     * Initialize threading bridge if board app is available
-     */
-    async initializeThreadingBridge() {
-        try {
-            // Wait for board app to be fully loaded
-            if (typeof BoardThreadingBridge === 'undefined') {
-                console.warn('BoardThreadingBridge not available, skipping integration');
-                return;
-            }
-
-            // Create threading bridge
-            const bridge = new BoardThreadingBridge(window.boardApp, null);
-            await bridge.initialize();
-
-            // Store bridge globally for access
-            window.threadingBridge = bridge;
-
-            console.log('✅ Threading bridge initialized successfully');
-
-        } catch (error) {
-            console.error('❌ Failed to initialize threading bridge:', error);
-        }
     }
 
     /**
@@ -172,8 +142,7 @@ class GitHubPagesLauncher {
             preloadScientific: true,
             playgroundPath: 'docs/weierstrass-playground/board.html',
             showLoadingScreen: true,
-            loadingDelay: 800,
-            enableThreadingBridge: true
+            loadingDelay: 800
         };
         
         return new GitHubPagesLauncher({

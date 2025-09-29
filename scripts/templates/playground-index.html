@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{widget_name}</title>
+    <link rel="stylesheet" href="{relative_js_path}/minimal-launcher-styles.css">
+</head>
+<body>
+    <div id="loading-container" class="loading-container">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Initializing {widget_name}</div>
+        <div class="loading-details" id="loading-details">
+            Setting up mathematical workspace...
+        </div>
+    </div>
+
+    <div id="error-container" class="error-container">
+        <div class="error-content">
+            <div class="error-title">Playground Loading Error</div>
+            <div class="error-message" id="error-message">
+                Failed to load the mathematical playground.
+            </div>
+            <div class="error-details" id="error-details"></div>
+            <div class="shutdown-links">
+                <a href="javascript:window.location.reload()" class="shutdown-link">🔄 Retry</a>
+                <a href="{playground_path}" class="shutdown-link">🎯 Direct Access</a>
+                <a href="https://github.com/litlfred/notebooks" class="shutdown-link" target="_blank">💻 GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="{relative_js_path}/github-pages-launcher.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {{
+            const launcher = GitHubPagesLauncher.createForGitHubPages({{
+                threadPoolWorkers: {thread_pool_workers},
+                enableLazyLoading: {enable_lazy_loading},
+                preloadScientific: true,
+                playgroundPath: '{playground_path}',
+                showLoadingScreen: {show_loading_screen},
+                loadingDelay: {loading_delay}
+            }});
+            launcher.launch();
+        }});
+    </script>
+</body>
+</html>
