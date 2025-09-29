@@ -240,6 +240,31 @@
           "enum": ["strict", "moderate", "permissive"],
           "default": "strict",
           "description": "Security policy level for transformation execution"
+        },
+        "nodejs_config": {
+          "type": "object",
+          "description": "Node.js-specific configuration for non-Python transformers",
+          "properties": {
+            "package_name": {
+              "type": "string",
+              "description": "Name of the Node.js transformer package (e.g., 'notebooks-transformers-js')"
+            },
+            "module_path": {
+              "type": "string", 
+              "description": "Path to the transformer module within the package (e.g., 'javascript')"
+            },
+            "node_version": {
+              "type": "string",
+              "description": "Required Node.js version (e.g., '>=16.0.0')"
+            },
+            "npm_dependencies": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Additional npm packages required for this transformation"
+            }
+          }
         }
       },
       "additionalProperties": false

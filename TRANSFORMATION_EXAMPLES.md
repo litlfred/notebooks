@@ -2,6 +2,37 @@
 
 This document provides concrete examples of how the proposed multi-type transformation system would work in practice.
 
+## Architecture Overview
+
+The transformation system uses a **Node.js-based architecture** for all non-Python languages:
+
+- **Python transformations**: Execute directly in the Python environment (built-in)
+- **All other languages**: Execute via Node.js modules using a common interface
+- **Each language**: Implemented as a separate Node.js package (e.g., `notebooks-transformers-js`, `notebooks-transformers-r`)
+- **Extensibility**: Adding new languages requires creating a Node.js module and Python wrapper
+
+### Node.js Transformer Interface
+All Node.js transformers implement this standard interface:
+```javascript
+class LanguageTransformer {
+    validate(content, config) { /* syntax validation */ }
+    transform(content, sourceData, inputMapping, config) { /* execution */ }
+}
+```
+
+### Python Integration
+Each Node.js transformer is registered via a Python wrapper:
+```python
+class LanguageTransformer(NodeJSTransformer):
+    def __init__(self):
+        super().__init__('notebooks-transformers-{lang}', '{lang}-module')
+    
+    def get_supported_mime_types(self) -> List[str]:
+        return ['application/x-{lang}', 'text/x-{lang}']
+
+TransformerFactory.register_transformer(LanguageTransformer())
+```
+
 ## Example 1: Python Data Normalization (Inline)
 
 ### Arrow Configuration
@@ -108,46 +139,76 @@ This document provides concrete examples of how the proposed multi-type transfor
 }
 ```
 
-### Referenced JavaScript File Content
+### Referenced JavaScript File Content (Node.js Module)
 ```javascript
-// time-series-aggregator.js
-const _ = require('lodash');
-const moment = require('moment');
-
-function transform_parameters(source_data, input_mapping) {
-  const timeSeries = source_data.time_series_data;
-  
-  // Group by time intervals (hourly aggregation)
-  const grouped = _.groupBy(timeSeries, (point) => {
-    return moment(point.timestamp).format('YYYY-MM-DD HH:00:00');
-  });
-  
-  // Aggregate each group
-  const aggregated = _.map(grouped, (points, timeKey) => {
-    return {
-      timestamp: timeKey,
-      count: points.length,
-      sum: _.sumBy(points, 'value'),
-      avg: _.meanBy(points, 'value'), 
-      min: _.minBy(points, 'value').value,
-      max: _.maxBy(points, 'value').value,
-      std: Math.sqrt(_.sumBy(points, p => Math.pow(p.value - _.meanBy(points, 'value'), 2)) / points.length)
-    };
-  });
-  
-  source_data.aggregated_data = _.sortBy(aggregated, 'timestamp');
-  source_data.aggregation_metadata = {
-    interval: 'hourly',
-    total_points: timeSeries.length,
-    aggregated_points: aggregated.length,
-    aggregation_time: new Date().toISOString()
-  };
-  
-  return source_data;
+// notebooks-transformers-js/javascript.js - Node.js transformer implementation
+class JavaScriptTransformer {
+    validate(content, config) {
+        try {
+            new Function(content);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    transform(content, sourceData, inputMapping, config) {
+        // Import required modules based on config
+        const _ = require('lodash');
+        const moment = require('moment');
+        
+        // Create transformation function
+        const transformCode = `
+            const _ = require('lodash');
+            const moment = require('moment');
+            
+            // User transformation code
+            ${content}
+            
+            return sourceData;
+        `;
+        
+        const transformFunction = new Function('sourceData', 'inputMapping', transformCode);
+        
+        // Execute transformation
+        const result = transformFunction(sourceData, inputMapping);
+        return result;
+    }
 }
 
-// Export for Node.js execution
-module.exports = { transform_parameters };
+module.exports = new JavaScriptTransformer();
+```
+
+### Example Transformation Content
+```javascript
+// This is the actual transformation code that would be in the 'content' field
+const timeSeries = sourceData.time_series_data;
+
+// Group by time intervals (hourly aggregation)
+const grouped = _.groupBy(timeSeries, (point) => {
+  return moment(point.timestamp).format('YYYY-MM-DD HH:00:00');
+});
+
+// Aggregate each group
+const aggregated = _.map(grouped, (points, timeKey) => {
+  return {
+    timestamp: timeKey,
+    count: points.length,
+    sum: _.sumBy(points, 'value'),
+    avg: _.meanBy(points, 'value'), 
+    min: _.minBy(points, 'value').value,
+    max: _.maxBy(points, 'value').value,
+    std: Math.sqrt(_.sumBy(points, p => Math.pow(p.value - _.meanBy(points, 'value'), 2)) / points.length)
+  };
+});
+
+sourceData.aggregated_data = _.sortBy(aggregated, 'timestamp');
+sourceData.aggregation_metadata = {
+  interval: 'hourly',
+  total_points: timeSeries.length,
+  aggregated_points: aggregated.length,
+  aggregation_time: new Date().toISOString()
+};
 ```
 
 ## Example 3: R Statistical Analysis (IRI with Semantic Context)
@@ -198,65 +259,135 @@ module.exports = { transform_parameters };
 }
 ```
 
-### Referenced R Script Content
-```r
-# Linear Regression Analysis v2.1
-# Available at: https://w3id.org/math/transforms/statistics#linear-regression-v2.1
+### R Transformer Node.js Implementation
+```javascript
+// notebooks-transformers-r/r-lang.js - Node.js-R bridge
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
+class RTransformer {
+    validate(content, config) {
+        try {
+            // Create temporary R script to validate syntax
+            const tempScript = this.createTempScript(content);
+            execSync(`Rscript --vanilla -e "source('${tempScript}')"`, { timeout: 5000 });
+            fs.unlinkSync(tempScript);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+    
+    transform(content, sourceData, inputMapping, config) {
+        const tempScript = this.createTransformScript(content, sourceData, inputMapping);
+        
+        try {
+            const result = execSync(`Rscript --vanilla ${tempScript}`, { 
+                timeout: (config.executionContext?.timeout || 120) * 1000,
+                encoding: 'utf8'
+            });
+            
+            // Parse JSON result from R script
+            const transformedData = JSON.parse(result);
+            fs.unlinkSync(tempScript);
+            
+            return transformedData;
+        } catch (error) {
+            fs.unlinkSync(tempScript);
+            throw error;
+        }
+    }
+    
+    createTransformScript(content, sourceData, inputMapping) {
+        const rScript = `
+library(jsonlite)
 library(stats)
 library(ggplot2) 
 library(dplyr)
 library(broom)
 library(car)
 
-transform_parameters <- function(source_data, input_mapping = NULL) {
-  # Extract data
-  dataset <- source_data$dataset
-  y_var <- source_data$dependent_var
-  x_vars <- source_data$independent_vars
-  
-  # Prepare formula
-  formula_str <- paste(y_var, "~", paste(x_vars, collapse = " + "))
-  model_formula <- as.formula(formula_str)
-  
-  # Fit linear model
-  lm_model <- lm(model_formula, data = dataset)
-  
-  # Extract model statistics
-  model_summary <- summary(lm_model)
-  model_tidy <- tidy(lm_model)
-  model_glance <- glance(lm_model)
-  
-  # Diagnostic tests
-  residual_normality <- shapiro.test(residuals(lm_model))
-  homoscedasticity <- bptest(lm_model)
-  
-  # Create diagnostic plots (base64 encoded)
-  plot_list <- list()
-  
-  # Residuals vs Fitted
-  png(filename = tempfile(fileext = ".png"), width = 800, height = 600)
-  plot(lm_model, which = 1)
-  dev.off()
-  # ... additional plotting code ...
-  
-  # Prepare results
-  source_data$regression_results <- list(
-    model_summary = model_summary,
-    coefficients = model_tidy,
-    model_fit = model_glance,
-    diagnostics = list(
-      residual_normality = list(
-        test = "Shapiro-Wilk",
-        statistic = residual_normality$statistic,
-        p_value = residual_normality$p.value,
-        interpretation = ifelse(residual_normality$p.value > 0.05, "Normal", "Non-normal")
-      ),
-      homoscedasticity = list(
-        test = "Breusch-Pagan", 
-        statistic = homoscedasticity$statistic,
-        p_value = homoscedasticity$p.value,
-        interpretation = ifelse(homoscedasticity$p.value > 0.05, "Homoscedastic", "Heteroscedastic")
+# Load source data
+source_data <- fromJSON('${JSON.stringify(sourceData).replace(/'/g, "\\'")}')
+input_mapping <- fromJSON('${JSON.stringify(inputMapping || {}).replace(/'/g, "\\'")}')
+
+# User transformation code
+${content}
+
+# Output result as JSON
+cat(toJSON(source_data, auto_unbox = TRUE))
+`;
+        
+        const tempPath = path.join(__dirname, \`temp_\${Date.now()}.R\`);
+        fs.writeFileSync(tempPath, rScript);
+        return tempPath;
+    }
+    
+    createTempScript(content) {
+        const tempPath = path.join(__dirname, \`validate_\${Date.now()}.R\`);
+        fs.writeFileSync(tempPath, content);
+        return tempPath;
+    }
+}
+
+module.exports = new RTransformer();
+```
+
+### Example R Transformation Content
+```r
+# This is the actual R transformation code that would be in the 'content' field
+# Extract data
+dataset <- source_data$dataset
+y_var <- source_data$dependent_var
+x_vars <- source_data$independent_vars
+
+# Prepare formula
+formula_str <- paste(y_var, "~", paste(x_vars, collapse = " + "))
+model_formula <- as.formula(formula_str)
+
+# Fit linear model
+lm_model <- lm(model_formula, data = dataset)
+
+# Extract model statistics
+model_summary <- summary(lm_model)
+model_tidy <- tidy(lm_model)
+model_glance <- glance(lm_model)
+
+# Diagnostic tests
+residual_normality <- shapiro.test(residuals(lm_model))
+homoscedasticity <- bptest(lm_model)
+
+# Prepare results
+source_data$regression_results <- list(
+  model_summary = list(
+    r_squared = model_summary$r.squared,
+    adj_r_squared = model_summary$adj.r.squared,
+    f_statistic = model_summary$fstatistic[1],
+    p_value = pf(model_summary$fstatistic[1], model_summary$fstatistic[2], model_summary$fstatistic[3], lower.tail = FALSE)
+  ),
+  coefficients = model_tidy,
+  model_fit = model_glance,
+  diagnostics = list(
+    residual_normality = list(
+      test = "Shapiro-Wilk",
+      statistic = residual_normality$statistic,
+      p_value = residual_normality$p.value,
+      interpretation = ifelse(residual_normality$p.value > 0.05, "Normal", "Non-normal")
+    ),
+    homoscedasticity = list(
+      test = "Breusch-Pagan", 
+      statistic = homoscedasticity$statistic,
+      p_value = homoscedasticity$p.value,
+      interpretation = ifelse(homoscedasticity$p.value > 0.05, "Homoscedastic", "Heteroscedastic")
+    )
+  ),
+  analysis_metadata = list(
+    r_version = R.version.string,
+    packages_used = c("stats", "ggplot2", "dplyr", "broom", "car"),
+    analysis_timestamp = Sys.time()
+  )
+)
       )
     ),
     diagnostic_plots = plot_list,
