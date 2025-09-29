@@ -4,15 +4,20 @@
     "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
     "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
     {
+      "notebook": "https://litlfred.github.io/notebooks/vocab/notebook/",
+      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
       "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
-      "Connection": "workflow:Connection"
+      "Connection": "workflow:Connection",
+      "dct": "http://purl.org/dc/terms/"
     }
   ],
   "@id": "urn:notebook:minimal-pq-torus",
-  "@type": ["prov:Entity", "notebook:Notebook"],
-  "dct:title": "Minimal PQ-Torus Example",
-  "dct:description": "Basic demonstration of PQ-Torus widget with prime lattice parameters",
+  "@type": ["prov:Entity", "notebook:Notebook", "widget:NotebookWidget"],
+  "dct:title": "Minimal PQ-Torus Demo - ℘ Weierstrass Playground",
+  "dct:description": "Basic demonstration notebook widget showcasing PQ-Torus functionality with prime lattice parameters in the Weierstrass Playground",
   "dct:created": "2024-09-28T10:00:00Z",
+  "widget:category": "mathematical",
+  "widget:complexity": "intermediate",
   "notebook:libraries": [
     {
       "@id": "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",

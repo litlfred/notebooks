@@ -1,5 +1,5 @@
 /**
- * Mathematical Board - Advanced Miro-like Interactive Workspace
+ * ℘ Weierstrass Playground - Advanced Miro-like Interactive Workspace
  * Handles JSON schema-based widgets, execution, and connections
  */
 
@@ -2047,7 +2047,7 @@ document.addEventListener('DOMContentLoaded', () => {
     boardApp = new MathematicalBoard();
     window.boardApp = boardApp; // Make globally available
     
-    console.log('Mathematical Board initialized');
+    console.log('℘ Weierstrass Playground initialized');
 });
 
 /**

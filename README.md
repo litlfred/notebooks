@@ -62,17 +62,18 @@ This repository contains a comprehensive widget framework for interactive mathem
 │   │   ├── ontology/            # JSON-LD contexts
 │   │   └── README.md            # Schema documentation
 │   ├── weierstrass-playground/   # Interactive blackboard system
-│   │   ├── board.html           # Widget blackboard interface
+│   │   ├── board.html           # ℘ Weierstrass Playground interface
 │   │   ├── widgets/             # Widget implementations
 │   │   └── widget-schemas.json  # Widget registry
 │   ├── widget-framework.md      # Complete framework documentation
 │   ├── json-schema-specification.md  # Schema specifications
 │   ├── architecture-examples.md # Implementation examples
 │   └── migration-guide.md       # Migration strategy
-├── weierstrass_lib.py           # Legacy library (maintained for compatibility)
-├── weierstrass_ui.py            # Legacy UI components
-├── weierstrass_preamble.py      # Setup and documentation
-├── weierstrass_playground.ipynb  # Jupyter notebook version
+├── legacy/                      # Legacy implementations (migrated to libraries/)
+│   ├── weierstrass_lib.py       # → libraries/pq-torus/weierstrass_math.py
+│   ├── weierstrass_ui.py        # → modern widget system
+│   ├── weierstrass_preamble.py  # → setup documentation
+│   └── weierstrass_playground.ipynb  # → JSON-LD notebooks
 ├── setup.py & pyproject.toml    # Package configuration
 └── requirements.txt             # Dependencies
 ```

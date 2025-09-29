@@ -293,6 +293,14 @@ body {
     transition: background 0.3s ease;
 }
 
+/* Special styling for Weierstrass ℘ symbol */
+.board-title h1:first-letter {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-color);
+    text-shadow: 0 0 8px rgba(230, 126, 34, 0.3);
+}
+
 .board-title h1:focus {
     background: var(--bg-secondary);
 }

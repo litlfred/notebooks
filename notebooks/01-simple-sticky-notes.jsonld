@@ -1,13 +1,20 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+    {
+      "notebook": "https://litlfred.github.io/notebooks/vocab/notebook/",
+      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
+      "dct": "http://purl.org/dc/terms/"
+    }
   ],
   "@id": "urn:notebook:simple-sticky-notes",
-  "@type": ["prov:Entity", "notebook:Notebook"],
-  "dct:title": "Simple Sticky Notes Example",
-  "dct:description": "Basic example with only sticky note widgets demonstrating simple markdown content",
+  "@type": ["prov:Entity", "notebook:Notebook", "widget:NotebookWidget"],
+  "dct:title": "Simple Sticky Notes Demo - ℘ Weierstrass Playground",
+  "dct:description": "Basic example notebook widget demonstrating sticky note functionality in the Weierstrass Playground environment",
   "dct:created": "2024-09-28T10:00:00Z",
+  "widget:category": "demonstration",
+  "widget:complexity": "beginner",
   "@graph": [
     {
       "@id": "urn:widget:sticky-note-1",
@@ -23,7 +30,7 @@
       "input": {
         "@type": ["prov:Entity", "sticky:input"],
         "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
-        "content": "# Welcome to Widget Framework\n\nThis is a simple **sticky note** widget demonstrating basic markdown support.\n\n- Easy to use\n- Supports *formatting*\n- Great for `documentation`",
+        "content": "# Welcome to ℘ Weierstrass Playground\n\nThis is a simple **sticky note** widget demonstrating basic markdown support within the Weierstrass Playground environment.\n\n- Easy to use mathematical workspace\n- Supports *formatting* and `code`\n- Perfect for mathematical documentation",
         "show_note": true
       }
     },
@@ -41,7 +48,7 @@
       "input": {
         "@type": ["prov:Entity", "sticky:input"],
         "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
-        "content": "## Getting Started\n\nTo create more widgets:\n\n1. Add widgets from the library\n2. Configure their parameters\n3. Connect widgets together\n4. Execute and analyze results",
+        "content": "## Getting Started with ℘ Functions\n\nTo explore mathematical concepts:\n\n1. Add Weierstrass widgets from the library\n2. Configure lattice parameters (p, q)\n3. Connect widgets for parameter flow\n4. Execute and visualize ℘ function results",
         "show_note": true
       }
     },
