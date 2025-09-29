@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/code-output.schema.json",
+  "title": "Jupyter Code Cell Output Schema",
+  "description": "Output schema for Jupyter notebook code cells",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the cell execution was successful"
+    },
+    "stdout": {
+      "type": "string",
+      "description": "Standard output from code execution"
+    },
+    "stderr": {
+      "type": "string",
+      "description": "Standard error from code execution"
+    },
+    "return_value": {
+      "description": "Return value from code execution",
+      "oneOf": [
+        {"type": "null"},
+        {"type": "string"},
+        {"type": "number"},
+        {"type": "boolean"},
+        {"type": "object"},
+        {"type": "array"}
+      ]
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Time taken to execute the code in seconds"
+    },
+    "cell_type": {
+      "type": "string",
+      "enum": ["code"],
+      "description": "Type of the cell"
+    },
+    "rendered_outputs": {
+      "type": "array",
+      "description": "Rendered HTML outputs from Jupyter cell",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["stream", "html", "text", "image", "json", "error"],
+            "description": "Type of rendered output"
+          },
+          "stream_name": {
+            "type": "string",
+            "description": "Stream name for stream outputs"
+          },
+          "mime_type": {
+            "type": "string",
+            "description": "MIME type of the output"
+          },
+          "html": {
+            "type": "string",
+            "description": "Rendered HTML content"
+          }
+        },
+        "required": ["type", "html"]
+      }
+    },
+    "execution_count": {
+      "type": ["integer", "null"],
+      "description": "Execution count from the notebook"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Cell execution metadata",
+      "properties": {
+        "cell_type": {
+          "type": "string",
+          "enum": ["code"],
+          "description": "Type of the cell"
+        },
+        "cell_index": {
+          "type": "integer",
+          "description": "Index of cell in original notebook"
+        },
+        "code_length": {
+          "type": "integer",
+          "description": "Length of the original code"
+        },
+        "has_outputs": {
+          "type": "boolean",
+          "description": "Whether the cell has outputs"
+        },
+        "cell_metadata": {
+          "type": "object",
+          "description": "Original Jupyter cell metadata"
+        }
+      }
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": false
+}

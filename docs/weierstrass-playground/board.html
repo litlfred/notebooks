@@ -17,6 +17,7 @@
     
     <link rel="stylesheet" href="board-style.css">
     <link rel="stylesheet" href="github-auth.css">
+    <link rel="stylesheet" href="jupyter-import.css">
     
     <!-- Fallback for Font Awesome icons - use Unicode symbols -->
     <style>
@@ -169,9 +170,12 @@
 
         <div class="control-section">
             <h4>Notebooks:</h4>
-            <input type="file" id="notebook-file-input" accept=".jsonld,.json" style="display: none;">
+            <input type="file" id="notebook-file-input" accept=".jsonld,.json,.ipynb" style="display: none;">
             <button class="control-btn" onclick="loadNotebookFromFile()">
                 <i class="fas fa-folder-open"></i> Load Notebook
+            </button>
+            <button class="control-btn" onclick="importJupyterFromUrl()">
+                <i class="fas fa-globe"></i> Import from URL
             </button>
             <button class="control-btn" onclick="saveNotebookToFile()">
                 <i class="fas fa-download"></i> Save Notebook
@@ -252,6 +256,29 @@
             
             console.log('Board system initializing...');
         });
+
+        // Jupyter import functions
+        function importJupyterFromUrl() {
+            const url = prompt('Enter Jupyter notebook URL (.ipynb):');
+            if (url && notebookLoader) {
+                notebookLoader.importFromUrl(url);
+            }
+        }
+
+        function loadNotebookFromFile() {
+            if (notebookLoader) {
+                notebookLoader.openFileDialog();
+            }
+        }
+
+        function saveNotebookToFile() {
+            if (notebookLoader) {
+                const filename = prompt('Enter filename for notebook:', 'my-notebook.jsonld');
+                if (filename) {
+                    notebookLoader.saveNotebook(filename);
+                }
+            }
+        }
     </script>
     <script src="github-auth.js"></script>
     <script src="board-app.js"></script>

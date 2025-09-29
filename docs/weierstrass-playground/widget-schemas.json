@@ -495,6 +495,110 @@
           "validation_required": true
         }
       }
+    },
+
+    "jupyter-markdown-cell": {
+      "id": "jupyter-markdown-cell",
+      "name": "Jupyter Markdown Cell",
+      "description": "Markdown cell from Jupyter notebook with attachment support",
+      "category": "content",
+      "icon": "📝",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/schemas/markdown-input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/schemas/markdown-output.schema.json"
+      ],
+      "python_script": "../libraries/core/jupyter-cell/jupyter_markdown_cell.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["jupyter", "markdown", "notebook", "cell"],
+      "actions": {
+        "render-markdown": {
+          "slug": "render-markdown",
+          "names": {
+            "en": "Render Markdown",
+            "es": "Renderizar Markdown",
+            "fr": "Rendre Markdown",
+            "de": "Markdown Rendern"
+          },
+          "icon": "📝",
+          "description": {
+            "en": "Render markdown content with attachment support"
+          },
+          "menu_category": "display",
+          "output_format": "html",
+          "validation_required": true
+        },
+        "export-cell": {
+          "slug": "export-cell",
+          "names": {
+            "en": "Export Cell",
+            "es": "Exportar Celda",
+            "fr": "Exporter Cellule",
+            "de": "Zelle Exportieren"
+          },
+          "icon": "💾",
+          "description": {
+            "en": "Export cell back to Jupyter format"
+          },
+          "menu_category": "export",
+          "output_format": "json",
+          "validation_required": true
+        }
+      }
+    },
+
+    "jupyter-code-cell": {
+      "id": "jupyter-code-cell",
+      "name": "Jupyter Code Cell",
+      "description": "Code cell from Jupyter notebook with output display support",
+      "category": "computation",
+      "icon": "🐍",
+      "input_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/schemas/code-input.schema.json"
+      ],
+      "output_schemas": [
+        "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/schemas/code-output.schema.json"
+      ],
+      "python_script": "../libraries/core/jupyter-cell/jupyter_code_cell.py",
+      "version": "1.0.0",
+      "author": "Widget Framework",
+      "tags": ["jupyter", "python", "code", "notebook", "cell"],
+      "actions": {
+        "execute-cell": {
+          "slug": "execute-cell",
+          "names": {
+            "en": "Execute Cell",
+            "es": "Ejecutar Celda",
+            "fr": "Exécuter Cellule",
+            "de": "Zelle Ausführen"
+          },
+          "icon": "▶️",
+          "description": {
+            "en": "Execute the code cell"
+          },
+          "menu_category": "computation",
+          "output_format": "json",
+          "validation_required": true
+        },
+        "export-cell": {
+          "slug": "export-cell",
+          "names": {
+            "en": "Export Cell",
+            "es": "Exportar Celda",
+            "fr": "Exporter Cellule",
+            "de": "Zelle Exportieren"
+          },
+          "icon": "💾",
+          "description": {
+            "en": "Export cell back to Jupyter format"
+          },
+          "menu_category": "export",
+          "output_format": "json",
+          "validation_required": true
+        }
+      }
     }
   }
 }

@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/markdown-output.schema.json",
+  "title": "Jupyter Markdown Cell Output Schema",
+  "description": "Output schema for Jupyter notebook markdown cells",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the cell rendering was successful"
+    },
+    "rendered_html": {
+      "type": "string",
+      "description": "Rendered HTML content of the markdown cell"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Cell rendering metadata",
+      "properties": {
+        "visible": {
+          "type": "boolean",
+          "description": "Whether the cell content is visible"
+        },
+        "cell_type": {
+          "type": "string",
+          "enum": ["markdown"],
+          "description": "Type of the cell"
+        },
+        "cell_index": {
+          "type": "integer",
+          "description": "Index of cell in original notebook"
+        },
+        "content_length": {
+          "type": "integer",
+          "description": "Length of the original content"
+        },
+        "rendered_length": {
+          "type": "integer",
+          "description": "Length of the rendered content"
+        },
+        "has_attachments": {
+          "type": "boolean",
+          "description": "Whether the cell has attachments"
+        },
+        "cell_metadata": {
+          "type": "object",
+          "description": "Original Jupyter cell metadata"
+        }
+      }
+    },
+    "cell_type": {
+      "type": "string",
+      "enum": ["markdown"],
+      "description": "Type of the cell"
+    },
+    "processed_attachments": {
+      "type": "object",
+      "description": "Processed attachment data URLs",
+      "additionalProperties": {
+        "type": "string",
+        "description": "Data URL or processed attachment content"
+      }
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": false
+}

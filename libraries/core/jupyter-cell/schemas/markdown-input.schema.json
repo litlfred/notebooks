@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/jupyter-cell/markdown-input.schema.json",
+  "title": "Jupyter Markdown Cell Input Schema",
+  "description": "Input schema for Jupyter notebook markdown cells with attachment support",
+  "type": "object",
+  "properties": {
+    "content": {
+      "type": "string",
+      "description": "Markdown content from the notebook cell",
+      "default": "# Jupyter Markdown Cell\n\nMarkdown content from notebook cell..."
+    },
+    "show_note": {
+      "type": "boolean",
+      "description": "Whether to show or hide the cell content",
+      "default": true
+    },
+    "cell_metadata": {
+      "type": "object",
+      "description": "Original Jupyter cell metadata",
+      "default": {}
+    },
+    "attachments": {
+      "type": "object",
+      "description": "Cell attachments (images, files) as per nbformat specification",
+      "default": {},
+      "additionalProperties": {
+        "type": "object",
+        "description": "Attachment data with MIME type keys",
+        "additionalProperties": true
+      }
+    },
+    "execution_count": {
+      "type": ["integer", "null"],
+      "description": "Execution count (null for markdown cells)"
+    },
+    "cell_index": {
+      "type": "integer",
+      "description": "Index of cell in original notebook",
+      "minimum": 0,
+      "default": 0
+    }
+  },
+  "required": ["content"],
+  "additionalProperties": false
+}
