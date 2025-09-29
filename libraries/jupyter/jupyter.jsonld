@@ -1,0 +1,72 @@
+{
+  "@context": {
+    "@vocab": "https://litlfred.github.io/notebooks/ontology/",
+    "jupyter": "https://litlfred.github.io/notebooks/ontology/jupyter#",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dct": "http://purl.org/dc/terms/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "library": "https://litlfred.github.io/notebooks/ontology/library#",
+    
+    "input": "@type",
+    "output": "@type", 
+    "widget": "@type",
+    
+    "conformsTo": {
+      "@id": "dct:conformsTo",
+      "@type": "@id"
+    },
+    "value": {
+      "@id": "prov:value"
+    }
+  },
+  "@id": "https://litlfred.github.io/notebooks/libraries/jupyter/",
+  "@type": ["prov:Collection", "library:WidgetLibrary"],
+  "dct:title": "Jupyter Notebook Widget Library",
+  "dct:description": "Jupyter notebook cell widgets for importing .ipynb files",
+  "dct:version": "1.0.0",
+  "widgets": {
+    "jupyter-markdown-cell": {
+      "@id": "jupyter-markdown-cell",
+      "@type": "library:WidgetDefinition",
+      "name": "Jupyter Markdown Cell",
+      "description": "Jupyter notebook markdown cell with rich output rendering",
+      "category": "jupyter",
+      "icon": "📄",
+      "input_schema": "markdown-cell/input.schema.json",
+      "output_schema": "markdown-cell/output.schema.json",
+      "widget_schema": "markdown-cell/widget.schema.json",
+      "python_script": "jupyter_markdown_cell.py",
+      "python_class": "JupyterMarkdownWidget"
+    },
+    "jupyter-code-cell": {
+      "@id": "jupyter-code-cell",
+      "@type": "library:WidgetDefinition",
+      "name": "Jupyter Code Cell",
+      "description": "Jupyter notebook code cell with execution and rich output support",
+      "category": "jupyter",
+      "icon": "🐍",
+      "input_schema": "code-cell/input.schema.json",
+      "output_schema": "code-cell/output.schema.json", 
+      "widget_schema": "code-cell/widget.schema.json",
+      "python_script": "jupyter_code_cell.py",
+      "python_class": "JupyterCodeWidget"
+    },
+    "jupyter-raw-cell": {
+      "@id": "jupyter-raw-cell",
+      "@type": "library:WidgetDefinition",
+      "name": "Jupyter Raw Cell",
+      "description": "Jupyter notebook raw cell for non-executable content",
+      "category": "jupyter",
+      "icon": "📝",
+      "input_schema": "raw-cell/input.schema.json",
+      "output_schema": "raw-cell/output.schema.json",
+      "widget_schema": "raw-cell/widget.schema.json",
+      "python_script": "jupyter_raw_cell.py",
+      "python_class": "JupyterRawWidget"
+    }
+  },
+  "common": {
+    "metadata_schema": "common/metadata.schema.json",
+    "execution_result_schema": "common/execution-result.schema.json"
+  }
+}

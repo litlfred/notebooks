@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:litlfred:notebooks:schema:jupyter-cell:markdown:widget",
+  "title": "Jupyter Markdown Cell Widget",
+  "description": "Widget schema for Jupyter notebook markdown cells, extending sticky-note functionality",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "../../sticky-note/widget.schema.json"
+    }
+  ],
+  "properties": {
+    "jupyter": {
+      "type": "object",
+      "description": "Jupyter-specific metadata and properties",
+      "properties": {
+        "cell_type": {
+          "type": "string",
+          "const": "markdown",
+          "description": "Jupyter cell type identifier"
+        },
+        "execution_count": {
+          "type": ["integer", "null"],
+          "description": "Cell execution count from notebook"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Original Jupyter cell metadata",
+          "additionalProperties": true
+        },
+        "id": {
+          "type": "string",
+          "description": "Original Jupyter cell ID if present"
+        },
+        "attachments": {
+          "type": "object",
+          "description": "Cell attachments per nbformat specification",
+          "patternProperties": {
+            "^[a-zA-Z0-9._-]+$": {
+              "type": "object",
+              "patternProperties": {
+                "^[a-zA-Z0-9._/-]+$": {
+                  "oneOf": [
+                    {"type": "string"},
+                    {"type": "array", "items": {"type": "string"}}
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["cell_type"]
+    }
+  },
+  "required": ["jupyter"]
+}
