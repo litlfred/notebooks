@@ -3,8 +3,11 @@ Jupyter Raw Cell Widget Executor
 Handles raw text cells imported from Jupyter notebooks
 """
 
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../core'))
+from base_widget import WidgetExecutor
 from typing import Dict, Any
-from .widget_executor import WidgetExecutor
 
 
 class JupyterRawWidget(WidgetExecutor):

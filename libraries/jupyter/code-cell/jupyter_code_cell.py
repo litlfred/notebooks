@@ -6,8 +6,11 @@ Handles code cells imported from Jupyter notebooks with output rendering
 import re
 import json
 import base64
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../core'))
+from base_widget import WidgetExecutor
 from typing import Dict, Any, List
-from .widget_executor import WidgetExecutor
 
 
 class JupyterCodeWidget(WidgetExecutor):

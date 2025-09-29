@@ -28,7 +28,11 @@ class WidgetExecutor:
         'PQTorusWeierstrassThreePanelWidget': 'pq-torus.weierstrass.three-panel',
         'PQTorusWeierstrassFivePanelWidget': 'pq-torus.weierstrass.five-panel',
         'PQTorusWeierstrassTrajectoriesWidget': 'pq-torus.weierstrass.trajectories',
-        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours'
+        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours',
+        # Jupyter widgets
+        'JupyterMarkdownWidget': 'jupyter.markdown-cell',
+        'JupyterCodeWidget': 'jupyter.code-cell',
+        'JupyterRawWidget': 'jupyter.raw-cell'
     }
     
     # Reverse mapping for JSON-LD ID to class name
