@@ -28,8 +28,7 @@ class WidgetExecutor:
         'PQTorusWeierstrassThreePanelWidget': 'pq-torus.weierstrass.three-panel',
         'PQTorusWeierstrassFivePanelWidget': 'pq-torus.weierstrass.five-panel',
         'PQTorusWeierstrassTrajectoriesWidget': 'pq-torus.weierstrass.trajectories',
-        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours',
-        'PQTorusWeierstrassTimeSeriesWidget': 'pq-torus.weierstrass.time-series'
+        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours'
     }
     
     # Reverse mapping for JSON-LD ID to class name
