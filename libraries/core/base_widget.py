@@ -10,11 +10,15 @@ from datetime import datetime
 from typing import Dict, Any, List, Optional
 
 class WidgetExecutor:
-    """Base class for executing schema-based widgets with multi-action support"""
+    """Base class for executing schema-based widgets with multi-action support and threading"""
     
     # Default empty input/output variable declarations - can be overridden by subclasses
     input_variables: Dict[str, Any] = {}
     output_variables: Dict[str, Any] = {}
+    
+    # Threading support flags
+    supports_threading: bool = False
+    supports_hierarchical_execution: bool = False
     
     def __init__(self, widget_schema: Dict[str, Any], jsonld_schema: Optional[Dict[str, Any]] = None):
         self.schema = widget_schema
@@ -469,6 +473,29 @@ class WidgetExecutor:
             'success': True,
             'message': f'Base widget {self.id} executed successfully',
             'input_received': validated_input
+        }
+    
+    # Default threading action implementations (can be overridden by subclasses)
+    def action_run(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Default run action - executes the widget"""
+        return self.execute(validated_input)
+    
+    def action_stop(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Default stop action - base widgets don't support stopping"""
+        return {
+            'success': True,
+            'message': f'Widget {self.id} does not support stopping (not threaded)',
+            'widget_id': self.id,
+            'supports_threading': self.supports_threading
+        }
+    
+    def action_halt(self, validated_input: Dict[str, Any]) -> Dict[str, Any]:
+        """Default halt action - base widgets don't support halting"""
+        return {
+            'success': True,
+            'message': f'Widget {self.id} does not support halting (not threaded)',
+            'widget_id': self.id,
+            'supports_threading': self.supports_threading
         }
     
     def get_jsonld_id(self) -> str:

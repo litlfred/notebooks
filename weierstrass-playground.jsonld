@@ -1,0 +1,192 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/prov-o.jsonld",
+    {
+      "playground": "https://litlfred.github.io/notebooks/vocab/playground/",
+      "notebooks": "https://litlfred.github.io/notebooks/vocab/",
+      "core": "https://litlfred.github.io/notebooks/libraries/core/",
+      "pqt": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+      "dct": "http://purl.org/dc/terms/",
+      "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+      "xsd": "http://www.w3.org/2001/XMLSchema#",
+      "widget": "https://litlfred.github.io/notebooks/vocab/widget/"
+    }
+  ],
+  "@id": "https://litlfred.github.io/notebooks/weierstrass-playground.jsonld",
+  "@type": [
+    "prov:Entity",
+    "playground:Widget",
+    "notebooks:InteractiveApplication"
+  ],
+  "dct:conformsTo": [
+    "https://litlfred.github.io/notebooks/libraries/core/notebook/widget.schema.json"
+  ],
+  "dct:title": "℘ Weierstrass Mathematical Playground",
+  "dct:description": "Interactive mathematical workspace for exploring the Weierstrass ℘ function with drag-and-drop widgets, computational pipelines, and real-time visualization.",
+  "dct:created": "2024-09-28T12:00:00Z",
+  "dct:modified": "2024-09-28T15:30:00Z",
+  "dct:creator": "litlfred",
+  "dct:license": "https://github.com/litlfred/notebooks/blob/main/LICENSE",
+  
+  "playground:widgetType": "playground",
+  "playground:category": "mathematical-workspace",
+  "playground:complexity": "advanced",
+  "playground:supportsFullscreen": true,
+  "playground:requiresThreadPool": true,
+  "playground:lazyLoading": true,
+  
+  "widget:renderUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/board.html",
+  "widget:configUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/widget-schemas.json",
+  "widget:indexUrl": "https://litlfred.github.io/notebooks/index.html",
+  
+  "playground:threadPoolConfig": {
+    "maxWorkers": 4,
+    "enableLazyLoading": true,
+    "preloadScientific": true,
+    "contextIsolation": true
+  },
+  
+  "playground:actions": {
+    "render": {
+      "names": {
+        "en": "Render Playground"
+      },
+      "description": "Render the mathematical playground in fullscreen mode",
+      "output_format": "html",
+      "validation_required": false,
+      "supports_fullscreen": true
+    },
+    "run": {
+      "names": {
+        "en": "Run Playground"
+      }, 
+      "description": "Initialize thread pool and start the playground widget",
+      "output_format": "json",
+      "validation_required": false,
+      "thread_pool_required": true
+    },
+    "stop": {
+      "names": {
+        "en": "Stop Playground"
+      },
+      "description": "Gracefully stop the playground and show shutdown message", 
+      "output_format": "json",
+      "validation_required": false
+    },
+    "halt": {
+      "names": {
+        "en": "Force Stop Playground"
+      },
+      "description": "Forcefully halt the playground widget execution",
+      "output_format": "json", 
+      "validation_required": false
+    }
+  },
+  
+  "playground:features": [
+    "drag-and-drop-widgets",
+    "hierarchical-execution",
+    "thread-pool-processing",
+    "real-time-connections",
+    "json-ld-export",
+    "notebook-import-export", 
+    "schema-based-validation",
+    "lazy-loading",
+    "fullscreen-mode",
+    "github-integration"
+  ],
+  
+  "playground:supportedWidgets": [
+    {
+      "@id": "core:sticky-note",
+      "dct:title": "Sticky Note Widget",
+      "playground:type": "content"
+    },
+    {
+      "@id": "core:python-code",
+      "dct:title": "Python Code Execution Widget", 
+      "playground:type": "computation"
+    },
+    {
+      "@id": "core:data-visualization",
+      "dct:title": "Data Visualization Widget",
+      "playground:type": "visualization"
+    },
+    {
+      "@id": "pqt:pq-torus",
+      "dct:title": "PQ-Torus Lattice Definition Widget",
+      "playground:type": "umbrella"
+    },
+    {
+      "@id": "pqt:weierstrass.two-panel",
+      "dct:title": "Two-Panel Weierstrass Visualization",
+      "playground:type": "visualization"
+    },
+    {
+      "@id": "pqt:weierstrass.five-panel", 
+      "dct:title": "Five-Panel Weierstrass Analysis",
+      "playground:type": "visualization"
+    },
+    {
+      "@id": "pqt:weierstrass.trajectories",
+      "dct:title": "Weierstrass Trajectories Widget",
+      "playground:type": "analysis"
+    },
+    {
+      "@id": "pqt:weierstrass.contours",
+      "dct:title": "Weierstrass Contours Widget", 
+      "playground:type": "visualization"
+    }
+  ],
+  
+  "playground:deployment": {
+    "deploymentUrl": "https://litlfred.github.io/notebooks/",
+    "repositoryUrl": "https://github.com/litlfred/notebooks",
+    "indexPath": "/index.html",
+    "playgroundPath": "/docs/weierstrass-playground/board.html",
+    "githubPages": true,
+    "staticDeployment": true
+  },
+  
+  "playground:dependencies": {
+    "libraries": [
+      "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+      "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld"
+    ],
+    "python": [
+      "numpy>=1.20.0",
+      "matplotlib>=3.5.0",
+      "scipy"
+    ],
+    "javascript": [
+      "board-app.js",
+      "notebook-loader.js", 
+      "github-auth.js"
+    ]
+  },
+  
+  "playground:configuration": {
+    "defaultTheme": "dark",
+    "enableMobileSupport": true,
+    "maxWidgetsPerBoard": 50,
+    "autosaveInterval": 30000,
+    "connectionValidation": true,
+    "realTimeExecution": true
+  },
+  
+  "playground:statistics": {
+    "totalWidgetTypes": 8,
+    "umbrellaWidgets": 1,
+    "visualizationWidgets": 4,
+    "computationWidgets": 1,
+    "contentWidgets": 1,
+    "analysisWidgets": 1
+  },
+  
+  "prov:generatedAtTime": "2024-09-28T15:30:00Z",
+  "prov:wasAttributedTo": {
+    "@id": "https://github.com/litlfred",
+    "@type": "prov:Agent",
+    "rdfs:label": "litlfred"
+  }
+}
