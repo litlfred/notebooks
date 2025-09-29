@@ -1,0 +1,435 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/arrow/input-multitype.schema.json",
+  "title": "Enhanced Workflow Arrow Input Schema with Multi-Type Transformations",
+  "description": "Schema for defining arrows/connections between widgets with multi-language transformations using MIME types",
+  "type": "object",
+  "properties": {
+    "source_widget": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI reference to source widget instance"
+    },
+    "target_widget": {
+      "type": "string",
+      "format": "uri", 
+      "description": "URI reference to target widget instance"
+    },
+    "source_parameters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Output parameter names from source widget"
+    },
+    "target_parameters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Input parameter names for target widget"
+    },
+    "arrow_type": {
+      "type": "string",
+      "enum": ["parameter_flow", "data_flow", "control_flow", "dependency"],
+      "default": "parameter_flow",
+      "description": "Type of connection between widgets"
+    },
+    "comment": {
+      "type": "string",
+      "description": "Optional markdown comment displayed as arrow title"
+    },
+    "transformation": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/legacy_transformation"
+        },
+        {
+          "$ref": "#/$defs/multitype_transformation"
+        }
+      ],
+      "description": "Transformation logic applied during parameter flow - supports both legacy and new multi-type formats"
+    }
+  },
+  "required": ["source_widget", "target_widget", "source_parameters", "target_parameters"],
+  "additionalProperties": false,
+  
+  "$defs": {
+    "legacy_transformation": {
+      "type": "object",
+      "title": "Legacy Python-only Transformation (Backward Compatibility)",
+      "properties": {
+        "python_code": {
+          "type": "string",
+          "description": "Legacy: Python function body for ETL transformation"
+        },
+        "input_mapping": {
+          "type": "object",
+          "description": "Legacy: Parameter name mapping from source to target"
+        }
+      },
+      "required": ["python_code"],
+      "additionalProperties": false
+    },
+    
+    "multitype_transformation": {
+      "type": "object", 
+      "title": "Multi-Type Transformation with MIME Type Support",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/x-python",
+            "text/x-python", 
+            "application/javascript",
+            "text/javascript",
+            "application/x-r",
+            "text/x-r",
+            "application/sql",
+            "text/sql",
+            "application/x-sh",
+            "text/x-shellscript",
+            "application/x-yaml",
+            "text/yaml",
+            "application/toml",
+            "text/toml",
+            "application/json",
+            "application/x-math-expression",
+            "application/x-widget-transform"
+          ],
+          "description": "MIME type specifying the transformation language"
+        },
+        "content_source": {
+          "type": "string",
+          "enum": ["inline", "url", "iri", "file"],
+          "default": "inline",
+          "description": "How the transformation content is provided"
+        },
+        "content": {
+          "type": ["string", "null"],
+          "description": "Inline transformation code/script (required for inline source)"
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL or IRI where transformation content is located (required for url/iri source)"
+        },
+        "content_hash": {
+          "type": "string",
+          "description": "Cryptographic hash of transformation content for integrity verification"
+        },
+        "hash_algorithm": {
+          "type": "string",
+          "enum": ["sha256", "sha512", "md5"],
+          "default": "sha256",
+          "description": "Algorithm used for content hashing"
+        },
+        "input_mapping": {
+          "type": "object",
+          "description": "Optional parameter name mapping from source to target",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "output_mapping": {
+          "type": "object", 
+          "description": "Optional mapping for transformation output parameters",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "execution_context": {
+          "$ref": "#/$defs/execution_context"
+        },
+        "jsonld_context": {
+          "$ref": "#/$defs/jsonld_transformation_context"
+        }
+      },
+      "required": ["content_type"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "content_source": {"const": "inline"}
+            }
+          },
+          "then": {
+            "required": ["content"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_source": {"enum": ["url", "iri"]}
+            }
+          },
+          "then": {
+            "required": ["source_url"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    
+    "execution_context": {
+      "type": "object",
+      "title": "Transformation Execution Context and Constraints",
+      "properties": {
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600,
+          "default": 30,
+          "description": "Maximum execution time in seconds"
+        },
+        "timeout_duration": {
+          "type": "string",
+          "pattern": "^PT([0-9]+(\\.?[0-9]*)?(H|M|S))+$",
+          "description": "ISO 8601 duration format for timeout (e.g., PT30S for 30 seconds)"
+        },
+        "memory_limit": {
+          "type": "string",
+          "pattern": "^[0-9]+\\s*(B|KB|MB|GB)$",
+          "default": "50MB",
+          "description": "Maximum memory usage (e.g., '100MB', '1GB')"
+        },
+        "sandboxed": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to execute transformation in sandboxed environment"
+        },
+        "allowed_modules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of allowed modules/packages for the transformation"
+        },
+        "required_capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "array_processing",
+              "statistical_modeling", 
+              "data_visualization",
+              "date_manipulation",
+              "database_read",
+              "database_write",
+              "file_read",
+              "file_write",
+              "network_access",
+              "mathematical_operations"
+            ]
+          },
+          "description": "Required system capabilities for transformation execution"
+        },
+        "environment_variables": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Environment variables to set for transformation execution"
+        },
+        "working_directory": {
+          "type": "string",
+          "description": "Working directory for transformation execution"
+        },
+        "security_policy": {
+          "type": "string",
+          "enum": ["strict", "moderate", "permissive"],
+          "default": "strict",
+          "description": "Security policy level for transformation execution"
+        }
+      },
+      "additionalProperties": false
+    },
+    
+    "jsonld_transformation_context": {
+      "type": "object",
+      "title": "JSON-LD Context for Semantic Transformation Description",
+      "properties": {
+        "@id": {
+          "type": "string",
+          "format": "uri",
+          "description": "Unique identifier for this transformation"
+        },
+        "@type": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "JSON-LD types for this transformation"
+        },
+        "dct:title": {
+          "type": "string",
+          "description": "Human-readable title for the transformation"
+        },
+        "dct:description": {
+          "type": "string", 
+          "description": "Detailed description of what the transformation does"
+        },
+        "dct:creator": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI identifying the creator of this transformation"
+        },
+        "dct:license": {
+          "type": "string",
+          "format": "uri",
+          "description": "License under which the transformation is published"
+        },
+        "schema:version": {
+          "type": "string",
+          "description": "Version of the transformation"
+        },
+        "schema:citation": {
+          "type": "string",
+          "format": "uri",
+          "description": "Citation or reference for the transformation algorithm"
+        },
+        "prov:wasAttributedTo": {
+          "type": "string",
+          "format": "uri", 
+          "description": "Agent responsible for this transformation"
+        },
+        "dct:source": {
+          "type": "object",
+          "description": "Provenance information about the transformation source",
+          "properties": {
+            "@id": {
+              "type": "string",
+              "format": "uri"
+            },
+            "@type": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "schema:programmingLanguage": {
+              "type": "string"
+            },
+            "dct:title": {
+              "type": "string"
+            },
+            "dct:creator": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  
+  "examples": [
+    {
+      "title": "Legacy Python Transformation (Backward Compatibility)",
+      "description": "Example showing backward compatibility with existing python_code format",
+      "data": {
+        "source_widget": "urn:widget:data-source",
+        "target_widget": "urn:widget:processor",
+        "source_parameters": ["raw_data"],
+        "target_parameters": ["processed_data"],
+        "transformation": {
+          "python_code": "source_data['processed_data'] = [x * 2 for x in source_data['raw_data']]\nreturn source_data",
+          "input_mapping": {"raw_data": "input_values"}
+        }
+      }
+    },
+    {
+      "title": "Python Inline Transformation",
+      "description": "New format with inline Python code",
+      "data": {
+        "source_widget": "urn:widget:sensor-data", 
+        "target_widget": "urn:widget:analyzer",
+        "source_parameters": ["temperature", "humidity"],
+        "target_parameters": ["comfort_index"],
+        "transformation": {
+          "content_type": "application/x-python",
+          "content_source": "inline",
+          "content": "import math\ntemp = source_data['temperature']\nhumidity = source_data['humidity']\ncomfort = 0.5 * (temp + 61.0 + ((temp - 68.0) * 1.2) + (humidity * 0.094))\nsource_data['comfort_index'] = comfort\nreturn source_data",
+          "execution_context": {
+            "timeout": 10,
+            "memory_limit": "25MB",
+            "allowed_modules": ["math", "statistics"]
+          }
+        }
+      }
+    },
+    {
+      "title": "JavaScript URL Transformation",
+      "description": "JavaScript transformation loaded from external URL",
+      "data": {
+        "source_widget": "urn:widget:time-series",
+        "target_widget": "urn:widget:aggregator", 
+        "source_parameters": ["data_points"],
+        "target_parameters": ["aggregated_data"],
+        "transformation": {
+          "content_type": "application/javascript",
+          "content_source": "url",
+          "source_url": "https://transforms.example.com/time-series-aggregator.js",
+          "content_hash": "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3",
+          "hash_algorithm": "sha256",
+          "execution_context": {
+            "timeout": 60,
+            "memory_limit": "100MB",
+            "allowed_modules": ["lodash", "moment"]
+          }
+        }
+      }
+    },
+    {
+      "title": "R Statistical Analysis with JSON-LD Context",
+      "description": "R transformation with full semantic context",
+      "data": {
+        "source_widget": "urn:widget:dataset",
+        "target_widget": "urn:widget:statistical-report",
+        "source_parameters": ["observations"],
+        "target_parameters": ["regression_results"],
+        "transformation": {
+          "content_type": "application/x-r",
+          "content_source": "iri",
+          "source_url": "https://w3id.org/math/transforms/statistics#linear-regression",
+          "execution_context": {
+            "timeout": 120,
+            "memory_limit": "200MB",
+            "allowed_modules": ["stats", "ggplot2", "dplyr"],
+            "required_capabilities": ["statistical_modeling"]
+          },
+          "jsonld_context": {
+            "@id": "urn:transform:linear-regression-analysis",
+            "@type": ["transform:Transformation", "prov:Entity"],
+            "dct:title": "Linear Regression Analysis",
+            "dct:description": "Performs linear regression with diagnostic plots",
+            "schema:version": "2.1.0",
+            "dct:creator": "https://orcid.org/0000-0000-0000-0001",
+            "dct:license": "https://spdx.org/licenses/GPL-3.0"
+          }
+        }
+      }
+    },
+    {
+      "title": "SQL Query Transformation",
+      "description": "SQL-based data transformation",
+      "data": {
+        "source_widget": "urn:widget:database-connection",
+        "target_widget": "urn:widget:report-generator",
+        "source_parameters": ["connection_params", "query_filters"],
+        "target_parameters": ["query_results"],
+        "transformation": {
+          "content_type": "application/sql",
+          "content_source": "inline",
+          "content": "SELECT region, product_category, SUM(amount) as total_sales FROM sales_transactions WHERE transaction_date >= :start_date GROUP BY region, product_category ORDER BY total_sales DESC",
+          "execution_context": {
+            "timeout": 90,
+            "memory_limit": "500MB",
+            "required_capabilities": ["database_read"]
+          }
+        }
+      }
+    }
+  ]
+}

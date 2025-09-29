@@ -1,0 +1,275 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "@base": "https://litlfred.github.io/notebooks/ontology/",
+    "@vocab": "https://litlfred.github.io/notebooks/ontology/transform#",
+    
+    "transform": "https://litlfred.github.io/notebooks/ontology/transform#",
+    "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
+    "prov": "https://www.w3.org/ns/prov#",
+    "dct": "http://purl.org/dc/terms/",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    
+    "Transformation": {
+      "@id": "transform:Transformation",
+      "@type": "@id"
+    },
+    "TransformationActivity": {
+      "@id": "transform:TransformationActivity", 
+      "@type": "@id"
+    },
+    "ContentResolver": {
+      "@id": "transform:ContentResolver",
+      "@type": "@id"
+    },
+    "ExecutionContext": {
+      "@id": "transform:ExecutionContext",
+      "@type": "@id"
+    },
+    
+    "contentType": {
+      "@id": "dct:format",
+      "@type": "@id"
+    },
+    "sourceCode": {
+      "@id": "schema:sourceCode",
+      "@type": "xsd:string"
+    },
+    "programmingLanguage": {
+      "@id": "schema:programmingLanguage", 
+      "@type": "@id"
+    },
+    "contentSource": {
+      "@id": "transform:contentSource",
+      "@type": "@vocab"
+    },
+    "sourceUrl": {
+      "@id": "transform:sourceUrl",
+      "@type": "@id"
+    },
+    "contentHash": {
+      "@id": "transform:contentHash",
+      "@type": "xsd:string"
+    },
+    "hashAlgorithm": {
+      "@id": "transform:hashAlgorithm",
+      "@type": "@vocab"
+    },
+    
+    "executionTimeout": {
+      "@id": "transform:executionTimeout",
+      "@type": "xsd:duration"
+    },
+    "memoryLimit": {
+      "@id": "transform:memoryLimit",
+      "@type": "xsd:string"
+    },
+    "sandboxed": {
+      "@id": "transform:sandboxed",
+      "@type": "xsd:boolean"
+    },
+    "allowedModules": {
+      "@id": "transform:allowedModules",
+      "@type": "@id",
+      "@container": "@set"
+    },
+    "requiredCapabilities": {
+      "@id": "transform:requiredCapabilities",
+      "@type": "@vocab",
+      "@container": "@set"
+    },
+    
+    "inputMapping": {
+      "@id": "transform:inputMapping",
+      "@type": "@json"
+    },
+    "outputMapping": {
+      "@id": "transform:outputMapping", 
+      "@type": "@json"
+    },
+    "parameterFlow": {
+      "@id": "workflow:parameterFlow",
+      "@type": "@id"
+    },
+    
+    "wasCompiledBy": {
+      "@id": "transform:wasCompiledBy",
+      "@type": "@id"
+    },
+    "compilationResult": {
+      "@id": "transform:compilationResult",
+      "@type": "@vocab"
+    },
+    "executionResult": {
+      "@id": "transform:executionResult",
+      "@type": "@vocab"
+    },
+    "transformationError": {
+      "@id": "transform:transformationError",
+      "@type": "xsd:string"
+    },
+    "stackTrace": {
+      "@id": "transform:stackTrace",
+      "@type": "xsd:string"
+    },
+    
+    "inline": "transform:InlineContent",
+    "url": "transform:UrlContent", 
+    "iri": "transform:IriContent",
+    "file": "transform:FileContent",
+    
+    "success": "transform:Success",
+    "error": "transform:Error",
+    "timeout": "transform:Timeout",
+    "compilation_error": "transform:CompilationError",
+    "runtime_error": "transform:RuntimeError",
+    
+    "sha256": "transform:SHA256",
+    "sha512": "transform:SHA512",
+    "md5": "transform:MD5",
+    
+    "python": "https://www.python.org/",
+    "javascript": "https://www.ecma-international.org/ecma-262/",
+    "nodejs": "https://nodejs.org/",
+    "r-lang": "https://www.r-project.org/",
+    "sql": "https://www.iso.org/standard/63555.html",
+    "bash": "https://www.gnu.org/software/bash/",
+    "yaml": "https://yaml.org/",
+    "json": "https://www.json.org/"
+  },
+  
+  "@graph": [
+    {
+      "@id": "transform:Transformation",
+      "@type": ["rdfs:Class", "prov:Entity"],
+      "rdfs:label": "Transformation",
+      "rdfs:comment": "A computational transformation that processes data between widgets",
+      "rdfs:subClassOf": "prov:Entity",
+      "schema:sameAs": "schema:SoftwareSourceCode"
+    },
+    
+    {
+      "@id": "transform:TransformationActivity", 
+      "@type": "rdfs:Class",
+      "rdfs:label": "Transformation Activity",
+      "rdfs:comment": "The execution of a transformation",
+      "rdfs:subClassOf": "prov:Activity"
+    },
+    
+    {
+      "@id": "transform:ContentResolver",
+      "@type": "rdfs:Class", 
+      "rdfs:label": "Content Resolver",
+      "rdfs:comment": "System component that resolves transformation content from various sources",
+      "rdfs:subClassOf": "prov:SoftwareAgent"
+    },
+    
+    {
+      "@id": "transform:ExecutionContext",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Execution Context", 
+      "rdfs:comment": "Configuration and constraints for transformation execution",
+      "rdfs:subClassOf": "prov:Entity"
+    },
+    
+    {
+      "@id": "transform:contentSource",
+      "@type": "rdf:Property",
+      "rdfs:label": "content source",
+      "rdfs:comment": "Specifies how transformation content is sourced",
+      "rdfs:domain": "transform:Transformation",
+      "rdfs:range": "xsd:string"
+    },
+    
+    {
+      "@id": "transform:sourceUrl", 
+      "@type": "rdf:Property",
+      "rdfs:label": "source URL",
+      "rdfs:comment": "URL or IRI where transformation content is located",
+      "rdfs:domain": "transform:Transformation", 
+      "rdfs:range": "xsd:anyURI"
+    },
+    
+    {
+      "@id": "transform:contentHash",
+      "@type": "rdf:Property",
+      "rdfs:label": "content hash",
+      "rdfs:comment": "Cryptographic hash of transformation content for integrity verification",
+      "rdfs:domain": "transform:Transformation",
+      "rdfs:range": "xsd:string"
+    },
+    
+    {
+      "@id": "transform:executionTimeout",
+      "@type": "rdf:Property", 
+      "rdfs:label": "execution timeout",
+      "rdfs:comment": "Maximum time allowed for transformation execution",
+      "rdfs:domain": "transform:ExecutionContext",
+      "rdfs:range": "xsd:duration"
+    },
+    
+    {
+      "@id": "transform:memoryLimit",
+      "@type": "rdf:Property",
+      "rdfs:label": "memory limit", 
+      "rdfs:comment": "Maximum memory allowed for transformation execution",
+      "rdfs:domain": "transform:ExecutionContext",
+      "rdfs:range": "xsd:string"
+    },
+    
+    {
+      "@id": "transform:wasCompiledBy",
+      "@type": "rdf:Property",
+      "rdfs:label": "was compiled by",
+      "rdfs:comment": "Links transformation to the compiler that processed it",
+      "rdfs:domain": "transform:Transformation",
+      "rdfs:range": "prov:SoftwareAgent",
+      "rdfs:subPropertyOf": "prov:wasGeneratedBy"
+    },
+    
+    {
+      "@id": "transform:InlineContent",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Inline Content",
+      "rdfs:comment": "Transformation content provided directly in the arrow definition"
+    },
+    
+    {
+      "@id": "transform:UrlContent", 
+      "@type": "rdfs:Class",
+      "rdfs:label": "URL Content",
+      "rdfs:comment": "Transformation content retrieved from HTTP/HTTPS URL"
+    },
+    
+    {
+      "@id": "transform:IriContent",
+      "@type": "rdfs:Class", 
+      "rdfs:label": "IRI Content",
+      "rdfs:comment": "Transformation content identified by semantic IRI with JSON-LD context"
+    },
+    
+    {
+      "@id": "transform:Success",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Success Result", 
+      "rdfs:comment": "Successful transformation execution result"
+    },
+    
+    {
+      "@id": "transform:CompilationError",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Compilation Error",
+      "rdfs:comment": "Error that occurred during transformation compilation"
+    },
+    
+    {
+      "@id": "transform:RuntimeError", 
+      "@type": "rdfs:Class",
+      "rdfs:label": "Runtime Error",
+      "rdfs:comment": "Error that occurred during transformation execution"
+    }
+  ]
+}
