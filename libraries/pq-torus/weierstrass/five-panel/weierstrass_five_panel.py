@@ -5,9 +5,19 @@ Provides complete Weierstrass ℘ function analysis with derivatives and propert
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'core'))
+import base64
+import io
+import matplotlib
+matplotlib.use('Agg')  # Use non-interactive backend
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Add parent directories to path for imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'core'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from base_widget import WidgetExecutor
+from weierstrass_math import field_grid, soft_background, grayscale_background, add_topo_contours, create_five_panel_figure
 from typing import Dict, Any
 from datetime import datetime
 

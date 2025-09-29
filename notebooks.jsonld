@@ -5,6 +5,7 @@
       "notebooks": "https://litlfred.github.io/notebooks/vocab/",
       "core": "https://litlfred.github.io/notebooks/libraries/core/",
       "pqt": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+      "playground": "https://litlfred.github.io/notebooks/vocab/playground/",
       "dct": "http://purl.org/dc/terms/",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#"
@@ -12,11 +13,12 @@
   ],
   "@id": "https://litlfred.github.io/notebooks/notebooks.jsonld",
   "@type": [
-    "prov:Collection",
-    "notebooks:Repository"
+    "prov:Entity",
+    "notebooks:Repository",
+    "playground:Widget"
   ],
-  "dct:title": "Notebooks - Interactive Mathematical Computing Repository",
-  "dct:description": "A collection of interactive Python notebooks and widget libraries for mathematical explorations, featuring self-contained widget directories and comprehensive schema-based framework.",
+  "dct:title": "℘ Weierstrass Playground - Interactive Mathematical Computing Repository",
+  "dct:description": "A collection of interactive Python notebooks and widget libraries for mathematical explorations, featuring the Weierstrass ℘ function playground as the primary interactive application.",
   "dct:created": "2024-09-28T12:00:00Z",
   "dct:modified": "2024-09-28T12:00:00Z",
   "dct:creator": "litlfred",
@@ -165,8 +167,8 @@
         "prov:Entity",
         "notebooks:InteractiveApplication"
       ],
-      "dct:title": "Widget Blackboard - Mathematical Board Application",
-      "dct:description": "Interactive drag-and-drop workspace for creating mathematical workflows with widgets, connections, and real-time visualization.",
+      "dct:title": "℘ Weierstrass Playground - Mathematical Board Application",
+      "dct:description": "Interactive drag-and-drop workspace for creating mathematical workflows with Weierstrass ℘ function widgets, connections, and real-time visualization.",
       "notebooks:type": "blackboard",
       "notebooks:features": [
         "drag-and-drop-widgets",

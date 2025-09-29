@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://litlfred.github.io/notebooks/libraries/core/notebook/output.schema.json",
+  "title": "Notebook Widget Output Schema",
+  "description": "Output from notebook widget rendering",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether rendering was successful"
+    },
+    "widget_instances": {
+      "type": "object",
+      "description": "Dictionary mapping widget IDs to their data IRIs",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "input_iri": {
+              "type": "string",
+              "description": "IRI for widget input data"
+            },
+            "output_iri": {
+              "type": "string", 
+              "description": "IRI for widget output data"
+            },
+            "widget_type": {
+              "type": "string",
+              "description": "Type of the widget"
+            },
+            "layout": {
+              "type": "object",
+              "description": "Widget layout information"
+            }
+          }
+        }
+      }
+    },
+    "board_state": {
+      "type": "object",
+      "description": "Current state of the notebook board",
+      "properties": {
+        "notebook_id": {
+          "type": "string",
+          "description": "Identifier of the notebook"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the notebook"
+        },
+        "widgets": {
+          "type": "array",
+          "description": "Widgets in the notebook"
+        },
+        "connections": {
+          "type": "array",
+          "description": "Connections between widgets"
+        },
+        "layout": {
+          "type": "object",
+          "description": "Overall layout configuration"
+        },
+        "libraries": {
+          "type": "array",
+          "description": "Widget libraries used in notebook"
+        }
+      }
+    },
+    "rendered_mode": {
+      "type": "string",
+      "enum": ["windowed", "fullscreen"],
+      "description": "The mode the notebook was rendered in"
+    },
+    "render_config": {
+      "type": "object",
+      "description": "Configuration used for rendering"
+    },
+    "total_widgets": {
+      "type": "integer",
+      "description": "Total number of widgets in the notebook"
+    },
+    "notebook_title": {
+      "type": "string",
+      "description": "Title of the rendered notebook"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if rendering failed"
+    }
+  },
+  "required": ["success"],
+  "additionalProperties": false
+}

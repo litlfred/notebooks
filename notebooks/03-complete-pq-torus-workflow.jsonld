@@ -4,15 +4,20 @@
     "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
     "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
     {
+      "notebook": "https://litlfred.github.io/notebooks/vocab/notebook/",
+      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
       "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
-      "Connection": "workflow:Connection"
+      "Connection": "workflow:Connection",
+      "dct": "http://purl.org/dc/terms/"
     }
   ],
   "@id": "urn:notebook:complete-pq-torus-workflow",
-  "@type": ["prov:Entity", "notebook:Notebook"],
-  "dct:title": "Complete PQ-Torus Mathematical Analysis Workflow",
-  "dct:description": "Comprehensive demonstration of PQ-Torus widget library with all Weierstrass sub-widgets and proper parameter linkages",
+  "@type": ["prov:Entity", "notebook:Notebook", "widget:NotebookWidget"],
+  "dct:title": "Complete ℘ Weierstrass Analysis Workflow",
+  "dct:description": "Comprehensive notebook widget demonstrating complete PQ-Torus workflow with all Weierstrass ℘ function sub-widgets and parameter flow connections",
   "dct:created": "2024-09-28T10:00:00Z",
+  "widget:category": "advanced-mathematical",
+  "widget:complexity": "advanced",
   "@graph": [
     {
       "@id": "urn:widget:pq-torus-umbrella",

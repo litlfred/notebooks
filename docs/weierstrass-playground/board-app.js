@@ -1,5 +1,5 @@
 /**
- * Mathematical Board - Advanced Miro-like Interactive Workspace
+ * ℘ Weierstrass Playground - Advanced Miro-like Interactive Workspace
  * Handles JSON schema-based widgets, execution, and connections
  */
 
@@ -14,6 +14,11 @@ class MathematicalBoard {
         this.isLibraryOpen = true;
         this.gridEnabled = true;
         this.connections = new Map(); // widget connections for data flow
+        
+        // Fullscreen mode management
+        this.fullscreenManager = new FullscreenManager(this);
+        this.isFullscreenMode = false;
+        this.fullscreenWidget = null;
         
         this.initializeBoard();
         this.setupEventListeners();
@@ -40,19 +45,36 @@ class MathematicalBoard {
     }
 
     /**
-     * Update widget library display with schema-based widgets
+     * Update widget library display with umbrella library organization
      */
     updateWidgetLibraryFromSchemas() {
         if (!this.widgetSchemas || !this.widgetSchemas['widget-schemas']) return;
 
         const schemas = this.widgetSchemas['widget-schemas'];
-        const categories = {};
+        const libraries = {};
         
-        // Group widgets by category
+        // Group widgets by library (umbrella category)
         Object.values(schemas).forEach(schema => {
-            const category = schema.category || 'other';
-            if (!categories[category]) categories[category] = [];
-            categories[category].push(schema);
+            let libraryName = 'core'; // Default library
+            
+            // Determine library from schema ID structure
+            if (schema.id.includes('pq-torus')) {
+                libraryName = 'pq-torus';
+            } else if (schema.parent) {
+                libraryName = schema.parent;
+            } else if (schema.id.includes('weier')) {
+                libraryName = 'pq-torus'; // Weierstrass belongs to PQ-Torus
+            }
+            
+            if (!libraries[libraryName]) {
+                libraries[libraryName] = {
+                    name: libraryName,
+                    displayName: this.getLibraryDisplayName(libraryName),
+                    icon: this.getLibraryIcon(libraryName),
+                    widgets: []
+                };
+            }
+            libraries[libraryName].widgets.push(schema);
         });
 
         // Update library display
@@ -60,7 +82,116 @@ class MathematicalBoard {
         if (!libraryContainer) return;
 
         libraryContainer.innerHTML = '';
+        
+        const libraryNames = Object.keys(libraries);
+        const needsPullOut = libraryNames.length > 4;
 
+        if (needsPullOut) {
+            // Create pull-out tray for libraries
+            this.createLibraryPullOutTray(libraryContainer, libraries);
+        } else {
+            // Display all libraries normally
+            this.displayLibraries(libraryContainer, libraries);
+        }
+    }
+    
+    /**
+     * Get display name for library
+     */
+    getLibraryDisplayName(libraryName) {
+        const displayNames = {
+            'core': 'Core Widgets',
+            'pq-torus': 'PQ-Torus',
+            'mathematics': 'Mathematics',
+            'visualization': 'Visualization'
+        };
+        return displayNames[libraryName] || libraryName.charAt(0).toUpperCase() + libraryName.slice(1);
+    }
+    
+    /**
+     * Get icon for library
+     */
+    getLibraryIcon(libraryName) {
+        const icons = {
+            'core': '🧩',
+            'pq-torus': '🔴',
+            'mathematics': '∫',
+            'visualization': '📊'
+        };
+        return icons[libraryName] || '📦';
+    }
+    
+    /**
+     * Create pull-out tray for libraries when there are more than 4
+     */
+    createLibraryPullOutTray(container, libraries) {
+        // Main visible libraries (first 3)
+        const libraryNames = Object.keys(libraries);
+        const mainLibraries = libraryNames.slice(0, 3);
+        const trayLibraries = libraryNames.slice(3);
+        
+        // Display main libraries
+        mainLibraries.forEach(libraryName => {
+            this.createLibrarySection(container, libraries[libraryName]);
+        });
+        
+        // Create pull-out tray section
+        const traySection = document.createElement('div');
+        traySection.className = 'library-tray-section';
+        
+        const trayToggle = document.createElement('div');
+        trayToggle.className = 'library-tray-toggle';
+        trayToggle.innerHTML = `
+            <span class="tray-icon">📂</span>
+            <span class="tray-text">More Libraries (${trayLibraries.length})</span>
+            <span class="tray-arrow">▼</span>
+        `;
+        trayToggle.onclick = () => this.toggleLibraryTray();
+        
+        const trayContent = document.createElement('div');
+        trayContent.className = 'library-tray-content';
+        trayContent.id = 'library-tray-content';
+        trayContent.style.display = 'none';
+        
+        trayLibraries.forEach(libraryName => {
+            this.createLibrarySection(trayContent, libraries[libraryName]);
+        });
+        
+        traySection.appendChild(trayToggle);
+        traySection.appendChild(trayContent);
+        container.appendChild(traySection);
+    }
+    
+    /**
+     * Display all libraries normally (when <= 4 libraries)
+     */
+    displayLibraries(container, libraries) {
+        Object.values(libraries).forEach(library => {
+            this.createLibrarySection(container, library);
+        });
+    }
+    
+    /**
+     * Create library section with widgets grouped by category
+     */
+    createLibrarySection(container, library) {
+        const libraryDiv = document.createElement('div');
+        libraryDiv.className = 'widget-library';
+        
+        const libraryHeader = document.createElement('h3');
+        libraryHeader.className = 'library-header';
+        libraryHeader.innerHTML = `<span class="library-icon">${library.icon}</span> ${library.displayName}`;
+        libraryDiv.appendChild(libraryHeader);
+        
+        // Group widgets in this library by category
+        const categories = {};
+        library.widgets.forEach(widget => {
+            const category = widget.category || 'other';
+            if (!categories[category]) categories[category] = [];
+            categories[category].push(widget);
+        });
+        
+        // Create category sections within the library
         Object.entries(categories).forEach(([categoryName, widgets]) => {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'widget-category';
@@ -91,8 +222,41 @@ class MathematicalBoard {
             });
             
             categoryDiv.appendChild(itemsDiv);
-            libraryContainer.appendChild(categoryDiv);
+            libraryDiv.appendChild(categoryDiv);
         });
+        
+        container.appendChild(libraryDiv);
+    }
+    
+    /**
+     * Toggle library tray visibility
+     */
+    toggleLibraryTray() {
+        const trayContent = document.getElementById('library-tray-content');
+        const trayArrow = document.querySelector('.tray-arrow');
+        
+        if (trayContent.style.display === 'none') {
+            trayContent.style.display = 'block';
+            trayArrow.textContent = '▲';
+        } else {
+            trayContent.style.display = 'none';
+            trayArrow.textContent = '▼';
+        }
+    }
+    
+    /**
+     * Update library display with notebook-specific libraries
+     */
+    updateLibraryDisplay(notebookLibraries) {
+        if (!notebookLibraries || notebookLibraries.length === 0) return;
+        
+        // Store notebook libraries for enhanced display
+        this.notebookLibraries = notebookLibraries;
+        
+        // Re-run library update with enhanced information
+        this.updateWidgetLibraryFromSchemas();
+        
+        console.log('Updated library display with notebook libraries');
     }
 
     getCategoryIcon(category) {
@@ -224,7 +388,7 @@ class MathematicalBoard {
     /**
      * Create a new widget using JSON schema
      */
-    createWidget(type, x, y, customConfig = {}) {
+    createWidget(type, x, y, customConfig = {}, jsonldSchema = null) {
         if (!this.widgetSchemas || !this.widgetSchemas['widget-schemas'][type]) {
             console.error(`Widget schema not found for type: ${type}`);
             return;
@@ -235,6 +399,11 @@ class MathematicalBoard {
         
         // Get default configuration from schema
         const defaultConfig = this.getDefaultConfigFromSchema(schema);
+        
+        // Create JSON-LD schema if not provided
+        if (!jsonldSchema) {
+            jsonldSchema = this.createJsonLdSchema(type, schema);
+        }
         
         const widget = {
             id: widgetId,
@@ -248,14 +417,20 @@ class MathematicalBoard {
             description: schema.description,
             config: { ...defaultConfig, ...customConfig },
             schema: schema,
+            jsonldSchema: jsonldSchema, // Add JSON-LD schema
             actions: schema.actions || {},
             connections: {
                 inputs: new Map(),
                 outputs: new Map()
             },
             lastOutput: null,
-            status: 'idle' // idle, running, completed, error
+            status: 'idle', // idle, running, completed, error
+            warnings: [], // Schema alignment warnings
+            warningMode: false // Toggle for warning display
         };
+        
+        // Validate schema alignment and populate warnings
+        this.validateSchemaAlignment(widget);
 
         // Create DOM element
         const element = this.createWidgetElement(widget);
@@ -297,6 +472,97 @@ class MathematicalBoard {
     }
 
     /**
+     * Create JSON-LD schema from widget schema
+     */
+    createJsonLdSchema(type, schema) {
+        return {
+            '@id': `${type}:widget`,
+            '@type': ['prov:Entity', `${type}:widget`],
+            'dct:conformsTo': schema.input_schemas || [],
+            'input': this.extractInputSchema(schema),
+            'output': this.extractOutputSchema(schema)
+        };
+    }
+
+    /**
+     * Extract input schema properties from widget schema
+     */
+    extractInputSchema(schema) {
+        // This would typically resolve the schema URLs, for now use a simple mapping
+        const inputSchemas = schema.input_schemas || [];
+        
+        // Basic schema structure based on widget type
+        if (schema.id === 'sticky-note') {
+            return {
+                'properties': {
+                    'content': { 'type': 'string' },
+                    'show_note': { 'type': 'boolean' }
+                }
+            };
+        } else if (schema.id === 'pq-torus') {
+            return {
+                'properties': {
+                    'p': { 'type': 'integer', 'minimum': 2 },
+                    'q': { 'type': 'integer', 'minimum': 2 }
+                }
+            };
+        }
+        
+        return { 'properties': {} };
+    }
+
+    /**
+     * Extract output schema properties from widget schema
+     */
+    extractOutputSchema(schema) {
+        return { 'properties': {} };
+    }
+
+    /**
+     * Validate schema alignment between JSON-LD and widget schema
+     */
+    validateSchemaAlignment(widget) {
+        widget.warnings = [];
+        
+        const jsonldInput = widget.jsonldSchema?.input?.properties || {};
+        const schemaInput = this.extractSchemaProperties(widget.schema);
+        
+        const jsonldParams = new Set(Object.keys(jsonldInput));
+        const schemaParams = new Set(Object.keys(schemaInput));
+        
+        // Check for parameters in JSON-LD but not in schema
+        const missingInSchema = [...jsonldParams].filter(p => !schemaParams.has(p));
+        const missingInJsonLd = [...schemaParams].filter(p => !jsonldParams.has(p));
+        
+        if (missingInSchema.length > 0) {
+            widget.warnings.push({
+                type: 'parameter_mismatch',
+                severity: 'warning',
+                message: `JSON-LD defines parameters not in widget schema: ${missingInSchema.join(', ')}`
+            });
+        }
+        
+        if (missingInJsonLd.length > 0) {
+            widget.warnings.push({
+                type: 'parameter_mismatch',
+                severity: 'warning',
+                message: `Widget schema has parameters not in JSON-LD: ${missingInJsonLd.join(', ')}`
+            });
+        }
+    }
+
+    /**
+     * Extract schema properties from widget schema
+     */
+    extractSchemaProperties(schema) {
+        // Simple extraction - in reality would parse the schema URLs
+        if (schema.id === 'sticky-note') {
+            return { 'content': 'string', 'show_note': 'boolean' };
+        }
+        return {};
+    }
+
+    /**
      * Create widget DOM element with schema-based structure
      */
     createWidgetElement(widget) {
@@ -311,6 +577,10 @@ class MathematicalBoard {
         // Status indicator
         const statusClass = widget.status === 'running' ? 'fa-spin' : '';
         const statusIcon = this.getStatusIcon(widget.status);
+        
+        // Warning indicator
+        const warningIcon = widget.warnings && widget.warnings.length > 0 ? 
+            `<span class="widget-warning" title="${widget.warnings.length} schema warnings">⚠️</span>` : '';
 
         element.innerHTML = `
             <div class="widget-header">
@@ -320,6 +590,7 @@ class MathematicalBoard {
                     <span class="widget-status ${statusClass}" title="${widget.status}">
                         ${statusIcon}
                     </span>
+                    ${warningIcon}
                 </div>
                 <div class="widget-actions">
                     <div class="widget-hamburger-menu">
@@ -464,6 +735,41 @@ class MathematicalBoard {
                 </div>
             `;
         }
+    }
+
+    /**
+     * Process markdown variables and substitutions
+     */
+    processMarkdownVariables(content, widget) {
+        // Simple variable substitution system
+        // Variables can be defined as {{variable_name}} and can reference widget properties or global values
+        
+        let processedContent = content;
+        
+        // Replace widget-specific variables
+        if (widget && widget.config) {
+            const variables = {
+                'widget_id': widget.id,
+                'widget_type': widget.type,
+                'widget_title': widget.title,
+                'timestamp': new Date().toISOString(),
+                'date': new Date().toLocaleDateString(),
+                'time': new Date().toLocaleTimeString()
+            };
+            
+            // Add widget config variables
+            Object.keys(widget.config).forEach(key => {
+                variables[key] = widget.config[key];
+            });
+            
+            // Replace {{variable}} patterns
+            Object.keys(variables).forEach(key => {
+                const pattern = new RegExp(`{{\\s*${key}\\s*}}`, 'gi');
+                processedContent = processedContent.replace(pattern, variables[key]);
+            });
+        }
+        
+        return processedContent;
     }
 
     /**
@@ -639,8 +945,28 @@ class MathematicalBoard {
      * Render hierarchical action menu for widget
      */
     renderActionMenu(widget) {
+        let menuHtml = '';
+        
+        // Warnings section (if any)
+        if (widget.warnings && widget.warnings.length > 0) {
+            menuHtml += `<div class="menu-category warnings">
+                <div class="menu-category-header">⚠️ Schema Warnings</div>`;
+            
+            for (const warning of widget.warnings) {
+                menuHtml += `
+                    <div class="menu-item warning" title="${warning.message}">
+                        <span class="menu-icon">⚠️</span>
+                        <span class="menu-text">${warning.type}</span>
+                    </div>`;
+            }
+            menuHtml += '</div>';
+        }
+        
         if (!widget.actions || Object.keys(widget.actions).length === 0) {
-            return '<div class="menu-item-empty">No actions available</div>';
+            if (menuHtml === '') {
+                return '<div class="menu-item-empty">No actions available</div>';
+            }
+            return menuHtml;
         }
 
         // Group actions by category
@@ -659,7 +985,6 @@ class MathematicalBoard {
         }
 
         // Render hierarchical menu
-        let menuHtml = '';
         for (const [category, actions] of Object.entries(categories)) {
             menuHtml += `<div class="menu-category">
                 <div class="menu-category-header">${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
@@ -1727,7 +2052,7 @@ document.addEventListener('DOMContentLoaded', () => {
     boardApp = new MathematicalBoard();
     window.boardApp = boardApp; // Make globally available
     
-    console.log('Mathematical Board initialized');
+    console.log('℘ Weierstrass Playground initialized');
 });
 
 /**
@@ -1818,4 +2143,379 @@ function changeStickyTheme(widgetId, themeName) {
     boardApp.saveBoardToStorage();
     
     console.log(`Changed sticky note ${widgetId} theme to ${themeName}`);
+}
+
+// Global functions for widget interaction
+function toggleWidgetMenu(widgetId) {
+    const menu = document.getElementById(`menu-${widgetId}`);
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function executeWidgetAction(widgetId, actionSlug) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    console.log(`Executing action ${actionSlug} on widget ${widgetId}`);
+    
+    // Handle fullscreen actions
+    if (actionSlug.includes('fullscreen') || actionSlug.includes('board')) {
+        boardApp.fullscreenManager.handleFullscreenAction(widgetId, actionSlug);
+        return;
+    }
+    
+    // Hide the menu
+    toggleWidgetMenu(widgetId);
+    
+    // Update widget status
+    widget.status = 'running';
+    boardApp.updateWidgetDisplay(widgetId);
+    
+    // Simulate action execution
+    setTimeout(() => {
+        widget.status = 'completed';
+        boardApp.updateWidgetDisplay(widgetId);
+        boardApp.updateStatus(`Executed ${actionSlug} on ${widget.title}`, 'success');
+    }, 1000);
+}
+
+
+/**
+ * Fullscreen Manager for Widget Framework
+ * Handles fullscreen mode for widgets, especially notebook widgets
+ */
+class FullscreenManager {
+    constructor(boardApp) {
+        this.boardApp = boardApp;
+        this.currentFullscreenWidget = null;
+        this.previousState = null;
+        this.fullscreenOverlay = null;
+        this.createOverlayElements();
+    }
+    
+    createOverlayElements() {
+        // Create fullscreen overlay container
+        this.fullscreenOverlay = document.createElement('div');
+        this.fullscreenOverlay.id = 'fullscreen-overlay';
+        this.fullscreenOverlay.className = 'fullscreen-overlay hidden';
+        
+        // Create fullscreen content area
+        const contentArea = document.createElement('div');
+        contentArea.className = 'fullscreen-content';
+        contentArea.id = 'fullscreen-content';
+        
+        // Create fullscreen toolbar
+        const toolbar = document.createElement('div');
+        toolbar.className = 'fullscreen-toolbar';
+        toolbar.innerHTML = `
+            <div class="fullscreen-title">
+                <span id="fullscreen-widget-title">Widget Fullscreen Mode</span>
+            </div>
+            <div class="fullscreen-controls">
+                <button id="fullscreen-minimize" class="fullscreen-btn" title="Minimize to window">
+                    🪟
+                </button>
+                <button id="fullscreen-close" class="fullscreen-btn" title="Close fullscreen (Esc)">
+                    ✕
+                </button>
+            </div>
+        `;
+        
+        this.fullscreenOverlay.appendChild(toolbar);
+        this.fullscreenOverlay.appendChild(contentArea);
+        document.body.appendChild(this.fullscreenOverlay);
+        
+        // Setup event listeners
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Close button
+        document.getElementById('fullscreen-close').addEventListener('click', () => {
+            this.exitFullscreen();
+        });
+        
+        // Minimize button
+        document.getElementById('fullscreen-minimize').addEventListener('click', () => {
+            this.minimizeToWindow();
+        });
+        
+        // Escape key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.currentFullscreenWidget) {
+                this.exitFullscreen();
+            }
+        });
+        
+        // Prevent closing on content click
+        document.getElementById('fullscreen-content').addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+    
+    handleFullscreenAction(widgetId, actionSlug) {
+        const widget = this.boardApp.widgets.get(widgetId);
+        if (!widget) return;
+        
+        console.log(`Handling fullscreen action ${actionSlug} for widget ${widgetId}`);
+        
+        if (actionSlug.includes('fullscreen')) {
+            this.enterFullscreen(widget);
+        } else if (actionSlug.includes('windowed')) {
+            this.openInWindow(widget);
+        }
+    }
+    
+    enterFullscreen(widget) {
+        if (this.currentFullscreenWidget) {
+            this.exitFullscreen();
+        }
+        
+        console.log(`Entering fullscreen mode for widget: ${widget.id}`);
+        
+        // Store current state
+        this.previousState = {
+            selectedWidget: this.boardApp.selectedWidget,
+            scrollPosition: {
+                x: window.scrollX,
+                y: window.scrollY
+            }
+        };
+        
+        this.currentFullscreenWidget = widget;
+        
+        // Update title
+        document.getElementById('fullscreen-widget-title').textContent = 
+            `${widget.title} - Interactive Board`;
+        
+        // Render widget content in fullscreen
+        this.renderWidgetInFullscreen(widget);
+        
+        // Show overlay
+        this.fullscreenOverlay.classList.remove('hidden');
+        document.body.classList.add('fullscreen-active');
+        
+        // Update board app state
+        this.boardApp.isFullscreenMode = true;
+        this.boardApp.fullscreenWidget = widget;
+        
+        this.boardApp.updateStatus(`Opened ${widget.title} in fullscreen mode`, 'success');
+    }
+    
+    renderWidgetInFullscreen(widget) {
+        const contentArea = document.getElementById('fullscreen-content');
+        
+        if (widget.type === 'notebook') {
+            this.renderNotebookBoard(widget, contentArea);
+        } else {
+            this.renderGenericWidgetFullscreen(widget, contentArea);
+        }
+    }
+    
+    renderNotebookBoard(widget, container) {
+        // Create a mini board environment for the notebook
+        container.innerHTML = `
+            <div class="notebook-board-fullscreen">
+                <div class="notebook-board-sidebar">
+                    <div class="notebook-info">
+                        <h3>${widget.title}</h3>
+                        <p>${widget.description || 'Interactive notebook board'}</p>
+                    </div>
+                    <div class="notebook-controls">
+                        <button class="btn-secondary" onclick="boardApp.fullscreenManager.loadNotebookExample()">
+                            📁 Load Notebook
+                        </button>
+                        <button class="btn-secondary" onclick="boardApp.fullscreenManager.saveNotebookState()">
+                            💾 Save State
+                        </button>
+                    </div>
+                </div>
+                <div class="notebook-board-content">
+                    <div class="mini-board" id="notebook-mini-board">
+                        <div class="board-workspace">
+                            <p class="placeholder-text">
+                                🔮 Interactive Board Mode<br>
+                                <small>Drag widgets from library to create your mathematical workflow</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Initialize mini-board functionality
+        this.initializeNotebookBoard();
+    }
+    
+    initializeNotebookBoard() {
+        // Add simplified widget creation for demo
+        const workspace = document.querySelector('.board-workspace');
+        workspace.addEventListener('click', (e) => {
+            if (e.target.classList.contains('board-workspace')) {
+                this.addDemoWidget(e.offsetX, e.offsetY);
+            }
+        });
+    }
+    
+    addDemoWidget(x, y) {
+        const workspace = document.querySelector('.board-workspace');
+        const demoWidget = document.createElement('div');
+        demoWidget.className = 'demo-widget';
+        demoWidget.style.left = `${x - 50}px`;
+        demoWidget.style.top = `${y - 25}px`;
+        demoWidget.innerHTML = `
+            <div class="demo-widget-header">
+                📝 Demo Widget
+                <button onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+            <div class="demo-widget-content">
+                Interactive widget placeholder
+            </div>
+        `;
+        
+        // Remove placeholder if this is the first widget
+        const placeholder = workspace.querySelector('.placeholder-text');
+        if (placeholder) {
+            placeholder.remove();
+        }
+        
+        workspace.appendChild(demoWidget);
+    }
+    
+    renderGenericWidgetFullscreen(widget, container) {
+        container.innerHTML = `
+            <div class="generic-widget-fullscreen">
+                <div class="widget-fullscreen-content">
+                    <div class="widget-icon-large">${widget.icon}</div>
+                    <h2>${widget.title}</h2>
+                    <p>${widget.description}</p>
+                    <div class="widget-fullscreen-actions">
+                        <p>Widget actions would be rendered here in fullscreen mode.</p>
+                        <div class="action-buttons">
+                            <button class="btn-primary">Execute Primary Action</button>
+                            <button class="btn-secondary">Configure Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    exitFullscreen() {
+        if (!this.currentFullscreenWidget) return;
+        
+        console.log(`Exiting fullscreen mode for widget: ${this.currentFullscreenWidget.id}`);
+        
+        // Hide overlay
+        this.fullscreenOverlay.classList.add('hidden');
+        document.body.classList.remove('fullscreen-active');
+        
+        // Restore previous state
+        if (this.previousState) {
+            window.scrollTo(this.previousState.scrollPosition.x, this.previousState.scrollPosition.y);
+        }
+        
+        // Update board app state
+        this.boardApp.isFullscreenMode = false;
+        this.boardApp.fullscreenWidget = null;
+        
+        this.boardApp.updateStatus(`Closed fullscreen mode`, 'info');
+        
+        // Clear current fullscreen widget
+        this.currentFullscreenWidget = null;
+        this.previousState = null;
+    }
+    
+    minimizeToWindow() {
+        if (!this.currentFullscreenWidget) return;
+        
+        // Exit fullscreen first
+        this.exitFullscreen();
+        
+        // Then open in windowed mode
+        this.openInWindow(this.currentFullscreenWidget);
+    }
+    
+    openInWindow(widget) {
+        console.log(`Opening widget ${widget.id} in windowed mode`);
+        
+        // Create windowed version
+        this.createWindowedWidget(widget);
+        
+        this.boardApp.updateStatus(`Opened ${widget.title} in window`, 'success');
+    }
+    
+    createWindowedWidget(widget) {
+        // Create windowed widget overlay
+        const windowedOverlay = document.createElement('div');
+        windowedOverlay.className = 'windowed-widget-overlay';
+        windowedOverlay.innerHTML = `
+            <div class="windowed-widget" style="width: 600px; height: 400px; top: 100px; left: 200px;">
+                <div class="windowed-header">
+                    <span class="windowed-title">${widget.title}</span>
+                    <div class="windowed-controls">
+                        <button onclick="this.closest('.windowed-widget-overlay').remove()" title="Close">×</button>
+                    </div>
+                </div>
+                <div class="windowed-content">
+                    <p>Windowed widget content for: ${widget.title}</p>
+                    <p><small>This is a resizable, movable window.</small></p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(windowedOverlay);
+        
+        // Make draggable
+        this.makeWindowDraggable(windowedOverlay.querySelector('.windowed-widget'));
+    }
+    
+    makeWindowDraggable(windowElement) {
+        const header = windowElement.querySelector('.windowed-header');
+        let isDragging = false;
+        let currentX, currentY, initialX, initialY;
+        
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            initialX = e.clientX - windowElement.offsetLeft;
+            initialY = e.clientY - windowElement.offsetTop;
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                
+                windowElement.style.left = `${currentX}px`;
+                windowElement.style.top = `${currentY}px`;
+            }
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    }
+    
+    loadNotebookExample() {
+        console.log('Loading notebook example...');
+        this.boardApp.updateStatus('Loading notebook example...', 'info');
+        
+        // Simulate loading a notebook
+        setTimeout(() => {
+            this.addDemoWidget(150, 100);
+            this.addDemoWidget(350, 150);
+            this.boardApp.updateStatus('Notebook example loaded', 'success');
+        }, 1000);
+    }
+    
+    saveNotebookState() {
+        console.log('Saving notebook state...');
+        this.boardApp.updateStatus('Saving notebook state...', 'info');
+        
+        // Simulate saving
+        setTimeout(() => {
+            this.boardApp.updateStatus('Notebook state saved', 'success');
+        }, 500);
+    }
 }

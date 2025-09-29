@@ -16,34 +16,29 @@ class WidgetExecutor:
     input_variables: Dict[str, Any] = {}
     output_variables: Dict[str, Any] = {}
     
-    # Hard-coded class name to JSON-LD ID mapping
-    _class_name_to_jsonld_id = {
-        'WidgetExecutor': 'base-widget',
-        'StickyNoteWidget': 'sticky-note',
-        'PythonCodeWidget': 'python-code', 
-        'DataVisualizationWidget': 'data-visualization',
-        'ArrowWidget': 'arrow',
-        'PQTorusWidget': 'pq-torus',
-        'PQTorusWeierstrassTwoPanelWidget': 'pq-torus.weierstrass.two-panel',
-        'PQTorusWeierstrassThreePanelWidget': 'pq-torus.weierstrass.three-panel',
-        'PQTorusWeierstrassFivePanelWidget': 'pq-torus.weierstrass.five-panel',
-        'PQTorusWeierstrassTrajectoriesWidget': 'pq-torus.weierstrass.trajectories',
-        'PQTorusWeierstrassContoursWidget': 'pq-torus.weierstrass.contours'
-    }
-    
-    # Reverse mapping for JSON-LD ID to class name
-    _jsonld_id_to_class_name = {v: k for k, v in _class_name_to_jsonld_id.items()}
-    
-    def __init__(self, widget_schema: Dict[str, Any]):
+    def __init__(self, widget_schema: Dict[str, Any], jsonld_schema: Optional[Dict[str, Any]] = None):
         self.schema = widget_schema
+        self.jsonld_schema = jsonld_schema or {}
         self.id = widget_schema['id']
         self.name = widget_schema['name']
         self.actions = widget_schema.get('actions', {})
+        
+        # Extract JSON-LD information from schema
+        self.jsonld_id = self._extract_jsonld_id()
+        self.jsonld_type = self._extract_jsonld_type()
         
         # Initialize parameter flow tracking
         self.incoming_arrows = []
         self.outgoing_arrows = []
         self.parameter_flow_processed = False
+        
+        # Schema signature validation warnings
+        self.schema_warnings = []
+        self._validate_schema_alignment()
+        
+        # Fullscreen mode support
+        self.supports_fullscreen = self._check_fullscreen_support()
+        self.fullscreen_config = self._get_fullscreen_config()
         
         # Handle both old and new schema formats
         if 'input_schemas' in widget_schema:
@@ -67,6 +62,115 @@ class WidgetExecutor:
             for param_name, default_value in self.input_variables.items():
                 if not hasattr(self, param_name):
                     setattr(self, param_name, default_value)
+    
+    def _extract_jsonld_id(self) -> str:
+        """Extract JSON-LD ID from schema or derive from widget type"""
+        if self.jsonld_schema and '@id' in self.jsonld_schema:
+            return self.jsonld_schema['@id']
+        elif 'id' in self.schema:
+            return self.schema['id']
+        else:
+            # Convert class name to kebab-case as fallback
+            class_name = self.__class__.__name__
+            return re.sub('([a-z0-9])([A-Z])', r'\1-\2', class_name).lower().replace('-widget', '').replace('-executor', '')
+    
+    def _extract_jsonld_type(self) -> List[str]:
+        """Extract JSON-LD types from schema"""
+        if self.jsonld_schema and '@type' in self.jsonld_schema:
+            jsonld_type = self.jsonld_schema['@type']
+            return jsonld_type if isinstance(jsonld_type, list) else [jsonld_type]
+        else:
+            return [f"{self.jsonld_id}:widget"]
+    
+    def _validate_schema_alignment(self):
+        """Validate alignment between JSON-LD schema and Python signature"""
+        self.schema_warnings = []
+        
+        # Check if JSON-LD input parameters align with Python signature
+        if self.jsonld_schema and 'input' in self.jsonld_schema:
+            jsonld_input = self.jsonld_schema['input']
+            if isinstance(jsonld_input, dict) and 'properties' in jsonld_input:
+                jsonld_params = set(jsonld_input['properties'].keys())
+                python_params = set(self.input_variables.keys()) if hasattr(self, 'input_variables') else set()
+                
+                missing_in_python = jsonld_params - python_params
+                missing_in_jsonld = python_params - jsonld_params
+                
+                if missing_in_python:
+                    self.schema_warnings.append({
+                        'type': 'parameter_mismatch',
+                        'severity': 'warning',
+                        'message': f'JSON-LD defines parameters not in Python signature: {", ".join(missing_in_python)}'
+                    })
+                
+                if missing_in_jsonld:
+                    self.schema_warnings.append({
+                        'type': 'parameter_mismatch', 
+                        'severity': 'warning',
+                        'message': f'Python signature has parameters not in JSON-LD: {", ".join(missing_in_jsonld)}'
+                    })
+    
+    def has_warnings(self) -> bool:
+        """Check if widget has schema warnings"""
+        return len(self.schema_warnings) > 0
+    
+    def get_warnings(self) -> List[Dict[str, str]]:
+        """Get list of schema warnings"""
+        return self.schema_warnings.copy()
+    
+    def _check_fullscreen_support(self) -> bool:
+        """Check if widget supports fullscreen mode"""
+        # Check if widget has fullscreen-related actions
+        for action_slug in self.actions.keys():
+            if 'fullscreen' in action_slug.lower() or 'board' in action_slug.lower():
+                return True
+        
+        # Check widget category/type for fullscreen capability
+        category = self.schema.get('category', '').lower()
+        if category in ['notebook', 'visualization', 'analysis']:
+            return True
+            
+        return False
+    
+    def _get_fullscreen_config(self) -> Dict[str, Any]:
+        """Get fullscreen configuration for widget"""
+        return {
+            'enable_exit': True,
+            'show_toolbar': True,
+            'allow_editing': True,
+            'theme': 'dark',
+            'overlay_mode': 'modal',
+            'animation': 'fade',
+            'close_on_escape': True,
+            'show_controls': True
+        }
+    
+    def enter_fullscreen_mode(self, config: Dict[str, Any] = None) -> Dict[str, Any]:
+        """Enter fullscreen mode with given configuration"""
+        if not self.supports_fullscreen:
+            return {
+                'success': False,
+                'error': 'Widget does not support fullscreen mode'
+            }
+        
+        fullscreen_config = {**self.fullscreen_config, **(config or {})}
+        
+        return {
+            'success': True,
+            'mode': 'fullscreen',
+            'config': fullscreen_config,
+            'widget_id': self.id,
+            'widget_type': self.schema.get('category', 'unknown')
+        }
+    
+    def exit_fullscreen_mode(self) -> Dict[str, Any]:
+        """Exit fullscreen mode and return to normal view"""
+        return {
+            'success': True,
+            'mode': 'windowed',
+            'widget_id': self.id,
+            'return_to_board': True
+        }
     
     def process_parameter_flow(self, arrows: List[Dict[str, Any]], source_widgets: Dict[str, Any]):
         """
@@ -180,21 +284,12 @@ class WidgetExecutor:
     
     def get_class_name_mapping(self) -> Dict[str, str]:
         """Get mapping between Python class names and JSON-LD identifiers."""
-        class_name = self.__class__.__name__
-        
-        # Convert PythonCamelCase to kebab-case for JSON-LD
-        kebab_case = re.sub('([a-z0-9])([A-Z])', r'\1-\2', class_name).lower()
-        
-        # Remove common suffixes
-        kebab_case = kebab_case.replace('-widget', '').replace('-executor', '')
-        
         return {
-            "python_class": class_name,
-            "json_ld_id": kebab_case,
-            "schema_reference": f"{kebab_case}.schema.json"
+            "python_class": self.__class__.__name__,
+            "json_ld_id": self.jsonld_id,
+            "json_ld_type": self.jsonld_type,
+            "schema_reference": f"{self.jsonld_id}.schema.json"
         }
-            self.input_schemas = [self.input_schema] if self.input_schema else []
-            self.output_schemas = [self.output_schema] if self.output_schema else []
     
     def _resolve_schema_reference(self, schema_ref):
         """Resolve schema reference to actual schema object"""
@@ -376,16 +471,13 @@ class WidgetExecutor:
             'input_received': validated_input
         }
     
-    @classmethod
-    def get_jsonld_id(cls) -> str:
-        """Get the JSON-LD identifier for this widget class"""
-        class_name = cls.__name__
-        return cls._class_name_to_jsonld_id.get(class_name, class_name.lower())
+    def get_jsonld_id(self) -> str:
+        """Get the JSON-LD identifier for this widget instance"""
+        return self.jsonld_id
     
-    @classmethod
-    def get_class_for_jsonld_id(cls, jsonld_id: str) -> str:
-        """Get the class name for a JSON-LD identifier"""
-        return cls._jsonld_id_to_class_name.get(jsonld_id, jsonld_id)
+    def get_jsonld_type(self) -> List[str]:
+        """Get the JSON-LD types for this widget instance"""
+        return self.jsonld_type
     
     def _execute_action_impl(self, validated_input: Dict[str, Any], action_slug: str, action_config: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -410,7 +502,7 @@ class WidgetExecutor:
         return result
 
 # Widget factory function
-def create_widget(widget_type: str, widget_schema: Dict[str, Any]) -> WidgetExecutor:
-    """Factory function to create widgets based on type"""
+def create_widget(widget_type: str, widget_schema: Dict[str, Any], jsonld_schema: Optional[Dict[str, Any]] = None) -> WidgetExecutor:
+    """Factory function to create widgets based on type with JSON-LD schema support"""
     # This is the base implementation - specific libraries can override
-    return WidgetExecutor(widget_schema)
+    return WidgetExecutor(widget_schema, jsonld_schema)
