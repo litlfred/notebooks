@@ -467,30 +467,6 @@ class MathematicalBoard {
     }
 
     /**
-     * Process markdown content with variable substitution
-     */
-    processMarkdownVariables(content, widget) {
-        // Get variables from widget config and other widgets
-        const variables = widget.config.variables || {};
-        
-        // Add widget metadata variables
-        variables.timestamp = new Date().toISOString();
-        variables.widget_id = widget.id;
-        variables.widget_name = widget.name;
-        
-        // Find and substitute variables
-        const variablePattern = /\{\{([a-zA-Z_][a-zA-Z0-9_]*)\}\}/g;
-        
-        return content.replace(variablePattern, (match, varName) => {
-            if (varName in variables) {
-                return String(variables[varName]);
-            } else {
-                return `<span style="color: red; text-decoration: underline;">{undefined:${varName}}</span>`;
-            }
-        });
-    }
-
-    /**
      * Simple markdown renderer with LaTeX support
      */
     renderMarkdown(content) {
@@ -1332,15 +1308,6 @@ class MathematicalBoard {
         const isMobile = window.innerWidth < 1024;
         const defaultMode = isMobile ? 'mobile' : 'desktop';
         setLayoutMode(defaultMode);
-    }
-
-    /**
-     * Escape HTML special characters
-     */
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 }
 
