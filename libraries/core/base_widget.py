@@ -129,31 +129,7 @@ class WidgetExecutor:
         """Add an outgoing parameter flow arrow from this widget"""
         self.outgoing_arrows.append(arrow)
     
-    def process_parameter_flow(self, widget_registry: Dict[str, 'WidgetExecutor']):
-        """Process all incoming parameter flow arrows to populate input variables."""
-        if self.parameter_flow_processed:
-            return
-        
-        for arrow in self.incoming_arrows:
-            try:
-                # Find source widget instance
-                source_widget = widget_registry.get(arrow.source_widget)
-                if not source_widget:
-                    print(f"Warning: Source widget {arrow.source_widget} not found in registry")
-                    continue
-                
-                # Execute the arrow connection
-                connection_result = arrow.execute_connection(source_widget, self)
-                
-                if not connection_result['success']:
-                    print(f"Warning: Arrow connection failed: {connection_result.get('error_message')}")
-                    continue
-                    
-            except Exception as e:
-                print(f"Error processing parameter flow arrow: {e}")
-                continue
-        
-        self.parameter_flow_processed = True
+
     
     def validate_inputs(self) -> Dict[str, Any]:
         """Validate current input variables against input schema"""
@@ -197,8 +173,6 @@ class WidgetExecutor:
             "json_ld_id": kebab_case,
             "schema_reference": f"{kebab_case}.schema.json"
         }
-            self.input_schemas = [self.input_schema] if self.input_schema else []
-            self.output_schemas = [self.output_schema] if self.output_schema else []
     
     def _resolve_schema_reference(self, schema_ref):
         """Resolve schema reference to actual schema object"""

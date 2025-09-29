@@ -62,13 +62,6 @@
     --current-sticky-content: var(--sticky-desert-content);
     --current-sticky-text: var(--sticky-desert-text);
     --current-sticky-border: var(--sticky-desert-border);
-    --sticky-ocean-border: #4fc3f7;
-    
-    --sticky-forest-bg: #c8e6c9;
-    --sticky-forest-header: #a5d6a7;
-    --sticky-forest-content: #e8f5e8;
-    --sticky-forest-text: #2e7d32;
-    --sticky-forest-border: #81c784;
 }
 
 /* Light mode override */
