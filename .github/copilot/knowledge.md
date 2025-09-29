@@ -19,7 +19,7 @@ notebooks/
 │   ├── weierstrass-playground/    # Interactive playground
 │   ├── _layouts/default.html      # Jekyll template
 │   └── index.md                   # Landing page
-├── src/weierstrass_playground/    # Python package
+
 │   ├── core.py                    # Mathematical functions
 │   ├── visualization.py           # Plotting utilities
 │   ├── integration.py             # Trajectory computation
@@ -54,8 +54,7 @@ Each major notebook follows a 4-file architecture:
 
 ### Testing Strategy
 - Mathematical correctness tests in `test_weierstrass.py`
-- Visualization tests in `test_visualization.py`
-- Browser compatibility tests in `test_browser_playground.py`
+- Core Weierstrass ℘ function tests in `test_weierstrass.py`
 - CI/CD via GitHub Actions (quality-check.yml, deploy.yml)
 
 ### Deployment Process

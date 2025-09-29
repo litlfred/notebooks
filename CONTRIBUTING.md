@@ -106,8 +106,6 @@ pip install -r requirements.txt
 
 # Run tests
 python test_weierstrass.py
-python test_visualization.py
-python test_browser_playground.py
 ```
 
 ## Dependencies

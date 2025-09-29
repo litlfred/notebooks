@@ -47,7 +47,7 @@ Integration uses RK4 method with automatic blow-up detection near poles.
 This repository contains a comprehensive widget framework for interactive mathematical computing:
 
 ```
-├── src/weierstrass_playground/    # Main Python package (legacy - for reference)
+
 ├── libraries/                    # New Widget Framework Libraries
 │   ├── core/                    # Core widgets & shared functionality
 │   │   ├── base_widget.py       # Enhanced WidgetExecutor base class
