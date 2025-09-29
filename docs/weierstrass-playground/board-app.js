@@ -40,19 +40,36 @@ class MathematicalBoard {
     }
 
     /**
-     * Update widget library display with schema-based widgets
+     * Update widget library display with umbrella library organization
      */
     updateWidgetLibraryFromSchemas() {
         if (!this.widgetSchemas || !this.widgetSchemas['widget-schemas']) return;
 
         const schemas = this.widgetSchemas['widget-schemas'];
-        const categories = {};
+        const libraries = {};
         
-        // Group widgets by category
+        // Group widgets by library (umbrella category)
         Object.values(schemas).forEach(schema => {
-            const category = schema.category || 'other';
-            if (!categories[category]) categories[category] = [];
-            categories[category].push(schema);
+            let libraryName = 'core'; // Default library
+            
+            // Determine library from schema ID structure
+            if (schema.id.includes('pq-torus')) {
+                libraryName = 'pq-torus';
+            } else if (schema.parent) {
+                libraryName = schema.parent;
+            } else if (schema.id.includes('weier')) {
+                libraryName = 'pq-torus'; // Weierstrass belongs to PQ-Torus
+            }
+            
+            if (!libraries[libraryName]) {
+                libraries[libraryName] = {
+                    name: libraryName,
+                    displayName: this.getLibraryDisplayName(libraryName),
+                    icon: this.getLibraryIcon(libraryName),
+                    widgets: []
+                };
+            }
+            libraries[libraryName].widgets.push(schema);
         });
 
         // Update library display
@@ -60,7 +77,116 @@ class MathematicalBoard {
         if (!libraryContainer) return;
 
         libraryContainer.innerHTML = '';
+        
+        const libraryNames = Object.keys(libraries);
+        const needsPullOut = libraryNames.length > 4;
 
+        if (needsPullOut) {
+            // Create pull-out tray for libraries
+            this.createLibraryPullOutTray(libraryContainer, libraries);
+        } else {
+            // Display all libraries normally
+            this.displayLibraries(libraryContainer, libraries);
+        }
+    }
+    
+    /**
+     * Get display name for library
+     */
+    getLibraryDisplayName(libraryName) {
+        const displayNames = {
+            'core': 'Core Widgets',
+            'pq-torus': 'PQ-Torus',
+            'mathematics': 'Mathematics',
+            'visualization': 'Visualization'
+        };
+        return displayNames[libraryName] || libraryName.charAt(0).toUpperCase() + libraryName.slice(1);
+    }
+    
+    /**
+     * Get icon for library
+     */
+    getLibraryIcon(libraryName) {
+        const icons = {
+            'core': '🧩',
+            'pq-torus': '🔴',
+            'mathematics': '∫',
+            'visualization': '📊'
+        };
+        return icons[libraryName] || '📦';
+    }
+    
+    /**
+     * Create pull-out tray for libraries when there are more than 4
+     */
+    createLibraryPullOutTray(container, libraries) {
+        // Main visible libraries (first 3)
+        const libraryNames = Object.keys(libraries);
+        const mainLibraries = libraryNames.slice(0, 3);
+        const trayLibraries = libraryNames.slice(3);
+        
+        // Display main libraries
+        mainLibraries.forEach(libraryName => {
+            this.createLibrarySection(container, libraries[libraryName]);
+        });
+        
+        // Create pull-out tray section
+        const traySection = document.createElement('div');
+        traySection.className = 'library-tray-section';
+        
+        const trayToggle = document.createElement('div');
+        trayToggle.className = 'library-tray-toggle';
+        trayToggle.innerHTML = `
+            <span class="tray-icon">📂</span>
+            <span class="tray-text">More Libraries (${trayLibraries.length})</span>
+            <span class="tray-arrow">▼</span>
+        `;
+        trayToggle.onclick = () => this.toggleLibraryTray();
+        
+        const trayContent = document.createElement('div');
+        trayContent.className = 'library-tray-content';
+        trayContent.id = 'library-tray-content';
+        trayContent.style.display = 'none';
+        
+        trayLibraries.forEach(libraryName => {
+            this.createLibrarySection(trayContent, libraries[libraryName]);
+        });
+        
+        traySection.appendChild(trayToggle);
+        traySection.appendChild(trayContent);
+        container.appendChild(traySection);
+    }
+    
+    /**
+     * Display all libraries normally (when <= 4 libraries)
+     */
+    displayLibraries(container, libraries) {
+        Object.values(libraries).forEach(library => {
+            this.createLibrarySection(container, library);
+        });
+    }
+    
+    /**
+     * Create library section with widgets grouped by category
+     */
+    createLibrarySection(container, library) {
+        const libraryDiv = document.createElement('div');
+        libraryDiv.className = 'widget-library';
+        
+        const libraryHeader = document.createElement('h3');
+        libraryHeader.className = 'library-header';
+        libraryHeader.innerHTML = `<span class="library-icon">${library.icon}</span> ${library.displayName}`;
+        libraryDiv.appendChild(libraryHeader);
+        
+        // Group widgets in this library by category
+        const categories = {};
+        library.widgets.forEach(widget => {
+            const category = widget.category || 'other';
+            if (!categories[category]) categories[category] = [];
+            categories[category].push(widget);
+        });
+        
+        // Create category sections within the library
         Object.entries(categories).forEach(([categoryName, widgets]) => {
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'widget-category';
@@ -91,8 +217,41 @@ class MathematicalBoard {
             });
             
             categoryDiv.appendChild(itemsDiv);
-            libraryContainer.appendChild(categoryDiv);
+            libraryDiv.appendChild(categoryDiv);
         });
+        
+        container.appendChild(libraryDiv);
+    }
+    
+    /**
+     * Toggle library tray visibility
+     */
+    toggleLibraryTray() {
+        const trayContent = document.getElementById('library-tray-content');
+        const trayArrow = document.querySelector('.tray-arrow');
+        
+        if (trayContent.style.display === 'none') {
+            trayContent.style.display = 'block';
+            trayArrow.textContent = '▲';
+        } else {
+            trayContent.style.display = 'none';
+            trayArrow.textContent = '▼';
+        }
+    }
+    
+    /**
+     * Update library display with notebook-specific libraries
+     */
+    updateLibraryDisplay(notebookLibraries) {
+        if (!notebookLibraries || notebookLibraries.length === 0) return;
+        
+        // Store notebook libraries for enhanced display
+        this.notebookLibraries = notebookLibraries;
+        
+        // Re-run library update with enhanced information
+        this.updateWidgetLibraryFromSchemas();
+        
+        console.log('Updated library display with notebook libraries');
     }
 
     getCategoryIcon(category) {
@@ -224,7 +383,7 @@ class MathematicalBoard {
     /**
      * Create a new widget using JSON schema
      */
-    createWidget(type, x, y, customConfig = {}) {
+    createWidget(type, x, y, customConfig = {}, jsonldSchema = null) {
         if (!this.widgetSchemas || !this.widgetSchemas['widget-schemas'][type]) {
             console.error(`Widget schema not found for type: ${type}`);
             return;
@@ -235,6 +394,11 @@ class MathematicalBoard {
         
         // Get default configuration from schema
         const defaultConfig = this.getDefaultConfigFromSchema(schema);
+        
+        // Create JSON-LD schema if not provided
+        if (!jsonldSchema) {
+            jsonldSchema = this.createJsonLdSchema(type, schema);
+        }
         
         const widget = {
             id: widgetId,
@@ -248,14 +412,20 @@ class MathematicalBoard {
             description: schema.description,
             config: { ...defaultConfig, ...customConfig },
             schema: schema,
+            jsonldSchema: jsonldSchema, // Add JSON-LD schema
             actions: schema.actions || {},
             connections: {
                 inputs: new Map(),
                 outputs: new Map()
             },
             lastOutput: null,
-            status: 'idle' // idle, running, completed, error
+            status: 'idle', // idle, running, completed, error
+            warnings: [], // Schema alignment warnings
+            warningMode: false // Toggle for warning display
         };
+        
+        // Validate schema alignment and populate warnings
+        this.validateSchemaAlignment(widget);
 
         // Create DOM element
         const element = this.createWidgetElement(widget);
@@ -297,6 +467,97 @@ class MathematicalBoard {
     }
 
     /**
+     * Create JSON-LD schema from widget schema
+     */
+    createJsonLdSchema(type, schema) {
+        return {
+            '@id': `${type}:widget`,
+            '@type': ['prov:Entity', `${type}:widget`],
+            'dct:conformsTo': schema.input_schemas || [],
+            'input': this.extractInputSchema(schema),
+            'output': this.extractOutputSchema(schema)
+        };
+    }
+
+    /**
+     * Extract input schema properties from widget schema
+     */
+    extractInputSchema(schema) {
+        // This would typically resolve the schema URLs, for now use a simple mapping
+        const inputSchemas = schema.input_schemas || [];
+        
+        // Basic schema structure based on widget type
+        if (schema.id === 'sticky-note') {
+            return {
+                'properties': {
+                    'content': { 'type': 'string' },
+                    'show_note': { 'type': 'boolean' }
+                }
+            };
+        } else if (schema.id === 'pq-torus') {
+            return {
+                'properties': {
+                    'p': { 'type': 'integer', 'minimum': 2 },
+                    'q': { 'type': 'integer', 'minimum': 2 }
+                }
+            };
+        }
+        
+        return { 'properties': {} };
+    }
+
+    /**
+     * Extract output schema properties from widget schema
+     */
+    extractOutputSchema(schema) {
+        return { 'properties': {} };
+    }
+
+    /**
+     * Validate schema alignment between JSON-LD and widget schema
+     */
+    validateSchemaAlignment(widget) {
+        widget.warnings = [];
+        
+        const jsonldInput = widget.jsonldSchema?.input?.properties || {};
+        const schemaInput = this.extractSchemaProperties(widget.schema);
+        
+        const jsonldParams = new Set(Object.keys(jsonldInput));
+        const schemaParams = new Set(Object.keys(schemaInput));
+        
+        // Check for parameters in JSON-LD but not in schema
+        const missingInSchema = [...jsonldParams].filter(p => !schemaParams.has(p));
+        const missingInJsonLd = [...schemaParams].filter(p => !jsonldParams.has(p));
+        
+        if (missingInSchema.length > 0) {
+            widget.warnings.push({
+                type: 'parameter_mismatch',
+                severity: 'warning',
+                message: `JSON-LD defines parameters not in widget schema: ${missingInSchema.join(', ')}`
+            });
+        }
+        
+        if (missingInJsonLd.length > 0) {
+            widget.warnings.push({
+                type: 'parameter_mismatch',
+                severity: 'warning',
+                message: `Widget schema has parameters not in JSON-LD: ${missingInJsonLd.join(', ')}`
+            });
+        }
+    }
+
+    /**
+     * Extract schema properties from widget schema
+     */
+    extractSchemaProperties(schema) {
+        // Simple extraction - in reality would parse the schema URLs
+        if (schema.id === 'sticky-note') {
+            return { 'content': 'string', 'show_note': 'boolean' };
+        }
+        return {};
+    }
+
+    /**
      * Create widget DOM element with schema-based structure
      */
     createWidgetElement(widget) {
@@ -311,6 +572,10 @@ class MathematicalBoard {
         // Status indicator
         const statusClass = widget.status === 'running' ? 'fa-spin' : '';
         const statusIcon = this.getStatusIcon(widget.status);
+        
+        // Warning indicator
+        const warningIcon = widget.warnings && widget.warnings.length > 0 ? 
+            `<span class="widget-warning" title="${widget.warnings.length} schema warnings">⚠️</span>` : '';
 
         element.innerHTML = `
             <div class="widget-header">
@@ -320,6 +585,7 @@ class MathematicalBoard {
                     <span class="widget-status ${statusClass}" title="${widget.status}">
                         ${statusIcon}
                     </span>
+                    ${warningIcon}
                 </div>
                 <div class="widget-actions">
                     <div class="widget-hamburger-menu">
@@ -639,8 +905,28 @@ class MathematicalBoard {
      * Render hierarchical action menu for widget
      */
     renderActionMenu(widget) {
+        let menuHtml = '';
+        
+        // Warnings section (if any)
+        if (widget.warnings && widget.warnings.length > 0) {
+            menuHtml += `<div class="menu-category warnings">
+                <div class="menu-category-header">⚠️ Schema Warnings</div>`;
+            
+            for (const warning of widget.warnings) {
+                menuHtml += `
+                    <div class="menu-item warning" title="${warning.message}">
+                        <span class="menu-icon">⚠️</span>
+                        <span class="menu-text">${warning.type}</span>
+                    </div>`;
+            }
+            menuHtml += '</div>';
+        }
+        
         if (!widget.actions || Object.keys(widget.actions).length === 0) {
-            return '<div class="menu-item-empty">No actions available</div>';
+            if (menuHtml === '') {
+                return '<div class="menu-item-empty">No actions available</div>';
+            }
+            return menuHtml;
         }
 
         // Group actions by category
@@ -659,7 +945,6 @@ class MathematicalBoard {
         }
 
         // Render hierarchical menu
-        let menuHtml = '';
         for (const [category, actions] of Object.entries(categories)) {
             menuHtml += `<div class="menu-category">
                 <div class="menu-category-header">${category.charAt(0).toUpperCase() + category.slice(1)}</div>`;
@@ -1818,4 +2103,33 @@ function changeStickyTheme(widgetId, themeName) {
     boardApp.saveBoardToStorage();
     
     console.log(`Changed sticky note ${widgetId} theme to ${themeName}`);
+}
+
+// Global functions for widget interaction
+function toggleWidgetMenu(widgetId) {
+    const menu = document.getElementById(`menu-${widgetId}`);
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function executeWidgetAction(widgetId, actionSlug) {
+    const widget = boardApp.widgets.get(widgetId);
+    if (!widget) return;
+    
+    console.log(`Executing action ${actionSlug} on widget ${widgetId}`);
+    
+    // Hide the menu
+    toggleWidgetMenu(widgetId);
+    
+    // Update widget status
+    widget.status = 'running';
+    boardApp.updateWidgetDisplay(widgetId);
+    
+    // Simulate action execution
+    setTimeout(() => {
+        widget.status = 'completed';
+        boardApp.updateWidgetDisplay(widgetId);
+        boardApp.updateStatus(`Executed ${actionSlug} on ${widget.title}`, 'success');
+    }, 1000);
 }

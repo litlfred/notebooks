@@ -165,6 +165,11 @@ class NotebookLoader {
         if (notebook['dct:title']) {
             document.title = `Mathematical Workspace - ${notebook['dct:title']}`;
         }
+        
+        // Process notebook libraries for UI display
+        if (notebook['notebook:libraries']) {
+            this.processNotebookLibraries(notebook['notebook:libraries']);
+        }
 
         // Load widgets from graph
         const graph = notebook['@graph'] || [];
@@ -194,6 +199,21 @@ class NotebookLoader {
 
         this.boardApp.saveBoardToStorage();
     }
+    
+    /**
+     * Process notebook libraries for display enhancement
+     */
+    processNotebookLibraries(libraries) {
+        // Store library information for enhanced display
+        this.notebookLibraries = libraries;
+        
+        // Update the board app with library information
+        if (this.boardApp && typeof this.boardApp.updateLibraryDisplay === 'function') {
+            this.boardApp.updateLibraryDisplay(libraries);
+        }
+        
+        console.log('Processed notebook libraries:', libraries);
+    }
 
     /**
      * Create widget from JSON-LD data
@@ -220,11 +240,35 @@ class NotebookLoader {
         }
 
         // Extract position and size
-        const position = widgetData['widget:position'] || { x: 100, y: 100 };
-        const size = widgetData['widget:size'] || { width: 300, height: 250 };
+        const position = widgetData.layout?.position || widgetData['widget:position'] || { x: 100, y: 100 };
+        const size = widgetData.layout?.size || widgetData['widget:size'] || { width: 300, height: 250 };
 
-        // Create widget
-        const widget = this.boardApp.createWidget(widgetType, position.x, position.y);
+        // Extract configuration
+        const config = widgetData.input || widgetData['prov:value'] || {};
+        
+        // Create JSON-LD schema from widget data for widget initialization
+        const jsonldSchema = {
+            '@id': widgetData['@id'],
+            '@type': widgetData['@type'],
+            'dct:conformsTo': widgetData['dct:conformsTo'],
+            'input': widgetData.input || {},
+            'output': widgetData.output || {}
+        };
+
+        // Create widget with JSON-LD schema
+        const widget = this.boardApp.createWidget(widgetType, position.x, position.y, config, jsonldSchema);
+        
+        if (widget) {
+            // Update widget dimensions if specified
+            if (size.width && size.height) {
+                widget.width = size.width;
+                widget.height = size.height;
+                const widgetEl = document.querySelector(`[data-widget-id="${widget.id}"]`);
+                if (widgetEl) {
+                    widgetEl.style.width = `${size.width}px`;
+                    widgetEl.style.height = `${size.height}px`;
+                }
+            }
         
         if (widget) {
             // Apply configuration from prov:value

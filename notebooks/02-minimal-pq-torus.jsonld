@@ -13,6 +13,22 @@
   "dct:title": "Minimal PQ-Torus Example",
   "dct:description": "Basic demonstration of PQ-Torus widget with prime lattice parameters",
   "dct:created": "2024-09-28T10:00:00Z",
+  "notebook:libraries": [
+    {
+      "@id": "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+      "name": "core",
+      "displayName": "Core Widgets",
+      "icon": "🧩",
+      "description": "Essential widgets for notebook functionality"
+    },
+    {
+      "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld", 
+      "name": "pq-torus",
+      "displayName": "PQ-Torus",
+      "icon": "🔴",
+      "description": "Mathematical widgets for PQ-Torus analysis"
+    }
+  ],
   "@graph": [
     {
       "@id": "urn:widget:pq-torus-1",
