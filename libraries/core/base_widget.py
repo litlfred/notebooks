@@ -129,8 +129,6 @@ class WidgetExecutor:
         """Add an outgoing parameter flow arrow from this widget"""
         self.outgoing_arrows.append(arrow)
     
-
-    
     def validate_inputs(self) -> Dict[str, Any]:
         """Validate current input variables against input schema"""
         if not self.input_schema:

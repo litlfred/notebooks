@@ -84,26 +84,6 @@
     --widget-bg: #ffffff;
 }
 
-/* Light mode override */
-[data-theme="light"] {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --accent-color: #e74c3c;
-    --success-color: #27ae60;
-    --warning-color: #f39c12;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f8f9fa;
-    --bg-tertiary: #ecf0f1;
-    --text-primary: #2c3e50;
-    --text-secondary: #7f8c8d;
-    --border-color: #bdc3c7;
-    --shadow: 0 2px 10px rgba(0,0,0,0.1);
-    --shadow-hover: 0 4px 20px rgba(0,0,0,0.15);
-    
-    --board-bg: #f5f6fa;
-    --widget-bg: #ffffff;
-}
-
 * {
     margin: 0;
     padding: 0;
