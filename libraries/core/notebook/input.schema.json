@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/notebook/input.schema.json",
+  "$id": "./libraries/core/notebook/input.schema.json",
   "title": "Notebook Widget Input Schema",
   "description": "Input parameters for notebook widget rendering",
   "type": "object",

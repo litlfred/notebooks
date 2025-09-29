@@ -1,12 +1,12 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld",
+    "./libraries/core/core.jsonld",
+    "./libraries/pq-torus/pq-torus.jsonld",
     {
-      "notebook": "https://litlfred.github.io/notebooks/vocab/notebook/",
-      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
-      "workflow": "https://litlfred.github.io/notebooks/ontology/workflow#",
+      "notebook": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/notebook/",
+      "widget": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/widget/",
+      "workflow": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/workflow#",
       "Connection": "workflow:Connection",
       "dct": "http://purl.org/dc/terms/"
     }
@@ -22,7 +22,7 @@
     {
       "@id": "urn:widget:pq-torus-umbrella",
       "@type": ["prov:Entity", "pqt:widget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/widget.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/widget.schema.json",
       "widget_id": "pq-torus-umbrella",
       "widget_type": "pq-torus",
       "prov:generatedAtTime": "2024-09-28T10:00:00Z",
@@ -32,7 +32,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "pqt:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json",
+        "dct:conformsTo": "./libraries/pq-torus/input.schema.json",
         "p": 11,
         "q": 5
       }
@@ -40,7 +40,7 @@
     {
       "@id": "urn:output:pq-torus-umbrella",
       "@type": ["prov:Entity", "pqt:output"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/output.schema.json",
       "prov:value": {
         "success": true,
         "p": 11,
@@ -58,7 +58,7 @@
     {
       "@id": "urn:widget:weierstrass-two-panel",
       "@type": ["prov:Entity", "weier:widget", "pqt:subwidget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/widget.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/two-panel/widget.schema.json",
       "widget_id": "weier-two-panel",
       "widget_type": "pq-torus.weierstrass.two-panel",
       "parent_widget": "urn:widget:pq-torus-umbrella",
@@ -69,7 +69,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "weier:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/input.schema.json",
+        "dct:conformsTo": "./libraries/pq-torus/weierstrass/two-panel/input.schema.json",
         "p": 11,
         "q": 5,
         "N": 3,
@@ -93,7 +93,7 @@
     {
       "@id": "urn:output:weierstrass-two-panel",
       "@type": ["prov:Entity", "weier:output"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/output.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/two-panel/output.schema.json",
       "prov:value": {
         "success": true,
         "plot_data": {
@@ -117,7 +117,7 @@
     {
       "@id": "urn:widget:weierstrass-five-panel",
       "@type": ["prov:Entity", "weier:widget", "pqt:subwidget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/widget.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/five-panel/widget.schema.json",
       "widget_id": "weier-five-panel",
       "widget_type": "pq-torus.weierstrass.five-panel",
       "parent_widget": "urn:widget:pq-torus-umbrella",
@@ -128,7 +128,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "weier:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/input.schema.json",
+        "dct:conformsTo": "./libraries/pq-torus/weierstrass/five-panel/input.schema.json",
         "p": 11,
         "q": 5,
         "N": 4,
@@ -151,7 +151,7 @@
     {
       "@id": "urn:output:weierstrass-five-panel",
       "@type": ["prov:Entity", "weier:output"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/five-panel/output.schema.json",
       "prov:value": {
         "success": true,
         "plot_data": {
@@ -171,7 +171,7 @@
     {
       "@id": "urn:widget:weierstrass-trajectories",
       "@type": ["prov:Entity", "weier:widget", "pqt:subwidget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/trajectories/input.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/trajectories/input.schema.json",
       "widget_id": "weier-trajectories",
       "widget_type": "pq-torus.weierstrass.trajectories",
       "parent_widget": "urn:widget:pq-torus-umbrella",
@@ -204,7 +204,7 @@
     {
       "@id": "urn:output:weierstrass-trajectories",
       "@type": ["prov:Entity", "weier:output"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/trajectories/input.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/trajectories/input.schema.json",
       "prov:value": {
         "success": true,
         "trajectory_data": {
@@ -224,7 +224,7 @@
     {
       "@id": "urn:widget:weierstrass-contours",
       "@type": ["prov:Entity", "weier:widget", "pqt:subwidget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/contours/input.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/contours/input.schema.json",
       "widget_id": "weier-contours",
       "widget_type": "pq-torus.weierstrass.contours",
       "parent_widget": "urn:widget:pq-torus-umbrella",
@@ -257,7 +257,7 @@
     {
       "@id": "urn:output:weierstrass-contours",
       "@type": ["prov:Entity", "weier:output"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/contours/input.schema.json",
+      "dct:conformsTo": "./libraries/pq-torus/weierstrass/contours/input.schema.json",
       "prov:value": {
         "success": true,
         "contour_data": {
@@ -386,7 +386,7 @@
     {
       "@id": "urn:widget:summary-note",
       "@type": ["prov:Entity", "sticky:widget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/widget.schema.json",
+      "dct:conformsTo": "./libraries/core/sticky-note/widget.schema.json",
       "widget_id": "summary-note",
       "widget_type": "sticky-note",
       "prov:generatedAtTime": "2024-09-28T10:05:00Z",
@@ -396,7 +396,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "sticky:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
+        "dct:conformsTo": "./libraries/core/sticky-note/input.schema.json",
         "content": "# Complete PQ-Torus Analysis\n\n## Umbrella Widget Configuration\n- **Prime Parameters:** p=11, q=5\n- **Torus:** T = ℂ / L where L = ℤ11 + ℤ5i\n\n## Connected Sub-Widgets\n1. **Two-Panel Visualization** ∞\n2. **Five-Panel Complete Analysis** 🔍\n3. **Trajectory Analysis** 🌀\n4. **Contour Mapping** 🗺️\n\n## Parameter Flow\nUmbrella widget **automatically provides** p,q parameters to all sub-widgets through dependency linkages.",
         "show_note": true
       }

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/common/metadata.schema.json",
+  "$id": "./libraries/core/common/metadata.schema.json",
   "title": "Common Metadata Schema",
   "description": "Shared schema for widget metadata",
   "type": "object",

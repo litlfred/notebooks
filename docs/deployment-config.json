@@ -1,0 +1,14 @@
+{
+  "baseUrl": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/branch-preview/feature-test-preview/branch-preview/feature-test-preview",
+  "deploymentType": "production",
+  "repository": "litlfred/notebooks",
+  "branch": "main",
+  "owner": "litlfred",
+  "repo": "notebooks",
+  "urls": {
+    "schemas": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/branch-preview/feature-test-preview/branch-preview/feature-test-preview/schema/",
+    "libraries": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/branch-preview/feature-test-preview/branch-preview/feature-test-preview/libraries/",
+    "widgets": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/branch-preview/feature-test-preview/branch-preview/feature-test-preview/widgets/",
+    "notebooks": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/branch-preview/feature-test-preview/branch-preview/feature-test-preview/notebooks/"
+  }
+}

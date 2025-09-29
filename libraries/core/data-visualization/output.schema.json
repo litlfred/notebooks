@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output.schema.json",
+  "$id": "./libraries/core/data-visualization/output.schema.json",
   "title": "Data Visualization Output Schema",
   "description": "Generic output schema for data visualization widgets",
   "type": "object",

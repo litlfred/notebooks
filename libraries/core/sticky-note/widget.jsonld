@@ -1,11 +1,11 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+    "./libraries/core/core.jsonld"
   ],
   "@type": ["prov:Entity", "sticky:widget"],
   "dct:conformsTo": "./widget.schema.json",
-  "@id": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.jsonld",
+  "@id": "./schema/sticky-note/widget.jsonld",
   "dct:title": "Sticky Note Widget",
   "dct:description": "JSON-LD context for sticky note widget instances"
 }

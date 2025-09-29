@@ -12,19 +12,23 @@ from pathlib import Path
 from typing import Dict, Any, List
 import subprocess
 
-# Import WidgetIndexGenerator by executing the module
+# Import URL service
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, script_dir)
+from url_service import URLService
 
-# Execute the generate-widget-index script to get the class
+# Import WidgetIndexGenerator by executing the module
 generate_script = os.path.join(script_dir, 'generate-widget-index.py')
-with open(generate_script, 'r') as f:
-    generate_code = f.read()
-
-# Create a namespace to execute the code
-generate_namespace = {}
-exec(generate_code, generate_namespace)
-WidgetIndexGenerator = generate_namespace['WidgetIndexGenerator']
+if os.path.exists(generate_script):
+    with open(generate_script, 'r') as f:
+        generate_code = f.read()
+    
+    # Create a namespace to execute the code
+    generate_namespace = {}
+    exec(generate_code, generate_namespace)
+    WidgetIndexGenerator = generate_namespace.get('WidgetIndexGenerator')
+else:
+    WidgetIndexGenerator = None
 
 class GitHubPagesDeployer:
     """Deploy widgets to GitHub Pages with automated index generation"""
@@ -33,6 +37,9 @@ class GitHubPagesDeployer:
         self.repo_root = Path(repo_root)
         self.build_dir = self.repo_root / "_build"
         self.docs_dir = self.repo_root / "docs"
+        
+        # Initialize URL service for environment-aware URLs
+        self.url_service = URLService(repo_root)
         
     def prepare_deployment(self):
         """Prepare deployment by generating all necessary files"""
@@ -84,16 +91,25 @@ class GitHubPagesDeployer:
     
     def create_deployment_manifest(self, generated_files: List[str]) -> Dict[str, Any]:
         """Create deployment manifest"""
-        # Discover all widgets
-        generator = WidgetIndexGenerator(str(self.repo_root))
-        widgets = generator.discover_widgets()
+        # Get deployment info from URL service
+        deployment_info = self.url_service.get_deployment_info()
+        
+        # Discover all widgets if available
+        widgets = []
+        if WidgetIndexGenerator:
+            generator = WidgetIndexGenerator(str(self.repo_root))
+            widgets = generator.discover_widgets()
         
         manifest = {
             "deployment": {
                 "timestamp": self.get_timestamp(),
                 "generator_version": "1.0.0",
-                "repository": "litlfred/notebooks",
-                "github_pages_url": "https://litlfred.github.io/notebooks"
+                "repository": deployment_info["repository"],
+                "github_pages_url": deployment_info["base_url"],
+                "deployment_type": deployment_info["deployment_type"],
+                "branch": deployment_info["branch"],
+                "owner": deployment_info["owner"],
+                "repo": deployment_info["repo"]
             },
             "widgets": {
                 "total_count": len(widgets),

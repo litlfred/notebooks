@@ -8,10 +8,10 @@
       "category": "utility",
       "icon": "↗️",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json"
+        "./libraries/core/arrow/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/arrow/output.schema.json"
+        "./libraries/core/arrow/output.schema.json"
       ],
       "python_script": "../libraries/core/arrow/arrow.py",
       "actions": {
@@ -32,10 +32,10 @@
       "category": "content",
       "icon": "📝",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
+        "./libraries/core/sticky-note/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
+        "./libraries/core/sticky-note/output.schema.json"
       ],
       "python_script": "sticky-note/sticky_note.py",
       "version": "1.0.0",
@@ -101,10 +101,10 @@
       "category": "content",
       "icon": "📝",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json"
+        "./libraries/core/sticky-note/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/sticky-note/output.schema.json"
+        "./libraries/core/sticky-note/output.schema.json"
       ],
       "python_script": "sticky-note/sticky_note.py",
       "version": "1.0.0",
@@ -119,10 +119,10 @@
       "category": "computation",
       "icon": "🐍",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json"
+        "./libraries/core/python-code/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/python-code/output.schema.json"
+        "./libraries/core/python-code/output.schema.json"
       ],
       "python_script": "python-code/python_code.py",
       "version": "1.0.0",
@@ -137,10 +137,10 @@
       "category": "notebook",
       "icon": "📓",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/notebook/input.schema.json"
+        "./libraries/core/notebook/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/notebook/output.schema.json"
+        "./libraries/core/notebook/output.schema.json"
       ],
       "python_script": "notebook/notebook_widget.py",
       "version": "1.0.0",
@@ -207,7 +207,7 @@
       "category": "visualization",
       "icon": "∞",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/input.schema.json",
+        "./libraries/pq-torus/weierstrass/input.schema.json",
         {
           "type": "object",
           "properties": {
@@ -217,7 +217,7 @@
         }
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json"
+        "./libraries/pq-torus/weierstrass/output.schema.json"
       ],
       "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
       "version": "1.0.0",
@@ -299,10 +299,10 @@
       "category": "visualization",
       "icon": "📊",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/plot_input.schema.json"
+        "./libraries/core/data-visualization/plot_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
+        "./libraries/core/data-visualization/output"
       ],
       "python_script": "data-visualization/data_visualization.py",
       "version": "1.0.0",
@@ -317,10 +317,10 @@
       "category": "data",
       "icon": "📋",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/data_generator_input.schema.json"
+        "./libraries/core/data-visualization/data_generator_input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/core/data-visualization/output"
+        "./libraries/core/data-visualization/output"
       ],
       "python_script": "data-visualization/data_visualization.py",
       "version": "1.0.0",
@@ -335,10 +335,10 @@
       "category": "computation",
       "icon": "🔴",
       "input_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json"
+        "./libraries/pq-torus/input.schema.json"
       ],
       "output_schemas": [
-        "https://litlfred.github.io/notebooks/libraries/pq-torus/output.schema.json"
+        "./libraries/pq-torus/output.schema.json"
       ],
       "python_script": "pq_torus.py",
       "version": "1.0.0",
@@ -353,10 +353,10 @@
           "icon": "∞",
           "parent": "pq-torus",
           "input_schemas": [
-            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/input.schema.json"
+            "./libraries/pq-torus/weierstrass/two-panel/input.schema.json"
           ],
           "output_schemas": [
-            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/output.schema.json"
+            "./libraries/pq-torus/weierstrass/two-panel/output.schema.json"
           ],
           "python_script": "weierstrass/two-panel/weierstrass_two_panel.py",
           "actions": {
@@ -402,10 +402,10 @@
           "icon": "🔍",
           "parent": "pq-torus",
           "input_schemas": [
-            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/input.schema.json"
+            "./libraries/pq-torus/weierstrass/five-panel/input.schema.json"
           ],
           "output_schemas": [
-            "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/five-panel/output.schema.json"
+            "./libraries/pq-torus/weierstrass/five-panel/output.schema.json"
           ],
           "python_script": "weierstrass/five-panel/weierstrass_five_panel.py",
           "actions": {

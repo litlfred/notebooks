@@ -1,9 +1,9 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
+    "./libraries/core/core.jsonld"
   ],
-  "@id": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+  "@id": "./libraries/pq-torus/",
   "@type": ["prov:Collection", "library:WidgetLibrary"],
   "dct:title": "PQ-Torus Widget Library",
   "dct:description": "Mathematical widgets for PQ-Torus analysis and Weierstrass ℘-function visualization",

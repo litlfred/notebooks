@@ -1,22 +1,26 @@
-name: 🚀 Deploy Mathematical Notebooks to GitHub Pages
+name: 🚀 Deploy to GitHub Pages
 
 on:
-  # Runs on pushes to main branch
+  # Runs on pushes to main branch (deploys to /branch-preview/main)
   push:
     branches: [ main ]
   
-  # Allows you to run this workflow manually from the Actions tab
+  # Manual production deployment (deploys to root)
   workflow_dispatch:
     inputs:
+      deployment_type:
+        description: '🎯 Deployment target'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+        - preview
+        - production
       deploy_branch:
-        description: '🌿 Branch to deploy from (defaults to current branch)'
+        description: '🌿 Branch to deploy from (defaults to main for production)'
         required: false
         default: ''
         type: string
-      
-  # Runs when PR is approved (for review deployments)
-  pull_request_review:
-    types: [submitted]
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -25,32 +29,83 @@ permissions:
   id-token: write
   pull-requests: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment per type
 concurrency:
-  group: "pages"
+  group: "pages-${{ github.event.inputs.deployment_type || 'preview' }}"
   cancel-in-progress: false
+
+env:
+  DEPLOYMENT_TYPE: ${{ github.event.inputs.deployment_type || 'preview' }}
+  GITHUB_REPOSITORY: ${{ github.repository }}
 
 jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')))
+    outputs:
+      deployment_type: ${{ steps.config.outputs.deployment_type }}
+      deploy_branch: ${{ steps.config.outputs.deploy_branch }}
+      deployment_url: ${{ steps.config.outputs.deployment_url }}
     
     steps:
+    - name: Determine deployment configuration
+      id: config
+      run: |
+        DEPLOYMENT_TYPE="${{ env.DEPLOYMENT_TYPE }}"
+        
+        # Determine branch to deploy
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ -n "${{ github.event.inputs.deploy_branch }}" ]; then
+            DEPLOY_BRANCH="${{ github.event.inputs.deploy_branch }}"
+          else
+            DEPLOY_BRANCH="${{ github.ref_name }}"
+          fi
+          
+          # For production deployment, enforce main branch unless explicitly overridden
+          if [ "$DEPLOYMENT_TYPE" = "production" ] && [ -z "${{ github.event.inputs.deploy_branch }}" ]; then
+            DEPLOY_BRANCH="main"
+          fi
+        else
+          # Push event - always deploy to preview
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          DEPLOYMENT_TYPE="preview"
+        fi
+        
+        echo "deployment_type=$DEPLOYMENT_TYPE" >> $GITHUB_OUTPUT
+        echo "deploy_branch=$DEPLOY_BRANCH" >> $GITHUB_OUTPUT
+        echo "GITHUB_REF_NAME=$DEPLOY_BRANCH" >> $GITHUB_ENV
+        echo "DEPLOYMENT_TYPE=$DEPLOYMENT_TYPE" >> $GITHUB_ENV
+        
+        # Generate deployment URL
+        if [ "$DEPLOYMENT_TYPE" = "production" ]; then
+          DEPLOYMENT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+        else
+          SANITIZED_BRANCH=$(echo "$DEPLOY_BRANCH" | sed 's/[^a-zA-Z0-9\-_]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+          DEPLOYMENT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/$SANITIZED_BRANCH"
+        fi
+        
+        echo "deployment_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+        
+        echo "🎯 Deployment Type: $DEPLOYMENT_TYPE"
+        echo "🌿 Deploy Branch: $DEPLOY_BRANCH"
+        echo "🔗 Target URL: $DEPLOYMENT_URL"
+    
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.config.outputs.deploy_branch }}
     
     - name: Display deployment info
       run: |
         echo "🚀 Deployment Information"
         echo "========================"
         echo "📦 Repository: ${{ github.repository }}"
-        echo "🌿 Branch: ${{ github.ref_name }}"
+        echo "🌿 Branch: ${{ steps.config.outputs.deploy_branch }}"
+        echo "🎯 Type: ${{ steps.config.outputs.deployment_type }}"
+        echo "🔗 Target URL: ${{ steps.config.outputs.deployment_url }}"
         echo "⚡ Trigger: ${{ github.event_name }}"
         if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           echo "👤 Triggered by: ${{ github.actor }}"
-          echo "ℹ️  Manual deployment from branch: ${{ github.ref_name }}"
         fi
         echo "========================"
     
@@ -117,6 +172,24 @@ jobs:
       run: |
         pip install numpy matplotlib
     
+    - name: Generate deployment URLs
+      run: |
+        echo "🌐 Generating environment-aware URLs..."
+        python scripts/url_service.py \
+          --deployment-type "${{ steps.config.outputs.deployment_type }}" \
+          --branch "${{ steps.config.outputs.deploy_branch }}" \
+          --output docs/deployment-config.json
+        
+        echo "📋 Generated configuration:"
+        cat docs/deployment-config.json
+    
+    - name: Update schema URLs for deployment
+      run: |
+        echo "🔄 Updating schema URLs for deployment..."
+        python scripts/update_schema_urls.py \
+          --deployment-type "${{ steps.config.outputs.deployment_type }}" \
+          --branch "${{ steps.config.outputs.deploy_branch }}"
+    
     - name: Test core mathematical functions
       run: |
         cd src
@@ -152,12 +225,85 @@ jobs:
     
     - name: Setup Pages
       uses: actions/configure-pages@v5
+    
+    - name: Prepare deployment structure
+      run: |
+        echo "📁 Preparing deployment structure..."
+        DEPLOYMENT_TYPE="${{ steps.config.outputs.deployment_type }}"
+        DEPLOY_BRANCH="${{ steps.config.outputs.deploy_branch }}"
+        
+        if [ "$DEPLOYMENT_TYPE" = "production" ]; then
+          echo "🎯 Production deployment - using root directory"
+          # For production, deploy directly to root
+        else
+          echo "🔀 Preview deployment - creating branch directory structure"
+          # For preview, we'll set up the branch-preview structure after Jekyll build
+        fi
+        
+        echo "✓ Deployment structure prepared"
       
     - name: Build with Jekyll
       uses: actions/jekyll-build-pages@v1
       with:
         source: ./docs
         destination: ./_site
+    
+    - name: Setup preview deployment structure
+      if: steps.config.outputs.deployment_type == 'preview'
+      run: |
+        echo "📁 Setting up preview deployment structure..."
+        
+        DEPLOY_BRANCH="${{ steps.config.outputs.deploy_branch }}"
+        SANITIZED_BRANCH=$(echo "$DEPLOY_BRANCH" | sed 's/[^a-zA-Z0-9\-_]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+        
+        # Create branch-preview directory structure
+        PREVIEW_DIR="_site/branch-preview/$SANITIZED_BRANCH"
+        mkdir -p "$PREVIEW_DIR"
+        
+        # Copy built site to preview directory (excluding existing branch-preview to avoid recursion)
+        rsync -av --exclude='branch-preview' _site/ "$PREVIEW_DIR/"
+        
+        # Create root index that shows available previews
+        cat > _site/index.html << EOF
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Branch Previews - ${{ github.repository }}</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+                .preview-link { display: block; padding: 15px; margin: 10px 0; border: 2px solid #ddd; text-decoration: none; color: #333; border-radius: 8px; }
+                .preview-link:hover { background: #f5f5f5; border-color: #999; }
+                .current { background: #e8f5e9; border-color: #4caf50; }
+                .meta { color: #666; font-size: 0.9em; margin-top: 5px; }
+            </style>
+        </head>
+        <body>
+            <h1>🔀 Branch Preview Deployments</h1>
+            <p><strong>Repository:</strong> ${{ github.repository }}</p>
+            
+            <h2>📂 Available Previews:</h2>
+            <a href="branch-preview/$SANITIZED_BRANCH/" class="preview-link current">
+                <div><strong>🌿 $DEPLOY_BRANCH</strong> (Current Deployment)</div>
+                <div class="meta">Deployed: $(date)</div>
+                <div class="meta">Type: Preview Branch</div>
+            </a>
+            
+            <h2>🚀 Production Deployment</h2>
+            <p>For production deployment to the root URL, use the <strong>workflow dispatch</strong> with deployment type set to "production".</p>
+            
+            <hr>
+            <p><small>
+                <strong>Note:</strong> This is a preview deployment system. Each feature branch gets its own preview URL under /branch-preview/{branch-name}/
+            </small></p>
+        </body>
+        </html>
+        EOF
+        
+        echo "✓ Preview structure created at: $PREVIEW_DIR"
+        echo "📋 Directory structure:"
+        ls -la _site/branch-preview/$SANITIZED_BRANCH/ | head -10
     
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
@@ -178,6 +324,9 @@ jobs:
       run: |
         echo "🚀 Deployment completed successfully!"
         echo "📱 Site URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🎯 Deployment Type: ${{ needs.build.outputs.deployment_type }}"
+        echo "🌿 Branch: ${{ needs.build.outputs.deploy_branch }}"
+        echo "🔗 Target URL: ${{ needs.build.outputs.deployment_url }}"
         echo "⏰ Deployed at: $(date)"
     
     - name: Update PR comment with success

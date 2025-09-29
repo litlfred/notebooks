@@ -2,24 +2,24 @@
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
     {
-      "playground": "https://litlfred.github.io/notebooks/vocab/playground/",
-      "notebooks": "https://litlfred.github.io/notebooks/vocab/",
-      "core": "https://litlfred.github.io/notebooks/libraries/core/",
-      "pqt": "https://litlfred.github.io/notebooks/libraries/pq-torus/",
+      "playground": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/playground/",
+      "notebooks": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/",
+      "core": "./libraries/core/",
+      "pqt": "./libraries/pq-torus/",
       "dct": "http://purl.org/dc/terms/",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
-      "widget": "https://litlfred.github.io/notebooks/vocab/widget/"
+      "widget": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/widget/"
     }
   ],
-  "@id": "https://litlfred.github.io/notebooks/weierstrass-playground.jsonld",
+  "@id": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/weierstrass-playground.jsonld",
   "@type": [
     "prov:Entity",
     "playground:Widget",
     "notebooks:InteractiveApplication"
   ],
   "dct:conformsTo": [
-    "https://litlfred.github.io/notebooks/libraries/core/notebook/widget.schema.json"
+    "./libraries/core/notebook/widget.schema.json"
   ],
   "dct:title": "℘ Weierstrass Mathematical Playground",
   "dct:description": "Interactive mathematical workspace for exploring the Weierstrass ℘ function with drag-and-drop widgets, computational pipelines, and real-time visualization.",
@@ -35,9 +35,9 @@
   "playground:requiresThreadPool": true,
   "playground:lazyLoading": true,
   
-  "widget:renderUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/board.html",
-  "widget:configUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/widget-schemas.json",
-  "widget:indexUrl": "https://litlfred.github.io/notebooks/index.html",
+  "widget:renderUrl": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/docs/weierstrass-playground/board.html",
+  "widget:configUrl": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/docs/weierstrass-playground/widget-schemas.json",
+  "widget:indexUrl": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/index.html",
   
   "playground:threadPoolConfig": {
     "maxWorkers": 4,
@@ -140,7 +140,7 @@
   ],
   
   "playground:deployment": {
-    "deploymentUrl": "https://litlfred.github.io/notebooks/",
+    "deploymentUrl": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/",
     "repositoryUrl": "https://github.com/litlfred/notebooks",
     "indexPath": "/index.html",
     "playgroundPath": "/docs/weierstrass-playground/board.html",
@@ -150,8 +150,8 @@
   
   "playground:dependencies": {
     "libraries": [
-      "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
-      "https://litlfred.github.io/notebooks/libraries/pq-torus/pq-torus.jsonld"
+      "./libraries/core/core.jsonld",
+      "./libraries/pq-torus/pq-torus.jsonld"
     ],
     "python": [
       "numpy>=1.20.0",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/arrow/input.schema.json",
+  "$id": "./libraries/core/arrow/input.schema.json",
   "title": "Workflow Arrow Input Schema",
   "description": "Schema for defining arrows/connections between widgets with optional transformations",
   "type": "object",

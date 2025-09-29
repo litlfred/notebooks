@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#", 
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/python-code/input.schema.json",
+  "$id": "./libraries/core/python-code/input.schema.json",
   "title": "Python Code Input Schema",
   "description": "Input parameters for Python code execution widget",
   "type": "object",

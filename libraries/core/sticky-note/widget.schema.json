@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/widget.schema.json",
+  "$id": "./libraries/core/sticky-note/widget.schema.json",
   "title": "Sticky Note Widget Schema",
   "description": "Schema for sticky note widget instances",
   "type": "object",

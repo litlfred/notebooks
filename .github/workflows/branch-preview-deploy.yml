@@ -1,0 +1,269 @@
+name: 🔀 Deploy Feature Branch Preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '🌿 Branch to deploy (leave empty for current branch)'
+        required: false
+        type: string
+      force_rebuild:
+        description: '🔄 Force rebuild (ignore cache)'
+        required: false
+        default: false
+        type: boolean
+
+# Allow multiple concurrent preview deployments
+concurrency:
+  group: "branch-preview-${{ github.ref_name }}-${{ github.event.inputs.branch || github.ref_name }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+env:
+  DEPLOYMENT_TYPE: preview
+  GITHUB_REPOSITORY: ${{ github.repository }}
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Determine deployment branch
+      id: branch
+      run: |
+        if [ -n "${{ github.event.inputs.branch }}" ]; then
+          DEPLOY_BRANCH="${{ github.event.inputs.branch }}"
+          echo "Using input branch: $DEPLOY_BRANCH"
+        else
+          DEPLOY_BRANCH="${{ github.ref_name }}"
+          echo "Using current branch: $DEPLOY_BRANCH"
+        fi
+        
+        echo "deploy_branch=$DEPLOY_BRANCH" >> $GITHUB_OUTPUT
+        echo "GITHUB_REF_NAME=$DEPLOY_BRANCH" >> $GITHUB_ENV
+        
+        # Sanitize branch name for URL
+        SANITIZED_BRANCH=$(echo "$DEPLOY_BRANCH" | sed 's/[^a-zA-Z0-9\-_]/-/g' | sed 's/-\+/-/g' | sed 's/^-\|-$//g')
+        echo "sanitized_branch=$SANITIZED_BRANCH" >> $GITHUB_OUTPUT
+        
+        PREVIEW_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/$SANITIZED_BRANCH"
+        echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+        
+        echo "🌿 Branch: $DEPLOY_BRANCH"
+        echo "🔗 Preview URL: $PREVIEW_URL"
+
+    - name: Checkout specified branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.branch.outputs.deploy_branch }}
+        fetch-depth: 0
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        fi
+        pip install numpy matplotlib
+    
+    - name: Generate deployment URLs
+      run: |
+        echo "🌐 Generating environment-aware URLs..."
+        python scripts/url_service.py \
+          --deployment-type preview \
+          --branch "${{ steps.branch.outputs.deploy_branch }}" \
+          --output docs/deployment-config.json
+        
+        echo "📋 Generated configuration:"
+        cat docs/deployment-config.json
+    
+    - name: Update schema URLs for preview deployment
+      run: |
+        echo "🔄 Updating schema URLs for preview deployment..."
+        python -c "
+        import os
+        import json
+        from pathlib import Path
+        from scripts.url_service import URLService
+        
+        # Initialize URL service
+        os.environ['DEPLOYMENT_TYPE'] = 'preview'
+        os.environ['GITHUB_REF_NAME'] = '${{ steps.branch.outputs.deploy_branch }}'
+        service = URLService()
+        
+        base_url = service.get_base_url()
+        print(f'Base URL: {base_url}')
+        
+        # Update deployment manifest if it exists
+        manifest_file = Path('docs/deployment-manifest.json')
+        if manifest_file.exists():
+            with open(manifest_file, 'r') as f:
+                manifest = json.load(f)
+            
+            manifest['deployment']['github_pages_url'] = base_url
+            manifest['deployment']['deployment_type'] = 'preview'
+            manifest['deployment']['branch'] = '${{ steps.branch.outputs.deploy_branch }}'
+            
+            with open(manifest_file, 'w') as f:
+                json.dump(manifest, f, indent=2)
+            
+            print('✓ Updated deployment manifest')
+        
+        print('✓ Schema URL updates completed')
+        "
+    
+    - name: Generate widget index files
+      run: |
+        if [ -f scripts/generate-widget-index.py ]; then
+          echo "📊 Generating widget index files..."
+          python scripts/generate-widget-index.py
+        else
+          echo "ℹ️  No widget index generator found, skipping..."
+        fi
+    
+    - name: Prepare preview deployment
+      run: |
+        if [ -f scripts/deploy-github-pages.py ]; then
+          echo "🚀 Preparing preview deployment..."
+          python scripts/deploy-github-pages.py
+        else
+          echo "ℹ️  No deployment script found, using basic deployment..."
+        fi
+    
+    - name: Test core functionality (if available)
+      run: |
+        if [ -d "src/weierstrass_playground" ]; then
+          echo "🧮 Testing mathematical functions..."
+          cd src
+          python -c "
+          try:
+              import weierstrass_playground.core as wc
+              import numpy as np
+              print('Testing mathematical functions...')
+              z = 2.0 + 1.5j
+              p, q, N = 11.0, 5.0, 2
+              wp_val = wc.wp_rect(z, p, q, N)
+              print(f'✓ ℘ function test passed: |℘({z})| = {abs(wp_val):.4f}')
+          except ImportError as e:
+              print(f'ℹ️  Mathematical functions not available: {e}')
+          " 
+        else
+          echo "ℹ️  No mathematical functions to test"
+        fi
+    
+    - name: Validate deployment structure
+      run: |
+        echo "🔍 Validating deployment structure..."
+        
+        # Check essential files
+        if [ -f "docs/index.html" ] || [ -f "docs/index.md" ]; then
+          echo "✓ Index file found"
+        else
+          echo "⚠️  No index file found"
+        fi
+        
+        if [ -d "docs" ]; then
+          echo "✓ Docs directory exists"
+          echo "📁 Docs contents:"
+          ls -la docs/ | head -10
+        else
+          echo "❌ No docs directory found"
+          exit 1
+        fi
+        
+        echo "✅ Deployment structure validated"
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+      
+    - name: Build with Jekyll
+      uses: actions/jekyll-build-pages@v1
+      with:
+        source: ./docs
+        destination: ./_site
+    
+    - name: Prepare preview deployment directory
+      run: |
+        echo "📁 Preparing preview deployment directory..."
+        
+        # Create branch-preview directory structure
+        PREVIEW_DIR="_site/branch-preview/${{ steps.branch.outputs.sanitized_branch }}"
+        mkdir -p "$PREVIEW_DIR"
+        
+        # Copy built site to preview directory
+        if [ -d "_site" ]; then
+          # Move current site content to preview subdirectory
+          rsync -av --exclude='branch-preview' _site/ "$PREVIEW_DIR/"
+          
+          # Create root index that redirects to main branch preview or shows directory
+          cat > _site/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Branch Previews - ${{ github.repository }}</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <style>
+                body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+                .branch-link { display: block; padding: 10px; margin: 5px 0; border: 1px solid #ddd; text-decoration: none; color: #333; }
+                .branch-link:hover { background: #f5f5f5; }
+                .current { background: #e8f5e9; border-color: #4caf50; }
+            </style>
+        </head>
+        <body>
+            <h1>🔀 Branch Previews</h1>
+            <p>Repository: <strong>${{ github.repository }}</strong></p>
+            
+            <h2>Available Previews:</h2>
+            <a href="branch-preview/${{ steps.branch.outputs.sanitized_branch }}/" class="branch-link current">
+                🌿 ${{ steps.branch.outputs.deploy_branch }} (Current)
+            </a>
+            
+            <p><small>
+                This is a preview deployment. For production deployment, 
+                use the workflow dispatch on the main branch.
+            </small></p>
+        </body>
+        </html>
+        EOF
+          
+          echo "✓ Preview directory structure created"
+          echo "📁 Preview path: $PREVIEW_DIR"
+        else
+          echo "❌ No built site found"
+          exit 1
+        fi
+    
+    - name: Upload preview artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./_site
+
+  deploy-preview:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build-preview
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+    
+    - name: Display preview information
+      run: |
+        echo "🎉 Preview deployment completed!"
+        echo "🔗 Preview URL: ${{ needs.build-preview.outputs.preview_url }}"
+        echo "📱 Full site URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🌿 Branch: ${{ needs.build-preview.outputs.deploy_branch }}"
+        echo "⏰ Deployed at: $(date)"

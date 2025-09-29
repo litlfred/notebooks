@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/output.schema.json",
+  "$id": "./libraries/pq-torus/weierstrass/output.schema.json",
   "title": "Weierstrass Function Output Schema",
   "description": "Generic output data from Weierstrass ℘-function visualization widgets",
   "type": "object",

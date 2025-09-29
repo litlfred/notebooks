@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/two-panel/widget.schema.json",
+  "$id": "./libraries/pq-torus/weierstrass/two-panel/widget.schema.json",
   "title": "Weierstrass Two-Panel Widget Schema",
   "description": "Schema for Weierstrass ℘(z) and ℘′(z) two-panel visualization widget instances",
   "type": "object",

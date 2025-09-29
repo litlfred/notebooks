@@ -1,10 +1,10 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld",
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+    "./libraries/core/core.jsonld",
     {
-      "notebook": "https://litlfred.github.io/notebooks/vocab/notebook/",
-      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
+      "notebook": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/notebook/",
+      "widget": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/widget/",
       "dct": "http://purl.org/dc/terms/"
     }
   ],
@@ -19,7 +19,7 @@
     {
       "@id": "urn:widget:sticky-note-1",
       "@type": ["prov:Entity", "sticky:widget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/widget.schema.json",
+      "dct:conformsTo": "./libraries/core/sticky-note/widget.schema.json",
       "widget_id": "sticky-1",
       "widget_type": "sticky-note",
       "prov:generatedAtTime": "2024-09-28T10:00:00Z",
@@ -29,7 +29,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "sticky:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
+        "dct:conformsTo": "./libraries/core/sticky-note/input.schema.json",
         "content": "# Welcome to ℘ Weierstrass Playground\n\nThis is a simple **sticky note** widget demonstrating basic markdown support within the Weierstrass Playground environment.\n\n- Easy to use mathematical workspace\n- Supports *formatting* and `code`\n- Perfect for mathematical documentation",
         "show_note": true
       }
@@ -37,7 +37,7 @@
     {
       "@id": "urn:widget:sticky-note-2", 
       "@type": ["prov:Entity", "sticky:widget"],
-      "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/widget.schema.json",
+      "dct:conformsTo": "./libraries/core/sticky-note/widget.schema.json",
       "widget_id": "sticky-2",
       "widget_type": "sticky-note",
       "prov:generatedAtTime": "2024-09-28T10:01:00Z",
@@ -47,7 +47,7 @@
       },
       "input": {
         "@type": ["prov:Entity", "sticky:input"],
-        "dct:conformsTo": "https://litlfred.github.io/notebooks/libraries/core/sticky-note/input.schema.json",
+        "dct:conformsTo": "./libraries/core/sticky-note/input.schema.json",
         "content": "## Getting Started with ℘ Functions\n\nTo explore mathematical concepts:\n\n1. Add Weierstrass widgets from the library\n2. Configure lattice parameters (p, q)\n3. Connect widgets for parameter flow\n4. Execute and visualize ℘ function results",
         "show_note": true
       }

@@ -1,8 +1,8 @@
 {
   "@context": [
-    "https://litlfred.github.io/notebooks/libraries/",
+    "./libraries/",
     {
-      "sympy": "https://litlfred.github.io/notebooks/libraries/sympy/",
+      "sympy": "./libraries/sympy/",
       "workflow": "https://w3id.org/ro/terms/workflow-run#",
       "prov": "http://www.w3.org/ns/prov#"
     }
@@ -13,7 +13,7 @@
   "description": "Complete SymPy function widgets with class introspection for symbolic mathematics",
   "version": "1.0.0",
   "author": "SymPy Widgets Team",
-  "base_url": "https://litlfred.github.io/notebooks/libraries/sympy/",
+  "base_url": "./libraries/sympy/",
   
   "widgets": {
     "calculus/euler/euler-equations": {

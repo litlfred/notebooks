@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2019-09/schema",
-  "$id": "https://litlfred.github.io/notebooks/libraries/core/notebook/widget.schema.json",
+  "$id": "./libraries/core/notebook/widget.schema.json",
   "title": "Notebook Widget Schema",
   "description": "Schema for notebook widget instances",
   "type": "object",

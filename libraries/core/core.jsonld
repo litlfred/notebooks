@@ -1,15 +1,15 @@
 {
   "@context": {
-    "@vocab": "https://litlfred.github.io/notebooks/ontology/",
-    "weier": "https://litlfred.github.io/notebooks/ontology/weier#",
-    "pqt": "https://litlfred.github.io/notebooks/ontology/pqt#", 
-    "sticky": "https://litlfred.github.io/notebooks/ontology/sticky#",
-    "python": "https://litlfred.github.io/notebooks/ontology/python#",
-    "data": "https://litlfred.github.io/notebooks/ontology/data#",
+    "@vocab": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/",
+    "weier": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/weier#",
+    "pqt": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/pqt#", 
+    "sticky": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/sticky#",
+    "python": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/python#",
+    "data": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/data#",
     "prov": "http://www.w3.org/ns/prov#",
     "dct": "http://purl.org/dc/terms/",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "library": "https://litlfred.github.io/notebooks/ontology/library#",
+    "library": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/ontology/library#",
     
     "input": "@type",
     "output": "@type", 
@@ -23,7 +23,7 @@
       "@id": "prov:value"
     }
   },
-  "@id": "https://litlfred.github.io/notebooks/libraries/core/",
+  "@id": "./libraries/core/",
   "@type": ["prov:Collection", "library:WidgetLibrary"],
   "dct:title": "Core Widget Library",
   "dct:description": "Base widgets and common functionality for the widget framework",

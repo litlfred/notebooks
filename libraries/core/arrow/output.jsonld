@@ -1,15 +1,15 @@
 {
   "@context": [
     "https://www.w3.org/ns/prov-o.jsonld", 
-    "https://litlfred.github.io/notebooks/libraries/core/core.jsonld",
+    "./libraries/core/core.jsonld",
     {
-      "arrow": "https://litlfred.github.io/notebooks/libraries/core/arrow/",
-      "workflow": "https://litlfred.github.io/notebooks/vocab/workflow/",
+      "arrow": "./libraries/core/arrow/",
+      "workflow": "https://litlfred.github.io/notebooks/branch-preview/feature-test-preview/vocab/workflow/",
       "dct": "http://purl.org/dc/terms/",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
     }
   ],
-  "@id": "https://litlfred.github.io/notebooks/libraries/core/arrow/output.jsonld", 
+  "@id": "./libraries/core/arrow/output.jsonld", 
   "@type": ["prov:Entity", "arrow:output", "workflow:ConnectionResult"],
   "dct:title": "Workflow Arrow Output Result",
   "dct:description": "JSON-LD context for arrow execution results and parameter transfer status",

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/input.schema.json",
+  "$id": "./libraries/pq-torus/input.schema.json",
   "title": "PQ-Torus Input Schema",
   "description": "Input parameters for PQ-Torus widget - pair of prime integers",
   "type": "object",
