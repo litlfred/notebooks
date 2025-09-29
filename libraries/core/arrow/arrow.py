@@ -8,11 +8,14 @@ import inspect
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Callable
 
+from .transformers import TransformerFactory
+
 
 class WorkflowArrow:
     """
     Represents a connection arrow between widgets with optional transformation logic.
     Supports ETL (Extract, Transform, Load) pattern for parameter flow.
+    Now supports multiple transformation languages via MIME types.
     """
     
     def __init__(self, arrow_config: Dict[str, Any]):
@@ -24,13 +27,42 @@ class WorkflowArrow:
         self.comment = arrow_config.get('comment', '')
         self.transformation = arrow_config.get('transformation', {})
         
-        # Compile optional Python transformation function
+        # Compile optional transformation function
         self.transform_function = None
-        if 'python_code' in self.transformation:
+        if self.transformation:
             self._compile_transformation()
     
     def _compile_transformation(self):
-        """Compile optional Python transformation code into executable function"""
+        """Compile transformation based on content type using appropriate transformer"""
+        # Check for legacy python_code format first
+        if 'python_code' in self.transformation:
+            self._compile_legacy_python_transformation()
+            return
+        
+        # Use new multi-type system
+        content_type = self.transformation.get('content_type', 'application/x-python')
+        content = self._resolve_content()
+        
+        if not content.strip():
+            return  # No transformation content
+        
+        try:
+            # Get transformer implementation for content type
+            transformer = TransformerFactory.get_transformer(content_type)
+            
+            # Validate content first
+            if not transformer.validate_content(content, self.transformation):
+                raise ValueError(f"Invalid {content_type} transformation content")
+            
+            # Compile transformation
+            self.transform_function = transformer.compile(content, self.transformation)
+            self.transformer = transformer
+            
+        except ValueError as e:
+            raise ValueError(f"Failed to compile transformation: {e}")
+    
+    def _compile_legacy_python_transformation(self):
+        """Compile legacy Python transformation for backward compatibility"""
         python_code = self.transformation['python_code']
         
         # Create transformation function with proper signature
@@ -46,8 +78,30 @@ def transform_parameters(source_data, input_mapping=None):
             local_scope = {}
             exec(function_code, {"__builtins__": __builtins__}, local_scope)
             self.transform_function = local_scope['transform_parameters']
+            self.transformer = TransformerFactory.get_transformer('application/x-python')
         except Exception as e:
-            raise ValueError(f"Failed to compile transformation function: {e}")
+            raise ValueError(f"Failed to compile legacy Python transformation: {e}")
+    
+    def _resolve_content(self) -> str:
+        """Resolve content from inline, URL, or IRI source"""
+        content_source = self.transformation.get('content_source', 'inline')
+        
+        if content_source == 'inline':
+            return self.transformation.get('content', '')
+        elif content_source in ['url', 'iri']:
+            url = self.transformation.get('source_url')
+            if url:
+                return self._fetch_content(url)
+            else:
+                raise ValueError(f"Missing source_url for {content_source} content source")
+        else:
+            raise ValueError(f"Unsupported content source: {content_source}")
+    
+    def _fetch_content(self, url: str) -> str:
+        """Fetch content from URL with proper caching and security"""
+        # TODO: Implement URL fetching with security validation
+        # For now, raise an error to indicate this feature needs implementation
+        raise NotImplementedError("URL-based content fetching not yet implemented")
     
     def execute_connection(self, source_widget_instance, target_widget_instance) -> Dict[str, Any]:
         """Execute the arrow connection by transferring parameters from source to target."""
@@ -63,13 +117,33 @@ def transform_parameters(source_data, input_mapping=None):
                     source_data[param] = getattr(source_widget_instance, param, None)
             
             # Apply optional transformation
-            transformed_data = source_data
+            transformed_data = source_data.copy()
             transformation_applied = False
+            transformation_info = {}
             
-            if self.transform_function:
-                input_mapping = self.transformation.get('input_mapping', {})
-                transformed_data = self.transform_function(source_data, input_mapping)
-                transformation_applied = True
+            if self.transform_function and hasattr(self, 'transformer'):
+                try:
+                    input_mapping = self.transformation.get('input_mapping', {})
+                    transformed_data = self.transformer.execute(
+                        self.transform_function, 
+                        source_data, 
+                        input_mapping
+                    )
+                    transformation_applied = True
+                    transformation_info = {
+                        'content_type': self.transformation.get('content_type', 'application/x-python'),
+                        'content_source': self.transformation.get('content_source', 'inline'),
+                        'input_mapping_applied': bool(input_mapping)
+                    }
+                except Exception as e:
+                    # Return error but don't fail the entire connection
+                    return {
+                        "success": False,
+                        "timestamp": timestamp,
+                        "error_message": f"Transformation failed: {str(e)}",
+                        "arrow_type": self.arrow_type,
+                        "transformation_info": transformation_info
+                    }
             
             # Load parameters into target widget
             for i, target_param in enumerate(self.target_parameters):
@@ -87,6 +161,7 @@ def transform_parameters(source_data, input_mapping=None):
                 "timestamp": timestamp,
                 "parameters_transferred": transformed_data,
                 "transformation_applied": transformation_applied,
+                "transformation_info": transformation_info,
                 "arrow_type": self.arrow_type,
                 "comment": self.comment
             }
@@ -101,7 +176,7 @@ def transform_parameters(source_data, input_mapping=None):
     
     def to_jsonld(self) -> Dict[str, Any]:
         """Convert arrow to JSON-LD representation"""
-        return {
+        jsonld = {
             "@context": [
                 "https://www.w3.org/ns/prov-o.jsonld",
                 "https://litlfred.github.io/notebooks/libraries/core/core.jsonld"
@@ -117,3 +192,26 @@ def transform_parameters(source_data, input_mapping=None):
             "workflow:hasTransformation": bool(self.transformation),
             "dct:created": datetime.now().isoformat()
         }
+        
+        # Add transformation info if present
+        if self.transformation:
+            transformation_jsonld = {
+                "@type": ["prov:Entity", "workflow:Transformation"]
+            }
+            
+            # Add content type if using new format
+            if 'content_type' in self.transformation:
+                transformation_jsonld["dct:format"] = self.transformation['content_type']
+            
+            # Add content source info
+            if 'content_source' in self.transformation:
+                transformation_jsonld["workflow:contentSource"] = self.transformation['content_source']
+            
+            # Add legacy support indicator
+            if 'python_code' in self.transformation:
+                transformation_jsonld["workflow:legacy"] = True
+                transformation_jsonld["dct:format"] = "application/x-python"
+            
+            jsonld["workflow:transformation"] = transformation_jsonld
+        
+        return jsonld

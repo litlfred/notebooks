@@ -40,20 +40,132 @@
       "description": "Optional markdown comment displayed as arrow title"
     },
     "transformation": {
-      "type": "object",
-      "properties": {
-        "python_code": {
-          "type": "string",
-          "description": "Optional Python function body for ETL transformation"
+      "oneOf": [
+        {
+          "$ref": "#/$defs/legacy_transformation"
         },
-        "input_mapping": {
-          "type": "object",
-          "description": "Optional parameter name mapping from source to target"
+        {
+          "$ref": "#/$defs/multitype_transformation"
         }
-      },
-      "description": "Optional transformation logic applied during parameter flow"
+      ],
+      "description": "Transformation logic applied during parameter flow - supports both legacy and new multi-type formats"
     }
   },
   "required": ["source_widget", "target_widget", "source_parameters", "target_parameters"],
-  "additionalProperties": false
+  "additionalProperties": false,
+  
+  "$defs": {
+    "legacy_transformation": {
+      "type": "object",
+      "title": "Legacy Python-only Transformation (Backward Compatibility)",
+      "properties": {
+        "python_code": {
+          "type": "string",
+          "description": "Legacy: Python function body for ETL transformation"
+        },
+        "input_mapping": {
+          "type": "object",
+          "description": "Legacy: Parameter name mapping from source to target"
+        }
+      },
+      "required": ["python_code"],
+      "additionalProperties": false
+    },
+    
+    "multitype_transformation": {
+      "type": "object", 
+      "title": "Multi-Type Transformation with MIME Type Support",
+      "properties": {
+        "content_type": {
+          "type": "string",
+          "enum": [
+            "application/x-python",
+            "text/x-python", 
+            "application/javascript",
+            "text/javascript",
+            "application/x-r",
+            "text/x-r",
+            "application/sql",
+            "text/sql"
+          ],
+          "description": "MIME type specifying the transformation language"
+        },
+        "content_source": {
+          "type": "string",
+          "enum": ["inline", "url", "iri"],
+          "default": "inline",
+          "description": "How the transformation content is provided"
+        },
+        "content": {
+          "type": ["string", "null"],
+          "description": "Inline transformation code/script (required for inline source)"
+        },
+        "source_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL or IRI where transformation content is located (required for url/iri source)"
+        },
+        "input_mapping": {
+          "type": "object",
+          "description": "Optional parameter name mapping from source to target",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "execution_context": {
+          "$ref": "#/$defs/execution_context"
+        }
+      },
+      "required": ["content_type"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "content_source": {"const": "inline"}
+            }
+          },
+          "then": {
+            "required": ["content"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "content_source": {"enum": ["url", "iri"]}
+            }
+          },
+          "then": {
+            "required": ["source_url"]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    
+    "execution_context": {
+      "type": "object",
+      "title": "Transformation Execution Context and Constraints",
+      "properties": {
+        "timeout": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600,
+          "default": 30,
+          "description": "Maximum execution time in seconds"
+        },
+        "memory_limit": {
+          "type": "string",
+          "pattern": "^[0-9]+\\s*(B|KB|MB|GB)$",
+          "default": "50MB",
+          "description": "Maximum memory usage (e.g., '100MB', '1GB')"
+        },
+        "sandboxed": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to execute transformation in sandboxed environment"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }

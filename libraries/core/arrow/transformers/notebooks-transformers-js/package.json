@@ -1,0 +1,8 @@
+{
+  "name": "notebooks-transformers-js",
+  "version": "1.0.0",
+  "description": "JavaScript transformer for notebook widget arrows",
+  "main": "javascript.js",
+  "author": "Notebooks Transformation System",
+  "license": "MIT"
+}
