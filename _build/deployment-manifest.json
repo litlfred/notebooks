@@ -1,0 +1,44 @@
+{
+  "deployment": {
+    "timestamp": "2025-09-29T03:07:33.969091",
+    "generator_version": "1.0.0",
+    "repository": "litlfred/notebooks",
+    "github_pages_url": "https://litlfred.github.io/notebooks"
+  },
+  "widgets": {
+    "total_count": 3,
+    "by_type": {
+      "widget": 1,
+      "notebook": 1,
+      "playground": 1
+    },
+    "by_library": {
+      "core": 2,
+      "root": 1
+    }
+  },
+  "generated_files": {
+    "index_files": [
+      "/home/runner/work/notebooks/notebooks/libraries/core/sticky-note/index.html",
+      "/home/runner/work/notebooks/notebooks/libraries/core/notebook/index.html"
+    ],
+    "total_generated": 2
+  },
+  "routes": {
+    "sticky-note": "/libraries/core/sticky-note/",
+    "notebook": "/libraries/core/notebook/",
+    "weierstrass-playground": "/"
+  },
+  "assets": {
+    "javascript": [
+      "js/github-pages-launcher.js"
+    ],
+    "css": [
+      "js/minimal-launcher-styles.css"
+    ],
+    "python": [
+      "libraries/core/widget_threading/",
+      "libraries/core/widget_integration.py"
+    ]
+  }
+}

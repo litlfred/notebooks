@@ -1,0 +1,120 @@
+/* Minimal loading styles for GitHub Pages launcher */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    color: #e0e6ed;
+    overflow: hidden;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #4facfe;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 18px;
+    color: #b0bec5;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.loading-details {
+    font-size: 14px;
+    color: #78909c;
+    text-align: center;
+    max-width: 400px;
+    line-height: 1.4;
+}
+
+.error-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #2c1810 0%, #3d1a1a 50%, #4a1515 100%);
+    z-index: 10001;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.error-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+}
+
+.error-title {
+    font-size: 24px;
+    color: #ff6b6b;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #ffb3b3;
+}
+
+.error-details {
+    font-size: 14px;
+    color: #cc9999;
+    font-family: monospace;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 30px;
+    text-align: left;
+    white-space: pre-wrap;
+}
+
+.shutdown-links {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.shutdown-link {
+    display: inline-block;
+    padding: 12px 24px;
+    background: rgba(79, 172, 254, 0.1);
+    color: #4facfe;
+    text-decoration: none;
+    border-radius: 6px;
+    border: 1px solid rgba(79, 172, 254, 0.3);
+    transition: all 0.3s ease;
+}
+
+.shutdown-link:hover {
+    background: rgba(79, 172, 254, 0.2);
+    border-color: #4facfe;
+}
