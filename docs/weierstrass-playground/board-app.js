@@ -733,6 +733,41 @@ class MathematicalBoard {
     }
 
     /**
+     * Process markdown variables and substitutions
+     */
+    processMarkdownVariables(content, widget) {
+        // Simple variable substitution system
+        // Variables can be defined as {{variable_name}} and can reference widget properties or global values
+        
+        let processedContent = content;
+        
+        // Replace widget-specific variables
+        if (widget && widget.config) {
+            const variables = {
+                'widget_id': widget.id,
+                'widget_type': widget.type,
+                'widget_title': widget.title,
+                'timestamp': new Date().toISOString(),
+                'date': new Date().toLocaleDateString(),
+                'time': new Date().toLocaleTimeString()
+            };
+            
+            // Add widget config variables
+            Object.keys(widget.config).forEach(key => {
+                variables[key] = widget.config[key];
+            });
+            
+            // Replace {{variable}} patterns
+            Object.keys(variables).forEach(key => {
+                const pattern = new RegExp(`{{\\s*${key}\\s*}}`, 'gi');
+                processedContent = processedContent.replace(pattern, variables[key]);
+            });
+        }
+        
+        return processedContent;
+    }
+
+    /**
      * Simple markdown renderer with LaTeX support
      */
     renderMarkdown(content) {
