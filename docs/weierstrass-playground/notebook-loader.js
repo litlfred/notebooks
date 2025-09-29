@@ -17,7 +17,7 @@ class NotebookLoader {
         // Create file input for loading
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
-        fileInput.accept = '.jsonld,.json';
+        fileInput.accept = '.jsonld,.json,.ipynb';
         fileInput.style.display = 'none';
         fileInput.addEventListener('change', this.handleFileLoad.bind(this));
         document.body.appendChild(fileInput);
@@ -85,8 +85,16 @@ class NotebookLoader {
 
         try {
             const content = await this.readFileAsText(file);
-            const notebook = JSON.parse(content);
-            await this.loadNotebookData(notebook);
+            
+            // Check if it's a Jupyter notebook
+            if (file.name.endsWith('.ipynb')) {
+                await this.handleJupyterNotebook(content, file.name);
+            } else {
+                // Handle as JSON-LD notebook
+                const notebook = JSON.parse(content);
+                await this.loadNotebookData(notebook);
+            }
+            
             this.boardApp.updateStatus(`Loaded notebook: ${file.name}`, 'success');
         } catch (error) {
             console.error('Failed to load notebook file:', error);
@@ -236,6 +244,10 @@ class NotebookLoader {
                 widgetType = 'pq-torus.weierstrass.trajectories';
             } else if (widgetTypeEntry.includes('sticky:widget')) {
                 widgetType = 'sticky-note';
+            } else if (widgetTypeEntry.includes('jupyter:markdown-cell')) {
+                widgetType = 'jupyter-markdown-cell';
+            } else if (widgetTypeEntry.includes('jupyter:code-cell')) {
+                widgetType = 'jupyter-code-cell';
             }
         }
 
@@ -439,6 +451,285 @@ class NotebookLoader {
             'pq-torus.weierstrass.five-panel': 'weier:five-panel',
             'pq-torus.weierstrass.trajectories': 'weier:trajectories',
             'pq-torus.weierstrass.contours': 'weier:contours'
+        };
+        
+        return typeMap[widgetType] || 'widget:generic';
+    }
+
+    /**
+     * Handle Jupyter notebook import
+     */
+    async handleJupyterNotebook(content, filename) {
+        try {
+            const jupyterData = JSON.parse(content);
+            
+            // Validate notebook format
+            if (!this.validateJupyterNotebook(jupyterData)) {
+                throw new Error('Invalid Jupyter notebook format');
+            }
+
+            // Show import options dialog
+            const importMode = await this.showJupyterImportDialog(jupyterData, filename);
+            if (!importMode) return; // User cancelled
+
+            // Convert to widget format
+            const widgetNotebook = this.convertJupyterToWidgets(jupyterData, importMode, filename);
+            
+            // Load into board
+            await this.loadNotebookData(widgetNotebook);
+            
+            this.boardApp.updateStatus(`Imported Jupyter notebook: ${filename}`, 'success');
+        } catch (error) {
+            console.error('Jupyter import error:', error);
+            this.boardApp.updateStatus(`Failed to import Jupyter notebook: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Validate Jupyter notebook format
+     */
+    validateJupyterNotebook(data) {
+        const required = ['cells', 'metadata', 'nbformat'];
+        for (let field of required) {
+            if (!(field in data)) return false;
+        }
+        
+        if (!Array.isArray(data.cells)) return false;
+        if (data.nbformat < 3) return false;
+        
+        return true;
+    }
+
+    /**
+     * Show import options dialog for Jupyter notebooks
+     */
+    async showJupyterImportDialog(jupyterData, filename) {
+        return new Promise((resolve) => {
+            const cells = jupyterData.cells || [];
+            const metadata = jupyterData.metadata || {};
+            
+            const cellCounts = cells.reduce((acc, cell) => {
+                acc[cell.cell_type] = (acc[cell.cell_type] || 0) + 1;
+                return acc;
+            }, {});
+
+            const dialogHtml = `
+                <div class="jupyter-import-dialog">
+                    <h3>Import Jupyter Notebook</h3>
+                    <div class="notebook-info">
+                        <p><strong>File:</strong> ${filename}</p>
+                        <p><strong>Format:</strong> nbformat ${jupyterData.nbformat}.${jupyterData.nbformat_minor || 0}</p>
+                        <p><strong>Language:</strong> ${metadata.language_info?.name || 'Unknown'}</p>
+                        <p><strong>Kernel:</strong> ${metadata.kernelspec?.display_name || 'Unknown'}</p>
+                        <p><strong>Total Cells:</strong> ${cells.length}</p>
+                        <div class="cell-breakdown">
+                            ${Object.entries(cellCounts).map(([type, count]) => 
+                                `<span class="cell-count">${count} ${type}</span>`
+                            ).join(' ')}
+                        </div>
+                    </div>
+                    <div class="import-options">
+                        <label><input type="radio" name="import-mode" value="import" checked> 
+                            Import (editable copy)</label>
+                        <label><input type="radio" name="import-mode" value="link"> 
+                            Link (read-only reference)</label>
+                    </div>
+                    <div class="dialog-buttons">
+                        <button id="jupyter-import-btn">Import</button>
+                        <button id="jupyter-cancel-btn">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            // Create dialog overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'dialog-overlay';
+            overlay.innerHTML = dialogHtml;
+            document.body.appendChild(overlay);
+
+            // Handle buttons
+            overlay.querySelector('#jupyter-import-btn').onclick = () => {
+                const mode = overlay.querySelector('input[name="import-mode"]:checked').value;
+                document.body.removeChild(overlay);
+                resolve(mode);
+            };
+
+            overlay.querySelector('#jupyter-cancel-btn').onclick = () => {
+                document.body.removeChild(overlay);
+                resolve(null);
+            };
+        });
+    }
+
+    /**
+     * Convert Jupyter notebook to widget format
+     */
+    convertJupyterToWidgets(jupyterData, importMode, filename) {
+        const cells = jupyterData.cells || [];
+        const metadata = jupyterData.metadata || {};
+        
+        const widgets = [];
+        const connections = [];
+        let previousWidgetId = null;
+
+        cells.forEach((cell, index) => {
+            if (!['markdown', 'code'].includes(cell.cell_type)) {
+                return; // Skip unsupported cell types
+            }
+
+            const widget = this.createJupyterCellWidget(cell, index, importMode);
+            widgets.push(widget);
+
+            // Create sequential arrow to previous cell
+            if (previousWidgetId) {
+                const connection = this.createSequentialConnection(previousWidgetId, widget['@id'], index);
+                connections.append(connection);
+            }
+
+            previousWidgetId = widget['@id'];
+        });
+
+        // Create notebook JSON-LD structure
+        return {
+            "@context": [
+                "https://www.w3.org/ns/prov-o.jsonld",
+                "https://litlfred.github.io/notebooks/libraries/core/common/context.jsonld"
+            ],
+            "@id": `urn:notebook:jupyter-${Date.now()}`,
+            "@type": ["prov:Entity", "jupyter:notebook"],
+            "dct:title": metadata.title || `Imported: ${filename}`,
+            "dct:description": `Jupyter notebook imported in ${importMode} mode with ${cells.length} cells`,
+            "jupyter:source_filename": filename,
+            "jupyter:import_mode": importMode,
+            "jupyter:nbformat": `${jupyterData.nbformat}.${jupyterData.nbformat_minor || 0}`,
+            "jupyter:language": metadata.language_info?.name || 'unknown',
+            "jupyter:kernel": metadata.kernelspec?.display_name || 'unknown',
+            "prov:generatedAtTime": new Date().toISOString(),
+            "@graph": [...widgets, ...connections]
+        };
+    }
+
+    /**
+     * Create widget from Jupyter cell
+     */
+    createJupyterCellWidget(cell, index, importMode) {
+        const cellId = `urn:widget:jupyter-${cell.cell_type}-cell-${index}`;
+        
+        // Extract cell content
+        let content = '';
+        if (Array.isArray(cell.source)) {
+            content = cell.source.join('');
+        } else {
+            content = cell.source || '';
+        }
+
+        const baseWidget = {
+            "@id": cellId,
+            "@type": ["prov:Entity", `jupyter:${cell.cell_type}-cell`, "widget:instance"],
+            "jupyter:cell_index": index,
+            "jupyter:cell_type": cell.cell_type,
+            "jupyter:import_mode": importMode,
+            "widget:position": {
+                "x": 100 + (index % 3) * 350,
+                "y": 100 + Math.floor(index / 3) * 300
+            },
+            "widget:size": {
+                "width": 320,
+                "height": 250
+            },
+            "prov:generatedAtTime": new Date().toISOString()
+        };
+
+        if (cell.cell_type === 'markdown') {
+            return {
+                ...baseWidget,
+                "widget:type": "jupyter-markdown-cell",
+                "input": {
+                    "@id": `${cellId}:input`,
+                    "@type": ["prov:Entity", "jupyter:markdown-input"],
+                    "content": content,
+                    "show_note": true,
+                    "cell_metadata": cell.metadata || {},
+                    "attachments": cell.attachments || {},
+                    "cell_index": index
+                }
+            };
+        } else if (cell.cell_type === 'code') {
+            return {
+                ...baseWidget,
+                "widget:type": "jupyter-code-cell",
+                "input": {
+                    "@id": `${cellId}:input`,
+                    "@type": ["prov:Entity", "jupyter:code-input"],
+                    "code": content,
+                    "execute_immediately": false,
+                    "cell_metadata": cell.metadata || {},
+                    "outputs": cell.outputs || [],
+                    "execution_count": cell.execution_count,
+                    "cell_index": index
+                }
+            };
+        }
+    }
+
+    /**
+     * Create sequential connection between cells
+     */
+    createSequentialConnection(sourceId, targetId, targetIndex) {
+        return {
+            "@id": `urn:connection:sequential-${targetIndex}`,
+            "@type": ["prov:Entity", "workflow:Connection", "jupyter:sequential-arrow"],
+            "workflow:connection_type": "sequential_flow",
+            "jupyter:connection_reason": "Sequential execution order in notebook",
+            "source": {
+                "widget": sourceId,
+                "output": `${sourceId}:output`
+            },
+            "target": {
+                "widget": targetId,
+                "input": `${targetId}:input`
+            },
+            "visual": {
+                "arrow_style": "sequential",
+                "color": "#4A90E2",
+                "label": `Cell ${targetIndex - 1} → ${targetIndex}`
+            },
+            "prov:generatedAtTime": new Date().toISOString()
+        };
+    }
+
+    /**
+     * Import Jupyter notebook from URL
+     */
+    async importFromUrl(url, importMode = 'link') {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const content = await response.text();
+            await this.handleJupyterNotebook(content, url.split('/').pop() || 'notebook.ipynb');
+            
+        } catch (error) {
+            console.error('URL import error:', error);
+            this.boardApp.updateStatus(`Failed to import from URL: ${error.message}`, 'error');
+        }
+    }
+
+    /**
+     * Map widget type to JSON-LD type
+     */
+    getWidgetJsonLdType(widgetType) {
+        const typeMap = {
+            'sticky-note': 'sticky:widget',
+            'pq-torus': 'pqt:widget',
+            'pq-torus.weierstrass.two-panel': 'weier:two-panel',
+            'pq-torus.weierstrass.five-panel': 'weier:five-panel',
+            'pq-torus.weierstrass.trajectories': 'weier:trajectories',
+            'pq-torus.weierstrass.contours': 'weier:contours',
+            'jupyter-markdown-cell': 'jupyter:markdown-cell',
+            'jupyter-code-cell': 'jupyter:code-cell'
         };
         
         return typeMap[widgetType] || 'widget:generic';
