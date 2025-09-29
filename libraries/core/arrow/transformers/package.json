@@ -1,0 +1,7 @@
+{
+  "name": "notebooks-transformers",
+  "version": "1.0.0",
+  "description": "Node.js transformers for notebook widget arrows",
+  "main": "index.js",
+  "dependencies": {}
+}
