@@ -447,7 +447,7 @@ class GitHubAuthService {
         const notebookId = this.generateNotebookId(title);
         
         const notebookData = {
-            "@context": [
+            "@context": window.urlService ? window.urlService.generateJsonLdContext() : [
                 "https://www.w3.org/ns/prov-o.jsonld",
                 "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
             ],
@@ -471,10 +471,14 @@ class GitHubAuthService {
             let widgetIndex = 1;
             board.widgets.forEach((widget, id) => {
                 const widgetId = `urn:widget:${widget.type}-${widgetIndex}`;
+                const schemaUrl = window.urlService ? 
+                    window.urlService.getSchemaUrl(widget.type, 'widget.schema.json') :
+                    `https://litlfred.github.io/notebooks/schema/${widget.type}/widget.schema.json`;
+                    
                 notebookData["prov:hadMember"].push({
                     "@id": widgetId,
                     "@type": ["prov:Entity", `${widget.type}:widget`],
-                    "dct:conformsTo": `https://litlfred.github.io/notebooks/schema/${widget.type}/widget.schema.json`,
+                    "dct:conformsTo": schemaUrl,
                     "notebook:position": widget.position || {"x": 100 + (widgetIndex * 50), "y": 100 + (widgetIndex * 50)},
                     "notebook:size": widget.size || {"width": 300, "height": 250},
                     "notebook:config": widget.configuration || {},
@@ -507,7 +511,7 @@ class GitHubAuthService {
         const notebookId = this.generateNotebookId(title);
         
         const emptyNotebook = {
-            "@context": [
+            "@context": window.urlService ? window.urlService.generateJsonLdContext() : [
                 "https://www.w3.org/ns/prov-o.jsonld",
                 "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
             ],
@@ -527,7 +531,9 @@ class GitHubAuthService {
                 {
                     "@id": "urn:widget:sticky-note-welcome",
                     "@type": ["prov:Entity", "sticky:widget"],
-                    "dct:conformsTo": "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
+                    "dct:conformsTo": window.urlService ? 
+                        window.urlService.getSchemaUrl('sticky-note', 'widget.schema.json') :
+                        "https://litlfred.github.io/notebooks/schema/sticky-note/widget.schema.json",
                     "notebook:position": {"x": 100, "y": 100},
                     "notebook:size": {"width": 300, "height": 200},
                     "notebook:config": {
