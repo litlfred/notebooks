@@ -1,0 +1,244 @@
+name: 🚀 Production Deployment
+
+on:
+  # Only allow manual deployment to production
+  workflow_dispatch:
+    inputs:
+      confirm_production:
+        description: '⚠️ Confirm production deployment (type "PRODUCTION" to confirm)'
+        required: true
+        type: string
+      deploy_branch:
+        description: 'Branch to deploy (defaults to main)'
+        required: false
+        default: 'main'
+        type: string
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent production deployment
+concurrency:
+  group: "production-pages"
+  cancel-in-progress: false
+
+env:
+  # Repository configuration
+  REPO_OWNER: ${{ github.repository_owner }}
+  REPO_NAME: ${{ github.event.repository.name }}
+  
+  # Deployment configuration
+  DEPLOYMENT_TYPE: production
+  DEPLOYMENT_CONTEXT: production
+
+jobs:
+  # Validate production deployment request
+  validate-production:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: ⚠️ Validate production deployment confirmation
+      run: |
+        if [ "${{ inputs.confirm_production }}" != "PRODUCTION" ]; then
+          echo "❌ Production deployment not confirmed."
+          echo "Please type 'PRODUCTION' in the confirmation field to proceed."
+          exit 1
+        fi
+        
+        echo "✅ Production deployment confirmed"
+        echo "🌿 Deploy branch: ${{ inputs.deploy_branch }}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+
+  # Build job for production deployment
+  build-production:
+    runs-on: ubuntu-latest
+    needs: validate-production
+    
+    outputs:
+      deployment-url: ${{ steps.deployment-info.outputs.url }}
+      
+    steps:
+    - name: 🏗️ Checkout production branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.deploy_branch }}
+    
+    - name: 📊 Set deployment info
+      id: deployment-info
+      run: |
+        DEPLOY_URL="https://${{ env.REPO_OWNER }}.github.io/${{ env.REPO_NAME }}"
+        
+        echo "url=${DEPLOY_URL}" >> $GITHUB_OUTPUT
+        
+        echo "🚀 Production deployment to: ${DEPLOY_URL}"
+        echo "🌿 From branch: ${{ inputs.deploy_branch }}"
+        echo "👤 Initiated by: ${{ github.actor }}"
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: 📦 Install dependencies
+      run: |
+        pip install numpy matplotlib
+        # Add any other Python dependencies here
+    
+    - name: 🧪 Test mathematical functions
+      run: |
+        if [ -d "src/weierstrass_playground" ]; then
+          echo "📦 Testing mathematical functions for production..."
+          cd src
+          python -c "
+          import weierstrass_playground.core as wc
+          import numpy as np
+          print('Testing mathematical functions for production deployment...')
+          z = 2.0 + 1.5j
+          p, q, N = 11.0, 5.0, 2
+          wp_val = wc.wp_rect(z, p, q, N)
+          print(f'✓ ℘ function test passed: |℘({z})| = {abs(wp_val):.4f}')
+          assert np.isfinite(wp_val), 'Function returned non-finite value'
+          print('✅ Mathematical functions ready for production')
+          "
+        else
+          echo "ℹ️  No mathematical functions to test"
+        fi
+    
+    - name: 🔧 Prepare production deployment
+      run: |
+        echo "🚀 Preparing production deployment from branch: ${{ inputs.deploy_branch }}"
+        
+        # Set environment variables for the deployment script
+        export GITHUB_WORKSPACE="${{ github.workspace }}"
+        export GITHUB_REF_NAME="${{ inputs.deploy_branch }}"
+        export GITHUB_REPOSITORY="${{ github.repository }}"
+        export GITHUB_REPOSITORY_OWNER="${{ env.REPO_OWNER }}"
+        export DEPLOYMENT_TYPE="production"
+        export DEPLOYMENT_CONTEXT="production"
+        
+        # Run the production deployment script
+        python scripts/deploy_preview_branch.py "${{ inputs.deploy_branch }}" "${{ github.workspace }}"
+    
+    - name: 📋 Validate production deployment
+      run: |
+        echo "🔍 Validating production deployment structure..."
+        
+        DEPLOY_DIR="_deploy"
+        
+        # Check if deployment directory exists
+        if [ ! -d "${DEPLOY_DIR}" ]; then
+          echo "❌ Deployment directory not found: ${DEPLOY_DIR}"
+          exit 1
+        fi
+        
+        # Check for required files (production deployment should be at root)
+        REQUIRED_FILES=(
+          "${DEPLOY_DIR}/index.html"
+          "${DEPLOY_DIR}/deployment-manifest.json"
+        )
+        
+        for file in "${REQUIRED_FILES[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "❌ Required file missing: $file"
+            exit 1
+          fi
+          echo "✓ Found: $file"
+        done
+        
+        # Verify this is a production deployment
+        if grep -q '"type": "production"' "${DEPLOY_DIR}/deployment-manifest.json"; then
+          echo "✅ Production deployment type confirmed"
+        else
+          echo "❌ Deployment manifest does not indicate production type"
+          exit 1
+        fi
+        
+        # Check for weierstrass-playground if it exists
+        if [ -d "docs/weierstrass-playground" ]; then
+          if [ ! -d "${DEPLOY_DIR}/weierstrass-playground" ]; then
+            echo "❌ Weierstrass playground not found in production deployment"
+            exit 1
+          fi
+          echo "✓ Weierstrass playground ready for production"
+        fi
+        
+        echo "✅ Production deployment validation passed"
+    
+    - name: 🔧 Setup Pages
+      uses: actions/configure-pages@v5
+      
+    - name: 🏗️ Build with Jekyll
+      uses: actions/jekyll-build-pages@v1
+      with:
+        source: ./_deploy
+        destination: ./_site
+    
+    - name: 📤 Upload artifact
+      uses: actions/upload-pages-artifact@v3
+
+  # Production deployment job
+  deploy-production:
+    environment:
+      name: github-pages
+      url: ${{ needs.build-production.outputs.deployment-url }}
+    runs-on: ubuntu-latest
+    needs: build-production
+    
+    steps:
+    - name: 🚀 Deploy to GitHub Pages (Production)
+      id: deployment
+      uses: actions/deploy-pages@v4
+      
+    - name: 🎉 Display production deployment results
+      run: |
+        echo "🎉 PRODUCTION DEPLOYMENT COMPLETED SUCCESSFULLY!"
+        echo "================================================"
+        echo "🌐 Production URL: ${{ needs.build-production.outputs.deployment-url }}"
+        echo "📱 GitHub Pages URL: ${{ steps.deployment.outputs.page_url }}"
+        echo "🌿 Deployed from branch: ${{ inputs.deploy_branch }}"
+        echo "👤 Deployed by: ${{ github.actor }}"
+        echo "⏰ Deployed at: $(date)"
+        echo "================================================"
+        
+        # Verify deployment is accessible
+        echo "🔍 Verifying production deployment..."
+        sleep 30  # Wait for DNS propagation
+        
+        if curl -f -s "${{ steps.deployment.outputs.page_url }}" > /dev/null; then
+          echo "✅ Production site is accessible"
+        else
+          echo "⚠️ Production site may still be propagating"
+        fi
+
+  # Create deployment summary
+  deployment-summary:
+    runs-on: ubuntu-latest
+    needs: [build-production, deploy-production]
+    
+    steps:
+    - name: 📋 Create deployment summary
+      run: |
+        echo "# 🚀 Production Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "✅ **Deployment completed successfully!**" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 📊 Deployment Details" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Repository**: \`${{ github.repository }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: \`${{ inputs.deploy_branch }}\`" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployment time**: $(date)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🔗 Access Links" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- 🌐 **Production Site**: [${{ needs.build-production.outputs.deployment-url }}](${{ needs.build-production.outputs.deployment-url }})" >> $GITHUB_STEP_SUMMARY
+        echo "- 📱 **GitHub Pages**: [${{ steps.deployment.outputs.page_url }}](${{ steps.deployment.outputs.page_url }})" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## ⚠️ Important Notes" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- This is a **production deployment** - the site is now live for all users" >> $GITHUB_STEP_SUMMARY
+        echo "- DNS propagation may take a few minutes to complete globally" >> $GITHUB_STEP_SUMMARY
+        echo "- Monitor the site for any issues and be prepared to rollback if necessary" >> $GITHUB_STEP_SUMMARY

@@ -511,7 +511,7 @@ class NotebookLoader {
         const timestamp = new Date().toISOString();
         
         const notebook = {
-            "@context": [
+            "@context": window.urlService ? window.urlService.generateJsonLdContext() : [
                 "https://www.w3.org/ns/prov-o.jsonld",
                 "https://litlfred.github.io/notebooks/schema/ontology/context.jsonld"
             ],
@@ -719,7 +719,9 @@ class NotebookLoader {
         return {
             "@context": [
                 "https://www.w3.org/ns/prov-o.jsonld",
-                "https://litlfred.github.io/notebooks/libraries/core/common/context.jsonld"
+                window.urlService ? 
+                    window.urlService.getContextUrl("libraries/core/common/context.jsonld") :
+                    "https://litlfred.github.io/notebooks/libraries/core/common/context.jsonld"
             ],
             "@id": `urn:notebook:jupyter-${Date.now()}`,
             "@type": ["prov:Entity", "jupyter:notebook"],

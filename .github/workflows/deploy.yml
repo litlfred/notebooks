@@ -1,19 +1,10 @@
-name: 🚀 Deploy Mathematical Notebooks to GitHub Pages
+name: 🌿 Main Branch Preview Deployment
 
 on:
-  # Runs on pushes to main branch
+  # Runs on pushes to main branch (for preview only)
   push:
     branches: [ main ]
   
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-    inputs:
-      deploy_branch:
-        description: '🌿 Branch to deploy from (defaults to current branch)'
-        required: false
-        default: ''
-        type: string
-      
   # Runs when PR is approved (for review deployments)
   pull_request_review:
     types: [submitted]
@@ -25,17 +16,25 @@ permissions:
   id-token: write
   pull-requests: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment per branch for main branch previews
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: "main-preview"
+  cancel-in-progress: true
+
+env:
+  # Repository configuration
+  REPO_OWNER: ${{ github.repository_owner }}
+  REPO_NAME: ${{ github.event.repository.name }}
+  
+  # Deployment configuration - main branch goes to preview location
+  DEPLOYMENT_TYPE: preview
+  DEPLOYMENT_CONTEXT: preview
 
 jobs:
-  # Build job
+  # Build job for main branch preview
   build:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')))
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved'))
     
     steps:
     - name: Checkout
@@ -43,16 +42,13 @@ jobs:
     
     - name: Display deployment info
       run: |
-        echo "🚀 Deployment Information"
-        echo "========================"
+        echo "🚀 Main Branch Preview Deployment"
+        echo "================================="
         echo "📦 Repository: ${{ github.repository }}"
-        echo "🌿 Branch: ${{ github.ref_name }}"
+        echo "🌿 Branch: main (deploying to preview location)"
         echo "⚡ Trigger: ${{ github.event_name }}"
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          echo "👤 Triggered by: ${{ github.actor }}"
-          echo "ℹ️  Manual deployment from branch: ${{ github.ref_name }}"
-        fi
-        echo "========================"
+        echo "🔗 Preview URL: https://${{ env.REPO_OWNER }}.github.io/${{ env.REPO_NAME }}/branch-preview/main"
+        echo "================================="
     
     - name: Post deployment start comment
       if: github.event.pull_request.number != null || github.event_name == 'pull_request_review'
@@ -117,38 +113,20 @@ jobs:
       run: |
         pip install numpy matplotlib
     
-    - name: Test core mathematical functions
+    - name: 🔧 Prepare main branch preview deployment
       run: |
-        cd src
-        python -c "
-        import weierstrass_playground.core as wc
-        import numpy as np
-        print('Testing mathematical functions...')
-        z = 2.0 + 1.5j
-        p, q, N = 11.0, 5.0, 2
-        wp_val = wc.wp_rect(z, p, q, N)
-        print(f'℘({z}) = {wp_val}')
-        print(f'|℘({z})| = {abs(wp_val):.4f}')
-        assert np.isfinite(wp_val), 'Function returned non-finite value'
-        print('✓ Mathematical functions working correctly')
-        "
-    
-    - name: Validate markdown and JavaScript
-      run: |
-        # Basic validation that files exist and have expected content
-        test -f docs/index.md
-        test -f docs/weierstrass-playground.md
-        test -f docs/_layouts/default.html
-        test -f docs/weierstrass-playground/weierstrass-app.js
-        test -f docs/weierstrass-playground/style.css
-        test -d docs/weierstrass-playground/python/weierstrass_playground
-        test -f docs/weierstrass-playground/python/weierstrass_playground/__init__.py
+        echo "🚀 Preparing main branch preview deployment"
         
-        # Check that markdown contains expected elements
-        grep -q "Weierstrass ℘ Playground" docs/weierstrass-playground.md
-        grep -q "Pyodide" docs/weierstrass-playground/weierstrass-app.js
+        # Set environment variables for the deployment script
+        export GITHUB_WORKSPACE="${{ github.workspace }}"
+        export GITHUB_REF_NAME="main"
+        export GITHUB_REPOSITORY="${{ github.repository }}"
+        export GITHUB_REPOSITORY_OWNER="${{ env.REPO_OWNER }}"
+        export DEPLOYMENT_TYPE="preview"
+        export DEPLOYMENT_CONTEXT="preview"
         
-        echo "✓ Static files validated"
+        # Run the preview deployment script for main branch
+        python scripts/deploy_preview_branch.py "main" "${{ github.workspace }}"
     
     - name: Setup Pages
       uses: actions/configure-pages@v5
@@ -156,17 +134,17 @@ jobs:
     - name: Build with Jekyll
       uses: actions/jekyll-build-pages@v1
       with:
-        source: ./docs
+        source: ./_deploy
         destination: ./_site
     
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
 
-  # Deployment job
+  # Deployment job for main branch preview
   deploy:
     environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      name: github-pages-main-preview
+      url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/main
     runs-on: ubuntu-latest
     needs: build
     steps:
@@ -176,7 +154,8 @@ jobs:
     
     - name: Update deployment status
       run: |
-        echo "🚀 Deployment completed successfully!"
+        echo "🚀 Main branch preview deployment completed successfully!"
+        echo "🔗 Preview URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/main"
         echo "📱 Site URL: ${{ steps.deployment.outputs.page_url }}"
         echo "⏰ Deployed at: $(date)"
     
@@ -204,12 +183,12 @@ jobs:
           
           const deploymentUrl = '${{ steps.deployment.outputs.page_url }}';
           
-          const body = `🚀 **Deployment Status**
+          const body = `🚀 **Main Branch Preview Deployment**
           
           ✅ **Deployment Successful!** 
           
           📦 Repository: \`${{ github.repository }}\`
-          🌿 Branch: \`${{ github.ref_name }}\`
+          🌿 Branch: \`main\` (preview location)
           ⚡ Trigger: \`${{ github.event_name }}\`
           👤 Started by: @${{ github.actor }}
           🕐 Completed at: ${new Date().toUTCString()}
@@ -218,12 +197,14 @@ jobs:
           
           <div align="center">
           
-          [![🌐 View Live Preview](https://img.shields.io/badge/🌐_View_Live_Preview-brightgreen?style=for-the-badge&logo=github-pages)](${deploymentUrl})
+          [![🌐 View Main Preview](https://img.shields.io/badge/🌐_View_Main_Preview-brightgreen?style=for-the-badge&logo=github-pages)](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/main)
           
           </div>
           
           ---
-          📱 **Direct URL**: ${deploymentUrl}`;
+          📱 **Preview URL**: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/branch-preview/main
+          
+          ⚠️ **Note**: This is a preview deployment. For production deployment, use the manual "Production Deployment" workflow.`;
           
           if (botComment) {
             await github.rest.issues.updateComment({

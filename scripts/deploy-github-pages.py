@@ -88,12 +88,19 @@ class GitHubPagesDeployer:
         generator = WidgetIndexGenerator(str(self.repo_root))
         widgets = generator.discover_widgets()
         
+        # Get deployment URLs from environment or use defaults
+        repo_owner = os.getenv('GITHUB_REPOSITORY_OWNER', 'litlfred')
+        repo_name = os.getenv('GITHUB_REPOSITORY', 'litlfred/notebooks').split('/')[-1]
+        github_pages_url = os.getenv('GITHUB_PAGES_BASE_URL', f'https://{repo_owner}.github.io/{repo_name}')
+        
         manifest = {
             "deployment": {
                 "timestamp": self.get_timestamp(),
                 "generator_version": "1.0.0",
-                "repository": "litlfred/notebooks",
-                "github_pages_url": "https://litlfred.github.io/notebooks"
+                "repository": f"{repo_owner}/{repo_name}",
+                "github_pages_url": github_pages_url,
+                "deployment_type": os.getenv('DEPLOYMENT_TYPE', 'production'),
+                "deployment_context": os.getenv('DEPLOYMENT_CONTEXT', 'production')
             },
             "widgets": {
                 "total_count": len(widgets),
