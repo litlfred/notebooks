@@ -186,7 +186,7 @@ def create_figure_layout(mode, p, q, figsize_base=8):
     Create figure and axes layout based on visualization mode.
     
     Args:
-        mode: visualization mode ('two_panel', 'three_panel', 'five_panel')
+        mode: visualization mode ('two_panel', 'three_panel', 'five_panel', 'time_series')
         p, q: lattice parameters for axis limits
         figsize_base: base figure size
         
@@ -236,6 +236,10 @@ def create_figure_layout(mode, p, q, figsize_base=8):
         
         return fig, (ax1, ax2, ax3)
         
+    elif mode == 'time_series':
+        # Time-series mode: 2x2 layout for ℘(z(t)) and ℘'(z(t)) components
+        return create_weierstrass_time_series_layout(figsize_base)
+        
     else:  # Default to two_panel
         return create_figure_layout('two_panel', p, q, figsize_base)
 
@@ -278,3 +282,112 @@ def save_high_resolution(fig, filename='weierstrass_viz.png', dpi=300):
     """
     fig.savefig(filename, dpi=dpi, bbox_inches='tight', facecolor='white')
     return filename
+
+
+def create_time_series_visualization(trajectory, dt, p, q, N, figsize_base=8):
+    """
+    Create time-series visualization of ℘(z(t)) and ℘'(z(t)) along a trajectory.
+    
+    Creates two plots:
+    - Re(℘(z(t))) vs time and Im(℘(z(t))) vs time
+    - Re(℘'(z(t))) vs time and Im(℘'(z(t))) vs time
+    
+    Args:
+        trajectory: array of complex trajectory points z(t)
+        dt: time step used in integration
+        p, q, N: lattice parameters
+        figsize_base: base figure size
+        
+    Returns:
+        fig: matplotlib figure with time-series plots
+    """
+    from .core import wp_rect, wp_deriv
+    
+    # Compute time array
+    t = np.arange(len(trajectory)) * dt
+    T = t[-1] if len(t) > 0 else 1.0
+    
+    # Compute ℘(z(t)) and ℘'(z(t)) along trajectory
+    wp_values = np.array([wp_rect(z, p, q, N) for z in trajectory])
+    wp_deriv_values = np.array([wp_deriv(z, p, q, N) for z in trajectory])
+    
+    # Create figure with 2x2 subplots
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(2*figsize_base, 2*figsize_base))
+    fig.suptitle(f'Time Series: ℘(z(t)) and ℘\'(z(t)) for T={T:.2f}', fontsize=16)
+    
+    # Plot Re(℘(z(t))) vs t
+    ax1.plot(t, np.real(wp_values), 'b-', linewidth=1.5, label='Re(℘(z(t)))')
+    ax1.set_xlabel('Time t')
+    ax1.set_ylabel('Re(℘(z(t)))')
+    ax1.set_title('Real Part of ℘(z(t))')
+    ax1.grid(True, alpha=0.3)
+    ax1.set_xlim(0, T)
+    
+    # Plot Im(℘(z(t))) vs t
+    ax2.plot(t, np.imag(wp_values), 'r-', linewidth=1.5, label='Im(℘(z(t)))')
+    ax2.set_xlabel('Time t')
+    ax2.set_ylabel('Im(℘(z(t)))')
+    ax2.set_title('Imaginary Part of ℘(z(t))')
+    ax2.grid(True, alpha=0.3)
+    ax2.set_xlim(0, T)
+    
+    # Plot Re(℘'(z(t))) vs t
+    ax3.plot(t, np.real(wp_deriv_values), 'g-', linewidth=1.5, label='Re(℘\'(z(t)))')
+    ax3.set_xlabel('Time t')
+    ax3.set_ylabel('Re(℘\'(z(t)))')
+    ax3.set_title('Real Part of ℘\'(z(t))')
+    ax3.grid(True, alpha=0.3)
+    ax3.set_xlim(0, T)
+    
+    # Plot Im(℘'(z(t))) vs t
+    ax4.plot(t, np.imag(wp_deriv_values), 'm-', linewidth=1.5, label='Im(℘\'(z(t)))')
+    ax4.set_xlabel('Time t')
+    ax4.set_ylabel('Im(℘\'(z(t)))')
+    ax4.set_title('Imaginary Part of ℘\'(z(t))')
+    ax4.grid(True, alpha=0.3)
+    ax4.set_xlim(0, T)
+    
+    # Adjust layout
+    plt.tight_layout()
+    
+    return fig
+
+
+def create_weierstrass_time_series_layout(figsize_base=8):
+    """
+    Create figure layout specifically for Weierstrass time-series visualization.
+    
+    Args:
+        figsize_base: base figure size
+        
+    Returns:
+        fig, axes: matplotlib figure and axes (2x2 layout)
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(2*figsize_base, 2*figsize_base))
+    
+    # Configure axes
+    ax1, ax2, ax3, ax4 = axes.flatten()
+    
+    ax1.set_title('Re(℘(z(t))) vs t', fontsize=14)
+    ax1.set_xlabel('Time t')
+    ax1.set_ylabel('Re(℘(z(t)))')
+    ax1.grid(True, alpha=0.3)
+    
+    ax2.set_title('Im(℘(z(t))) vs t', fontsize=14)
+    ax2.set_xlabel('Time t')
+    ax2.set_ylabel('Im(℘(z(t)))')
+    ax2.grid(True, alpha=0.3)
+    
+    ax3.set_title('Re(℘\'(z(t))) vs t', fontsize=14)
+    ax3.set_xlabel('Time t')
+    ax3.set_ylabel('Re(℘\'(z(t)))')
+    ax3.grid(True, alpha=0.3)
+    
+    ax4.set_title('Im(℘\'(z(t))) vs t', fontsize=14)
+    ax4.set_xlabel('Time t')
+    ax4.set_ylabel('Im(℘\'(z(t)))')
+    ax4.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    
+    return fig, axes

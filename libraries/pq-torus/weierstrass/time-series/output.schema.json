@@ -1,0 +1,125 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://litlfred.github.io/notebooks/libraries/pq-torus/weierstrass/time-series/output.schema.json",
+  "title": "Weierstrass Time-Series Output Schema",
+  "description": "Output data from Weierstrass ℘(z(t)) and ℘′(z(t)) time-series visualization",
+  "type": "object",
+  "properties": {
+    "success": {
+      "type": "boolean",
+      "description": "Whether the computation was successful"
+    },
+    "execution_time": {
+      "type": "number",
+      "description": "Execution time in milliseconds"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp when computation completed"
+    },
+    "plot_data": {
+      "type": "object",
+      "description": "Time-series visualization plot data",
+      "properties": {
+        "image_base64": {
+          "type": "string",
+          "description": "Base64 encoded PNG image of time-series plots"
+        },
+        "width": {
+          "type": "integer",
+          "description": "Image width in pixels"
+        },
+        "height": {
+          "type": "integer", 
+          "description": "Image height in pixels"
+        },
+        "mime_type": {
+          "type": "string",
+          "default": "image/png",
+          "description": "MIME type of the image"
+        }
+      },
+      "required": ["image_base64", "width", "height"],
+      "additionalProperties": false
+    },
+    "trajectory_data": {
+      "type": "object",
+      "description": "Particle trajectory and function evaluation data",
+      "properties": {
+        "trajectory_length": {
+          "type": "integer",
+          "description": "Number of points in trajectory"
+        },
+        "time_range": {
+          "type": "object",
+          "properties": {
+            "start": {"type": "number"},
+            "end": {"type": "number"},
+            "dt": {"type": "number"}
+          },
+          "required": ["start", "end", "dt"]
+        },
+        "function_statistics": {
+          "type": "object",
+          "properties": {
+            "wp_values": {
+              "type": "object",
+              "properties": {
+                "real_range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+                "imag_range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+                "magnitude_max": {"type": "number"}
+              }
+            },
+            "wp_deriv_values": {
+              "type": "object", 
+              "properties": {
+                "real_range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+                "imag_range": {"type": "array", "items": {"type": "number"}, "minItems": 2, "maxItems": 2},
+                "magnitude_max": {"type": "number"}
+              }
+            }
+          }
+        },
+        "blow_up_detected": {
+          "type": "boolean",
+          "description": "Whether trajectory blow-up was detected"
+        }
+      },
+      "required": ["trajectory_length", "time_range"],
+      "additionalProperties": false
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "lattice_params": {
+          "type": "object",
+          "properties": {
+            "p": {"type": "number"},
+            "q": {"type": "number"},
+            "N": {"type": "integer"},
+            "lattice_description": {"type": "string"}
+          },
+          "required": ["p", "q", "N"]
+        },
+        "initial_conditions": {
+          "type": "object",
+          "properties": {
+            "z0": {"type": "string", "description": "Initial position as string"},
+            "v0": {"type": "string", "description": "Initial velocity as string"}
+          }
+        },
+        "computation_method": {
+          "type": "string",
+          "default": "runge_kutta_4"
+        },
+        "widget_instance": {
+          "type": "string",
+          "description": "Widget instance identifier"
+        }
+      }
+    }
+  },
+  "required": ["success", "timestamp", "plot_data", "trajectory_data"],
+  "additionalProperties": false
+}

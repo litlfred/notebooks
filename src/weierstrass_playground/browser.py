@@ -24,7 +24,7 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
     Returns matplotlib figure optimized for web display via Pyodide.
     
     Args:
-        mode: visualization mode ('two_panel', 'three_panel', 'five_panel')
+        mode: visualization mode ('two_panel', 'three_panel', 'five_panel', 'time_series')
         p, q, N: lattice parameters
         nx, ny: grid resolution
         n_contours: number of contour lines
@@ -70,6 +70,38 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
             visualization.vector_overlay(ax1, X1, Y1, F1, M1, vec_density, vec_width, vec_max_len)
             visualization.vector_overlay(ax2, X2, Y2, F2, M2, vec_density, vec_width, vec_max_len)
     
+    elif mode == 'time_series':
+        # Time-series visualization mode
+        if len(particles) == 0:
+            # If no particles specified, use a default one
+            particles = [(p/2, q/2, 0.0, 1.0)]
+        
+        # For time-series, we process only the first particle
+        z0_real, z0_imag, v0_real, v0_imag = particles[0]
+        z0 = complex(z0_real, z0_imag)
+        v0 = complex(v0_real, v0_imag)
+        
+        try:
+            # Integrate trajectory
+            trajectory, blowup_point = integration.integrate_second_order_with_blowup(
+                z0, v0, dt, T, p, q, N, blow_thresh
+            )
+            
+            if len(trajectory) > 1:
+                # Create time-series plots
+                fig = visualization.create_time_series_visualization(trajectory, dt, p, q, N)
+                return fig
+            else:
+                raise ValueError("Trajectory too short for time-series visualization")
+                
+        except Exception as e:
+            print(f"Error creating time-series visualization: {e}")
+            # Fall back to two-panel mode
+            return create_complete_visualization('two_panel', p, q, N, nx, ny, n_contours, 
+                                               vec_density, vec_width, vec_max_len, saturation, 
+                                               value_floor, mag_scale, particles, dt, T, 
+                                               blow_thresh, emoji_size, show_lattice_trajectories)
+    
     else:
         # For other modes, default to two-panel for browser compatibility
         return create_complete_visualization('two_panel', p, q, N, nx, ny, n_contours, 
@@ -77,48 +109,49 @@ def create_complete_visualization(mode, p, q, N, nx, ny, n_contours, vec_density
                                            value_floor, mag_scale, particles, dt, T, 
                                            blow_thresh, emoji_size, show_lattice_trajectories)
     
-    # Integrate and plot particle trajectories
-    trajectory_colors = plt.cm.tab10(np.linspace(0, 1, len(particles)))
-    
-    for i, (z0_real, z0_imag, v0_real, v0_imag) in enumerate(particles):
-        z0 = complex(z0_real, z0_imag)
-        v0 = complex(v0_real, v0_imag)
+    # Integrate and plot particle trajectories (only for non-time-series modes)
+    if mode != 'time_series':
+        trajectory_colors = plt.cm.tab10(np.linspace(0, 1, len(particles)))
         
-        try:
-            trajectory, blowup_point = integration.integrate_second_order_with_blowup(
-                z0, v0, dt, T, p, q, N, blow_thresh
-            )
+        for i, (z0_real, z0_imag, v0_real, v0_imag) in enumerate(particles):
+            z0 = complex(z0_real, z0_imag)
+            v0 = complex(v0_real, v0_imag)
             
-            if len(trajectory) > 1:
-                # Wrap trajectory with breaks
-                wrapped_traj = integration.wrap_with_breaks(trajectory, p, q)
+            try:
+                trajectory, blowup_point = integration.integrate_second_order_with_blowup(
+                    z0, v0, dt, T, p, q, N, blow_thresh
+                )
                 
-                # Plot trajectory segments
-                plot_trajectory_segments(axes, wrapped_traj, trajectory_colors[i], 
-                                       p, q, blowup_point, emoji_size)
-        
-        except Exception as e:
-            print(f"Error integrating particle {i}: {e}")
-            # Plot just the starting point
-            z0_wrapped = core.wrap_point(z0, p, q)
-            for ax in axes:
-                ax.plot(z0_wrapped.real, z0_wrapped.imag, 'o', color=trajectory_colors[i], 
-                       markersize=8, markeredgecolor='white')
-    
-    # Plot lattice trajectories if requested
-    if show_lattice_trajectories:
-        try:
-            lattice_trajectories = integration.generate_lattice_trajectories(
-                p, q, N, dt, T, blow_thresh
-            )
-            
-            for trajectory, blowup_point in lattice_trajectories:
                 if len(trajectory) > 1:
+                    # Wrap trajectory with breaks
                     wrapped_traj = integration.wrap_with_breaks(trajectory, p, q)
-                    plot_lattice_trajectory_segments(axes, wrapped_traj, p, q)
                     
-        except Exception as e:
-            print(f"Error generating lattice trajectories: {e}")
+                    # Plot trajectory segments
+                    plot_trajectory_segments(axes, wrapped_traj, trajectory_colors[i], 
+                                           p, q, blowup_point, emoji_size)
+            
+            except Exception as e:
+                print(f"Error integrating particle {i}: {e}")
+                # Plot just the starting point
+                z0_wrapped = core.wrap_point(z0, p, q)
+                for ax in axes:
+                    ax.plot(z0_wrapped.real, z0_wrapped.imag, 'o', color=trajectory_colors[i], 
+                           markersize=8, markeredgecolor='white')
+        
+        # Plot lattice trajectories if requested
+        if show_lattice_trajectories:
+            try:
+                lattice_trajectories = integration.generate_lattice_trajectories(
+                    p, q, N, dt, T, blow_thresh
+                )
+                
+                for trajectory, blowup_point in lattice_trajectories:
+                    if len(trajectory) > 1:
+                        wrapped_traj = integration.wrap_with_breaks(trajectory, p, q)
+                        plot_lattice_trajectory_segments(axes, wrapped_traj, p, q)
+                        
+            except Exception as e:
+                print(f"Error generating lattice trajectories: {e}")
     
     plt.tight_layout()
     return fig
