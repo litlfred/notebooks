@@ -9,7 +9,9 @@
       "dct": "http://purl.org/dc/terms/",
       "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
       "xsd": "http://www.w3.org/2001/XMLSchema#",
-      "widget": "https://litlfred.github.io/notebooks/vocab/widget/"
+      "widget": "https://litlfred.github.io/notebooks/vocab/widget/",
+      "engine": "https://litlfred.github.io/notebooks/vocab/engine/",
+      "rdfs:comment": "The weierstrass-playground widget differs from regular notebooks by overseeing an execution engine/thread pool rather than containing executable content. It acts as an orchestrator for other widgets and notebooks."
     }
   ],
   "@id": "https://litlfred.github.io/notebooks/weierstrass-playground.jsonld",
@@ -38,6 +40,26 @@
   "widget:renderUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/board.html",
   "widget:configUrl": "https://litlfred.github.io/notebooks/docs/weierstrass-playground/widget-schemas.json",
   "widget:indexUrl": "https://litlfred.github.io/notebooks/index.html",
+  
+  "playground:engine": {
+    "url": "https://litlfred.github.io/notebooks/index.html",
+    "type": "thread-pool-execution-engine",
+    "description": "Execution platform that can load and execute widget notebooks with thread pool management",
+    "threadPoolSize": 4,
+    "maxConcurrentWidgets": 50,
+    "contextIsolation": true,
+    "lazyLoadingEnabled": true,
+    "preloadScientific": true,
+    "supportsHierarchicalExecution": true,
+    "supportsWidgetLifecycle": true,
+    "runtimeConfiguration": {
+      "memoryLimit": "512MB",
+      "executionTimeout": 30000,
+      "autosaveInterval": 30000,
+      "enableMobileSupport": true,
+      "realTimeExecution": true
+    }
+  },
   
   "playground:threadPoolConfig": {
     "maxWorkers": 4,

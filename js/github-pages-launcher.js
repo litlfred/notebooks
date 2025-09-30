@@ -13,6 +13,7 @@ class GitHubPagesLauncher {
             playgroundPath: 'docs/weierstrass-playground/board.html',
             showLoadingScreen: true,
             loadingDelay: 1000,
+            defaultWidgetIri: 'weierstrass-playground.jsonld',
             ...config
         };
         
@@ -25,6 +26,54 @@ class GitHubPagesLauncher {
         
         this.currentStateIndex = 0;
         this.loadingInterval = null;
+        this.widgetIri = null;
+        this.widgetMetadata = null;
+    }
+
+    /**
+     * Parse query parameters and extract widget IRI
+     */
+    parseWidgetIri() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const iriParam = urlParams.get('iri');
+        
+        if (iriParam) {
+            // Use provided IRI parameter
+            this.widgetIri = iriParam;
+        } else {
+            // Default to weierstrass-playground widget IRI
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/');
+            this.widgetIri = baseUrl + this.config.defaultWidgetIri;
+        }
+        
+        console.log('Widget IRI:', this.widgetIri);
+        return this.widgetIri;
+    }
+
+    /**
+     * Fetch and validate widget metadata from IRI
+     */
+    async fetchWidgetMetadata(iri) {
+        try {
+            const response = await fetch(iri);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch widget metadata: ${response.status} ${response.statusText}`);
+            }
+            
+            const metadata = await response.json();
+            
+            // Validate this is a widget
+            if (!metadata['@type'] || !Array.isArray(metadata['@type'])) {
+                throw new Error('Invalid widget metadata: missing @type');
+            }
+            
+            this.widgetMetadata = metadata;
+            return metadata;
+            
+        } catch (error) {
+            console.error('Error fetching widget metadata:', error);
+            throw error;
+        }
     }
 
     /**
@@ -32,16 +81,25 @@ class GitHubPagesLauncher {
      */
     async launch() {
         try {
+            // Parse query parameters to get widget IRI
+            this.parseWidgetIri();
+            
             if (this.config.showLoadingScreen) {
                 this.showLoadingScreen();
+            }
+            
+            // Fetch widget metadata from IRI
+            await this.fetchWidgetMetadata(this.widgetIri);
+            
+            if (this.config.showLoadingScreen) {
                 await this.simulateInitialization();
             }
             
-            // Navigate directly to playground instead of using iframe
-            this.navigateToPlayground();
+            // Navigate to appropriate destination based on widget metadata
+            this.navigateToWidget();
             
         } catch (error) {
-            this.showError('Failed to launch playground', error);
+            this.showError('Failed to launch widget', error);
         }
     }
 
@@ -82,15 +140,36 @@ class GitHubPagesLauncher {
     }
 
     /**
-     * Navigate directly to playground without iframe
+     * Navigate to appropriate widget destination based on metadata
      */
-    navigateToPlayground() {
+    navigateToWidget() {
         if (this.loadingInterval) {
             clearInterval(this.loadingInterval);
         }
         
-        // Navigate directly to the playground page
-        window.location.href = this.config.playgroundPath;
+        // Determine navigation path based on widget metadata
+        let navigationPath = this.config.playgroundPath; // default
+        
+        if (this.widgetMetadata) {
+            // Check for specific render URL in widget metadata
+            if (this.widgetMetadata['widget:renderUrl']) {
+                const renderUrl = this.widgetMetadata['widget:renderUrl'];
+                // Convert full URL to relative path if it's from same origin
+                if (renderUrl.startsWith(window.location.origin)) {
+                    navigationPath = renderUrl.substring(window.location.origin.length);
+                } else if (renderUrl.startsWith('http')) {
+                    // External URL - navigate directly
+                    window.location.href = renderUrl;
+                    return;
+                }
+            } else if (this.widgetMetadata['playground:deployment'] && 
+                       this.widgetMetadata['playground:deployment']['playgroundPath']) {
+                navigationPath = this.widgetMetadata['playground:deployment']['playgroundPath'];
+            }
+        }
+        
+        // Navigate to the determined path
+        window.location.href = navigationPath;
         
         // If we're staying on the same page (for testing), initialize threading bridge
         if (this.config.enableThreadingBridge && window.boardApp) {
